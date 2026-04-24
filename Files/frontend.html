@@ -1,0 +1,48 @@
+<div id="smart-form">
+  <h3>Your Farm Profile</h3>
+  <p>We've pre-filled typical values. <strong>Focus on the recommended fields below</strong> for best accuracy.</p>
+  <div id="recommended-fields"></div>
+  <details>
+    <summary>Advanced (all fields)</summary>
+    <div id="all-fields"></div>
+  </details>
+  <button onclick="runModel()">Calculate Profitability</button>
+</div>
+
+<script>
+  const defaults = {
+    landHa: 100,
+    flockSize: 150,
+    breed: "Merino",
+    productionSystem: "semiIntensive",
+    marketChannel: "auction",
+    feedSource: "mixed",
+    studOperation: false,
+    agriTourism: false,
+    feedCostPerTon: 6500,
+    transportCostPer100km: 35,
+    annualVetBillPerEwe: 90,
+    insurancePerEwe: 0
+  };
+
+  // In reality, you'd call InputSensitivityAnalyzer on the backend or in JS
+  // For demo, hardcode high-impact fields from earlier analysis:
+  const highImpactFields = [
+    { field: "flockSize", label: "Number of ewes", default: 150, reason: "Directly scales revenue and costs" },
+    { field: "feedCostPerTon", label: "Feed cost (R/ton)", default: 6500, reason: "Feed is 60-70% of variable costs" },
+    { field: "marketChannel", label: "Market channel", default: "auction", reason: "Direct sales add 20% margin" }
+  ];
+
+  function buildForm() {
+    let recHtml = '';
+    highImpactFields.forEach(f => {
+      recHtml += `<div class="recommended">
+        <label>${f.label} <span class="badge">Recommended</span></label>
+        <input type="text" id="${f.field}" value="${f.default}" />
+        <small>${f.reason}</small>
+      </div>`;
+    });
+    document.getElementById('recommended-fields').innerHTML = recHtml;
+  }
+  buildForm();
+</script>

@@ -1,0 +1,125 @@
+Below is a revenue summary with each stream’s key dependencies and the specific actions you must take to unlock that revenue. Use this to focus your limited time on what actually moves the needle.
+
+---
+
+💰 Revenue Streams & Dependencies (Prioritised)
+
+1. One‑Time Action Sheet (R499)
+
+Dependency Status Action to Unlock
+Publicly accessible website with HTTPS Not started Set up home server + DuckDNS + Let’s Encrypt (Phase 0)
+User sign‑up / login Not started Build email + password auth (SQLite + bcrypt)
+Farm input form (smart defaults) Not started Copy the HTML form from our earlier design
+Profitability model running on server Coded but not deployed Move sheepFarmModel.js to Node.js backend
+PDF generation Not started Add PDFKit or Puppeteer to convert action sheet to PDF
+Payment (PayFast + manual EFT) Not started Register for PayFast (free), add bank details page
+Email delivery of PDF Not started Use Nodemailer with your own SMTP (Gmail works)
+
+Estimated time to unlock: 2 weeks (full‑time) or 4 weeks (evenings/weekends)
+
+Revenue potential: R5,000–10,000/month after 50–100 farmers
+
+---
+
+2. Monthly Ecosystem Membership (R99)
+
+Dependency Status Action to Unlock
+PayFast subscription (recurring) Not started Enable PayFast recurring billing (requires one‑time setup)
+Member dashboard (past reports, profile) Not started Build simple HTML page that lists past purchases
+Quarterly benchmark updates Not started Create a script to refresh lookup tables (JSON file)
+Private WhatsApp group Not started Create a group, add members manually after payment
+
+Note: You can launch membership immediately after one‑time payment works – just add an upsell checkbox and store is_member = true in your DB.
+
+Estimated time to unlock: +3 days after Phase 1
+
+Revenue potential: R2,000–5,000/month (20% of one‑time buyers upgrade)
+
+---
+
+3. Classifieds Paid Listings (R10–R50 per ad)
+
+Dependency Status Action to Unlock
+User KYC (ID + address + bank) Not started Build KYC upload form + manual review queue
+Listing creation form Not started Basic HTML form with category, price, description
+Map integration (region selection) Already have map Reuse your existing SA region map component
+Payment for upgrades Not started Integrate PayFast for one‑time ad fees
+Fraud moderation (automated + manual) Not started Add keyword filters + daily review of new ads
+
+Estimated time to unlock: 3–4 weeks (higher complexity)
+
+Revenue potential: R2,000–8,000/month after 6 months
+
+⚠️ Do not build until after Phase 2 – focus on action sheet first.
+
+---
+
+4. Guides & Training (R49–R149)
+
+Dependency Status Action to Unlock
+Write first 5 guides Not started Use AI + your knowledge (2 hours per guide)
+Vet review for medical guides Not started Find local vet, pay R500–1,000 per guide
+PDF delivery page Not started Reuse action sheet PDF generator
+Payment (one‑time) Not started Same PayFast integration as action sheet
+
+Estimated time to unlock: 1–2 weeks (low complexity)
+
+Revenue potential: R1,000–5,000/month after 10 guides
+
+Do this in parallel with Phase 1 – guides are low‑effort, high‑trust builders.
+
+---
+
+5. Crowdfunding Platform (Long‑term)
+
+Dependency Status Action to Unlock
+Legal entity + NCR registration Not started Register Pty Ltd, then apply for credit provider licence (R2k + 4–6 weeks)
+Insurance partnership Not started Approach Santam / Old Mutual (requires legal entity)
+Investor dashboard Not started Build after core platform is stable
+Escrow / payment handling Not started Requires FICA registration as accountable institution
+
+Estimated time to unlock: 6–9 months (legal + partnerships)
+
+Revenue potential: High (percentage of assets under management) but do not prioritise until you have consistent revenue from streams 1–4.
+
+---
+
+📊 Priority Matrix (Effort vs. Revenue)
+
+Revenue Stream Effort (weeks) Monthly Revenue Potential (Year 1) Priority
+One‑time action sheet (R499) 2 R5k–10k 🔥 Highest
+Membership (R99/mo) +0.5 (add to above) R2k–5k 🔥 High
+Guides (R49–149) 1–2 R1k–5k ✅ Medium
+Classifieds (R10–50/ad) 3–4 R2k–8k ⚠️ Low (build later)
+Crowdfunding 24–36 R20k+ (year 2) ❌ Future
+
+---
+
+🔓 The One Dependency That Unlocks Everything
+
+A working, public website with HTTPS and a payment gateway. Without that, you have zero revenue. With that, you can sell the action sheet and membership immediately.
+
+Focus 100% of your energy on Phase 0 and Phase 1 from the roadmap. Do not touch classifieds, crowdfunding, or SME expansion until you have:
+
+· At least 20 paying customers
+· R5,000+ in monthly recurring revenue
+· Automated PDF delivery working without manual intervention
+
+Once you have those, reinvest profits into building the next stream.
+
+---
+
+✅ Your Next 7 Days (Unlock First Revenue)
+
+Day Task Deliverable
+1 Set up home server + Ubuntu + Nginx Server responds to local IP
+2 Configure DuckDNS + port forwarding + Let's Encrypt Public HTTPS site (even if just a test page)
+3 Deploy brochure website (HTML/CSS) Landing page visible from outside
+4 Build sign‑up / login (SQLite + bcrypt) User can register and log in
+5 Build farm input form + connect to model User sees profit estimate after submit
+6 Integrate PayFast (sandbox) + PDF generation Test payment flow (no real money yet)
+7 Go live with manual bank deposit option First farmer pays R499 via EFT, you email PDF manually
+
+After day 7, you have revenue. Then automate the PDF email, add membership, and start guides.
+
+You now have a clear, dependency‑focused roadmap to first cash. Go execute.

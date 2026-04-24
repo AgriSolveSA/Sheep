@@ -1,0 +1,120 @@
+You've now defined a full product ecosystem – not just a one‑off report, but an operational partner for the farmer. Below is the complete product specification, organised as a reference for your development and future module planning.
+
+---
+
+ShepherdAI – Complete Product Specification
+
+1. Core Offering (One‑Time Service)
+
+Item Description
+Inputs Land, flock size, breed, production system, market channel, feed source (plus optional: vet bill, transport cost, insurance, rainfall, soil type)
+Engine Profitability model + Inefficiency Engine (Stupidity Index) + Recommendation Engine
+Output One‑page action sheet (printable, with checkboxes, phone numbers, expected savings, timeline: this week / month / season)
+Price R499 once
+Delivery PDF via email + downloadable from user dashboard
+Guarantee “Follow first three actions – save at least R499 within 60 days or full refund”
+
+---
+
+2. Ecosystem – Monthly Membership (R99/month)
+
+The Ecosystem turns the one‑off report into an ongoing operational partnership. Members get:
+
+2.1 Quarterly Benchmark Updates
+
+· Updated lookup tables (meat prices, wool prices, feed costs, carrying capacity)
+· New inefficiency thresholds based on latest SA data
+· Refreshed one‑page action sheet (re‑run with current farm data)
+
+2.2 Add‑on Modules (Available to Members Only)
+
+Each module is an optional extension that the farmer can activate for an additional fee or included in higher tier.
+
+Module Functionality Example Output
+Compliance Documentation Generate health certificates, movement permits, export docs Fill forms automatically from farm data → printable PDF
+Labour Management Track worker hours, wages, tasks; compliance with minimum wage (R28.79/hr) Monthly payroll summary + leave schedule
+Stock Management Inventory: feed, medicines, supplies. Low‑stock alerts “Buy lucerne – only 2 tons left”
+Stock Control (Livestock) Record births, deaths, sales, purchases; track weaning rates per ewe “Ewe #342 weaned 1.2 lambs – below average. Cull?”
+Biosecurity Vaccination schedules, disease outbreak checklists, visitor logs “Next blue tongue vaccination due in 14 days”
+Normal Security Theft risk assessment, fencing checklists, patrol scheduling “Your area has high theft – install motion lights”
+Water Access Monitor borehole levels, pump performance, rainwater tank levels “Borehole level dropped 2m this month – reduce grazing”
+Market Research Real‑time prices for meat, wool, feed; nearest abattoir/auction locator “Auction 45km away – price R94/kg. Direct sale: R113/kg.”
+
+2.3 Community & Support
+
+· Private WhatsApp / Telegram group for members
+· Monthly live Q&A (recorded)
+· Discounted rates for one‑on‑one consulting
+
+---
+
+3. Payment Architecture (Inclusive, Offline‑Capable)
+
+Tier Method Fee Requirements Best For
+1 PayFast / Ozow / SnapScan 1.5% – 3.2% Bank account, internet Most farmers
+2 MTN MoMo Pay 0.5% Mobile number, basic phone Rural, no bank account
+3 Voucher (spaza shop) ~5% (shop commission) Cash only No phone, no internet, no bank
+4 Airtime conversion (manual) Varies Any mobile phone Extreme cases
+
+Integration plan:
+
+· Start with Tier 1 + Tier 2 (MoMo Pay).
+· Add voucher system via Kazang / Shop2Shop after validation.
+· Keep manual airtime as last resort.
+
+---
+
+4. Technology Stack (Self‑Hosted, No Vendor Lock‑In)
+
+Layer Choice Reason
+Frontend HTML/CSS/JS (no framework) Simple, works offline as PWA
+Backend Node.js + Express JavaScript end‑to‑end
+Database SQLite (or PostgreSQL for scale) Zero‑config, file‑based
+Authentication bcrypt + session cookies No external auth provider
+PDF generation Puppeteer or PDFKit Self‑contained
+Email Nodemailer + your own SMTP No third‑party email API
+Hosting On‑premise server (or cheap VPS) Full control
+Payments PayFast API + MoMo API + manual voucher No monthly gateway fees
+
+---
+
+5. User Journey (From Landing to Recurring Member)
+
+1. Landing page (brochure website) → Free sample report download.
+2. Sign up (email + password).
+3. Enter farm data (smart defaults, only high‑impact fields highlighted).
+4. Choose payment (online, MoMo, or voucher).
+5. Pay → Report generated immediately (PDF + dashboard).
+6. Post‑purchase upsell: “Add monthly membership for R99 – first month free, cancel anytime.”
+7. Member dashboard shows:
+   · Current action sheet (updated quarterly)
+   · Access to add‑on modules (compliance, labour, stock, etc.)
+   · Community links
+8. Monthly billing (via same payment method) – if fails, member demoted to free tier (still keeps past reports).
+
+---
+
+6. Future Roadmap (Post‑Launch)
+
+Phase Focus Timeline
+1 Core model + one‑page report + PayFast Month 1
+2 MoMo Pay + voucher system + membership Month 2
+3 Add‑on modules (stock management, water) Month 3
+4 Compliance + labour + biosecurity Month 4
+5 Mobile app (offline‑first, USSD interface) Month 6
+
+---
+
+7. Why This Ecosystem Wins
+
+· No vendor lock‑in – farmer owns their data.
+· No subscription fatigue – core report is one‑time; membership is optional but valuable.
+· Offline and cash‑friendly – voucher system and MoMo Pay reach the unbanked.
+· Modular – farmers pay only for the modules they need.
+· Action‑oriented – every output is a checklist, not a textbook.
+
+---
+
+You now have a complete product blueprint – from the initial one‑page action sheet to a full operational platform that helps farmers manage every aspect of their farm. The technology is self‑hosted, the payment methods are inclusive, and the business model is sustainable.
+
+Would you like me to now produce the actual code files for the payment module (PayFast + MoMo Pay integration) and the user dashboard (sign‑in, farm form, report history) as ready‑to‑use JavaScript/Node.js files?

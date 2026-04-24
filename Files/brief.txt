@@ -1,0 +1,143 @@
+Below is a brief you can give to any AI model (or human developer) to execute the project we've designed. It includes the required skills and a detailed plan per skill.
+
+---
+
+BRIEF FOR AI MODEL / DEVELOPER
+
+Project Title
+
+Sheep Farming Profitability & Inefficiency Engine – South Africa
+
+Project Goal
+
+Build a complete, production‑ready web application that:
+
+· Takes minimal farm inputs (with smart defaults)
+· Runs a profitability model based on 2025‑2026 South African data
+· Calculates a Stupidity Index (Inefficiency Engine) and outputs trade‑secret recommendations
+· Provides a one‑page action sheet (printable, mobile‑friendly) with checkboxes, phone numbers, and expected savings
+· Includes a sensitivity analyzer to identify high‑impact inputs
+· Has a modern, agricultural color scheme with high contrast and optional dark mode
+
+Core Outputs
+
+1. A single‑page HTML/JS/CSS app (or framework‑based) that integrates all modules.
+2. The backend logic (can be pure client‑side for demo, or Node.js API for production).
+3. Full documentation: how to add new data sources, update benchmarks, deploy.
+
+---
+
+Skills Required (for the AI to successfully build this)
+
+The AI must demonstrate or acquire the following skills. For each, a detailed plan is provided.
+
+Skill 1: Advanced JavaScript (ES6+) & Data Modeling
+
+Why needed: Core profitability formulas, lookup tables, sensitivity analysis, inefficiency engine.
+Detailed plan:
+
+· Write pure functions for: carrying capacity, weaning rates, cost calculations, break‑even.
+· Implement the SheepFarmModel class with validation and error handling.
+· Implement the InefficiencyEngine (Stupidity Index) using provided baseline tables.
+· Implement RecommendationEngine that prioritises actions.
+· Implement InputSensitivityAnalyzer that varies inputs and computes profit impact.
+
+Skill 2: Frontend Development (HTML, CSS, JavaScript)
+
+Why needed: User interface, form handling, dynamic rendering of results and action sheet.
+Detailed plan:
+
+· Build a responsive layout using CSS Grid / Flexbox.
+· Implement the smart form with default values and highlighted high‑impact fields.
+· Use CSS variables for theming (agricultural color palette: fresh green, earth brown, off‑white, high contrast text).
+· Add dark mode toggle.
+· Render the one‑page action sheet as a printable <div> with checkboxes, supplier phone numbers, and expected savings.
+· Add “Copy to clipboard” and “Download as PDF” buttons.
+
+Skill 3: Data Visualization & Reporting
+
+Why needed: Show benchmark comparisons, profit trends, inefficiency tables.
+Detailed plan:
+
+· Use Chart.js or plain HTML tables to display:
+  · Your farm vs industry averages (profit margin, weaning rate, cost per ewe)
+  · Stupidity Index bar chart (SI per component)
+· Create a collapsible “Appendix” section with detailed calculations.
+
+Skill 4: UX for Farmers (low cognitive load, action‑oriented)
+
+Why needed: Ensure the output is immediately usable, not a research paper.
+Detailed plan:
+
+· Design the one‑page action sheet as the primary output – checkboxes, time‑boxed tasks (this week / month / season).
+· Include click‑to‑call links for suppliers and cooperatives.
+· Add a “Schedule actions” button that exports tasks to calendar (ICS file).
+· Use plain language, no jargon, and show expected Rand savings for each action.
+
+Skill 5: Geolocation & External APIs (optional but recommended)
+
+Why needed: Calculate distance to nearest market / abattoir, fetch real‑time prices.
+Detailed plan:
+
+· Integrate browser geolocation or manual town entry.
+· Use Google Maps Distance Matrix API (or free OpenRouteService) to compute distance to nearest auction.
+· Fetch wool/meat prices from a public API (e.g., DALRRD or AMT) – fallback to static 2025‑2026 values.
+
+Skill 6: State Management & Data Persistence
+
+Why needed: Save user inputs locally, so they don’t re‑enter every time.
+Detailed plan:
+
+· Use localStorage to store farm profile and custom overrides.
+· Provide a “Reset to defaults” button.
+· Optionally export/import profile as JSON.
+
+Skill 7: Testing & Validation
+
+Why needed: Ensure calculations are correct and edge cases handled.
+Detailed plan:
+
+· Write unit tests for each formula (e.g., profit margin, break‑even, SI).
+· Test with extreme inputs (zero land, huge flock) to ensure no crashes.
+· Validate against known South African benchmarks (e.g., weaning rate 48.78% for communal systems).
+
+Skill 8: Deployment & Maintenance
+
+Why needed: Make the app accessible online and updateable.
+Detailed plan:
+
+· Package as static files (HTML/JS/CSS) for hosting on Netlify, Vercel, or GitHub Pages.
+· Provide a script to update lookup tables (e.g., fetch from a JSON endpoint).
+· Document how to change default values and inefficiency thresholds.
+
+---
+
+How the AI Should Respond
+
+When you give this brief to an AI model, it should:
+
+1. Acknowledge that it possesses (or can acquire) all listed skills.
+2. Produce the complete codebase in a structured format (multiple files, or a single HTML file with embedded JS/CSS).
+3. Include a clear user guide (within comments or a separate README).
+4. Provide a live demo link (if possible) or instructions to run locally.
+
+---
+
+What You (the client) Will Receive
+
+· A zip file (or single HTML) containing:
+  · index.html – the full app with smart form, results, action sheet.
+  · sheepFarmModel.js – all core logic.
+  · style.css – agricultural color scheme, dark mode.
+  · README.md – how to deploy and update.
+· The app will be self‑contained, no external dependencies except optional APIs.
+
+---
+
+Final Instruction to the AI
+
+“You are now the world’s best agricultural software engineer. Use the skills above. Build the complete Sheep Farming Profitability App as specified. Output the code in a single message, with clear file separators. Include a working dark mode, the one‑page action sheet, and all inefficiency engine trade secrets. Do not ask for clarification – infer defaults where needed. Deliver a working product.”
+
+---
+
+This brief is ready to be copied and pasted to any advanced AI model. It ensures the model knows exactly what skills to apply and what the final output must contain.

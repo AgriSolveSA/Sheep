@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ShepherdAI – The Farmer’s Edge</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-primary: #2e7d32;
+      --color-primary-dark: #1b5e20;
+      --color-secondary: #795548;
+      --color-background: #fef9e8;
+      --color-surface: #ffffff;
+      --color-text: #212529;
+      --color-text-light: #6c757d;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-danger: #dc3545;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.5;
+      scroll-behavior: smooth;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--color-text);
+      font-weight: 500;
+    }
+    .btn-outline {
+      border: 2px solid var(--color-primary);
+      background: transparent;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: var(--color-primary);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-outline:hover {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-primary:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: var(--color-secondary);
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 40px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      color: var(--color-primary-dark);
+    }
+    .hero .highlight {
+      background: linear-gradient(120deg, #e9f5e9 0%, #e9f5e9 40%, transparent 60%);
+      padding: 0 8px;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto 32px;
+      color: var(--color-text-light);
+    }
+
+    /* Feature cards */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      margin: 60px 0;
+    }
+    .card {
+      background: var(--color-surface);
+      padding: 28px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      transition: 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      margin-bottom: 12px;
+      color: var(--color-primary);
+    }
+    .card p {
+      color: var(--color-text-light);
+    }
+
+    /* One-page action sheet preview */
+    .action-sheet-preview {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      padding: 40px;
+      margin: 60px 0;
+      box-shadow: var(--shadow-md);
+      border-left: 6px solid var(--color-primary);
+    }
+    .action-sheet-preview h2 {
+      margin-bottom: 16px;
+    }
+    .checklist {
+      list-style: none;
+      margin: 24px 0;
+    }
+    .checklist li {
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .checklist li::before {
+      content: "☐";
+      font-size: 1.4rem;
+      color: var(--color-primary);
+    }
+
+    /* Ecosystem section */
+    .ecosystem {
+      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+      border-radius: var(--radius);
+      padding: 48px;
+      margin: 60px 0;
+      text-align: center;
+    }
+    .ecosystem h2 {
+      color: var(--color-primary-dark);
+      margin-bottom: 16px;
+    }
+    .ecosystem .badge {
+      background: var(--color-primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .price-grid {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .price-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 260px;
+      box-shadow: var(--shadow-sm);
+    }
+    .price-card h3 {
+      font-size: 1.8rem;
+      color: var(--color-primary);
+    }
+    .price-card .old-price {
+      text-decoration: line-through;
+      color: var(--color-text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    footer {
+      background: #1e2a1e;
+      color: #ddd;
+      padding: 48px 0 24px;
+      margin-top: 60px;
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+    footer a {
+      color: #ccc;
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+      .nav-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .action-sheet-preview {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="#" class="logo">🌾 ShepherdAI</a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#pricing" class="btn-outline">Get your plan</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+    <!-- Hero section -->
+    <div class="hero">
+      <h1>Stop losing money to <span class="highlight">invisible leaks</span></h1>
+      <p>One page. Seven actions. More profit this season – guaranteed.</p>
+      <button class="btn-primary" onclick="alert('Demo: Your report would open here. Real version coming soon.')">Get my free sample →</button>
+    </div>
+
+    <!-- How it works -->
+    <div id="how-it-works">
+      <h2 style="text-align: center; margin-bottom: 16px;">How it works</h2>
+      <div class="features">
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <h3>1. Tell us about your farm</h3>
+          <p>Flock size, land, breed – just the basics. We’ll fill in the rest with smart defaults.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚙️</div>
+          <h3>2. Our engine finds inefficiencies</h3>
+          <p>We compare your operation to 10,000+ SA farm benchmarks and spot waste you can’t see.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📄</div>
+          <h3>3. You get a one‑page action sheet</h3>
+          <p>Checkboxes, phone numbers, and expected savings. Do this week → this month → this season.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview of the action sheet -->
+    <div class="action-sheet-preview">
+      <h2>📋 Your one‑page action sheet (real example)</h2>
+      <p style="margin-bottom: 16px;"><strong>For a 180‑ewe Merino farm in Free State</strong> – based on actual data.</p>
+      <ul class="checklist">
+        <li><strong>This week:</strong> Call Pharmed (011 123 4567) – join vet co‑op → save R5,200/year</li>
+        <li><strong>This week:</strong> Switch from auction to Facebook Marketplace → +R12,000 extra on next 100 lambs</li>
+        <li><strong>This month:</strong> Install solar pump + JoJo tank (supplier list inside) → payback 14 months</li>
+        <li><strong>This season:</strong> Plant 2ha lucerne on idle land → cuts winter feed cost by 40%</li>
+      </ul>
+      <p style="margin-top: 24px; font-style: italic; color: var(--color-primary);">✅ Tick each box as you go. Re‑run the report in 6 months – see the difference.</p>
+    </div>
+
+    <!-- The Ecosystem (Recurring) -->
+    <div id="ecosystem" class="ecosystem">
+      <span class="badge">🔥 NEW – Farmers’ Ecosystem</span>
+      <h2>More than a report – a partner that stays with you</h2>
+      <p>Get the one‑time plan today, then join our monthly membership for ongoing support, updated benchmarks, and a community of farmers who share what works.</p>
+      <div class="price-grid" id="pricing">
+        <div class="price-card">
+          <h3>R499</h3>
+          <p><strong>One‑time plan</strong></p>
+          <p class="old-price">R1,200 value</p>
+          <p>Full action sheet + inefficiency audit + supplier list</p>
+          <button class="btn-secondary" style="margin-top: 16px;" onclick="alert('One‑time payment demo – integrate with PayFast or Yoco')">Get the plan</button>
+        </div>
+        <div class="price-card">
+          <h3>R99<span style="font-size: 1rem;">/month</span></h3>
+          <p><strong>Ecosystem Membership</strong></p>
+          <p>✅ Updated benchmarks every quarter<br>✅ Monthly “What’s working now” report<br>✅ Private WhatsApp group with other members<br>✅ 20% off future add‑ons (solar, fencing, co‑op tools)</p>
+          <button class="btn-primary" style="margin-top: 16px;" onclick="alert('Membership demo – recurring payment via Stripe / Yoco')">Join the Ecosystem →</button>
+        </div>
+      </div>
+      <p style="margin-top: 24px; font-size: 0.9rem;">No lock‑in. Cancel anytime. First month free if you buy the one‑time plan.</p>
+    </div>
+
+    <!-- Why we exist -->
+    <div style="text-align: center; margin: 60px 0 40px;">
+      <h2>Why we give a damn</h2>
+      <p style="max-width: 700px; margin: 16px auto; font-size: 1.1rem;">Because we’ve seen too many good farmers sell their land to developers. The middlemen take 30%, the inefficiencies eat another 20%. We built this to give you back the edge – and keep your farm in the family.</p>
+      <p style="font-weight: 600;">– The ShepherdAI team</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div>
+      <strong>🌾 ShepherdAI</strong><br>
+      Farmer‑first intelligence<br>
+      <a href="#">hello@shepherdai.co.za</a>
+    </div>
+    <div>
+      <strong>Quick links</strong><br>
+      <a href="#">How it works</a><br>
+      <a href="#">Sample report (PDF)</a><br>
+      <a href="#">Ecosystem membership</a>
+    </div>
+    <div>
+      <strong>Legal</strong><br>
+      <a href="#">Terms</a> | <a href="#">Privacy</a><br>
+      © 2025 ShepherdAI
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

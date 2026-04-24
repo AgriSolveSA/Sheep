@@ -1,0 +1,159 @@
+You're right: giving a free trial of the full report would let people get the value and walk away. The solution is no free trial of the core output – instead, you offer a free sample (a generic one‑page action sheet example) and then charge for the personalized report. Sign‑in is for payment and to retrieve past reports, not for a time‑limited trial.
+
+Below is a sign‑in + payment flow that respects your service model. It includes:
+
+· Sign‑up / login (email + password, stored in SQLite)
+· A free sample report (downloadable PDF preview – generic, not personalized)
+· A pay‑per‑report flow (R499) that generates the personalized action sheet
+· No recurring subscription unless they explicitly join the Ecosystem (R99/month)
+
+This way, users don't fill forms for 7 days – they fill one form, pay once, get the report immediately.
+
+---
+
+🧩 Architecture for Sign‑in + One‑time Payment
+
+```
+User lands on brochure site
+        │
+        ▼
+┌───────────────────┐
+│  "Get your plan"  │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐      ┌───────────────────┐
+│  Free sample      │      │  Sign up / Log in  │
+│  (generic PDF)    │      │  (email + password)│
+└───────────────────┘      └─────────┬─────────┘
+                                      │
+                                      ▼
+                          ┌───────────────────┐
+                          │  Farm input form   │
+                          │  (smart defaults)  │
+                          └─────────┬─────────┘
+                                    │
+                                    ▼
+                          ┌───────────────────┐
+                          │  Payment (R499)    │
+                          │  PayFast / Yoco    │
+                          └─────────┬─────────┘
+                                    │
+                                    ▼
+                          ┌───────────────────┐
+                          │  Generate report   │
+                          │  & save to account │
+                          └─────────┬─────────┘
+                                    │
+                                    ▼
+                          ┌───────────────────┐
+                          │  User downloads   │
+                          │  personalized PDF  │
+                          └───────────────────┘
+```
+
+---
+
+📄 Free Sample Report (Generic)
+
+You create a static PDF (or HTML page) that shows what the action sheet looks like, but with placeholder data (e.g., "For a typical 200‑ewe farm in the Karoo"). This gives them a taste without giving away their personalized results. Link: “Download free sample” (no sign‑in required).
+
+---
+
+🔐 Sign‑up / Login (Self‑hosted, no external auth)
+
+Use Node.js + SQLite. Passwords hashed with bcrypt. No third‑party auth providers.
+
+```sql
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY,
+  email TEXT UNIQUE,
+  password_hash TEXT,
+  created_at DATETIME,
+  ecosystem_member BOOLEAN DEFAULT 0
+);
+
+CREATE TABLE reports (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER,
+  generated_at DATETIME,
+  inputs_json TEXT,
+  results_json TEXT,
+  pdf_path TEXT,
+  payment_id TEXT
+);
+```
+
+---
+
+💰 Payment Integration (PayFast / Yoco – both SA)
+
+No recurring fees for the core report – just a one‑time payment. Example using PayFast (no monthly cost, only transaction fee).
+
+Frontend: After user submits farm form, redirect to PayFast with a unique order ID.
+
+Backend webhook: PayFast calls your server on success. Then generate the PDF and email it to the user, also save it in their account.
+
+Simpler alternative: Use Yoco’s payment gateway – similar flow.
+
+---
+
+🧾 Report Generation & Delivery
+
+Once payment is confirmed:
+
+· Run the model with their inputs
+· Generate the one‑page action sheet as a PDF (using a library like puppeteer or pdfkit)
+· Save the PDF to a folder (e.g., /reports/user_123_2025-04-19.pdf)
+· Email the PDF to the user
+· Also allow them to download from their account dashboard
+
+---
+
+👥 Ecosystem Membership (Recurring)
+
+After they receive their report, offer:
+
+“Get quarterly updated benchmarks, new trade secrets, and community access for R99/month.”
+
+If they accept, you set ecosystem_member = 1 and charge monthly via PayFast subscription or Yoco recurring. Members get a new report each quarter (or can re‑run the model with updated defaults).
+
+---
+
+🧪 No Free Trial – But a “Money‑Back Guarantee”
+
+To overcome hesitation, offer:
+
+“If you follow the first three actions on your plan and don’t save at least R499 within 60 days, we’ll refund every cent.”
+
+That’s a powerful trust signal without giving away the product for free.
+
+---
+
+📦 Files You’ll Need to Build (Next Steps)
+
+File Purpose
+signup.html Email + password form
+login.html Sign in form
+dashboard.html User account area (past reports, membership status)
+farm-form.html Input form (pre‑filled with defaults)
+payment-gateway.js PayFast / Yoco integration
+webhook.js Handle payment confirmation
+pdf-generator.js Convert action sheet HTML to PDF
+email-service.js Send report + login links (use Nodemailer with your own SMTP)
+
+All open‑source, self‑hosted.
+
+---
+
+✅ Summary: No Trial, Just Trust
+
+· Free sample (generic) – no sign‑in.
+· Sign‑in to save reports and pay.
+· Pay once (R499) for the personalized plan.
+· Optional membership (R99/month) for ongoing value.
+· Money‑back guarantee instead of free trial.
+
+This protects your value and gives farmers a reason to stay in your ecosystem.
+
+Would you like me to produce the complete HTML/JS/CSS for the sign‑in page, farm input form, and dashboard – all ready to connect to your backend?

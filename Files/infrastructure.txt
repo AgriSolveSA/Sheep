@@ -1,0 +1,184 @@
+You need a minimal viable infrastructure that you can run at home, on your own hardware, with no cloud dependencies. Below is a roadmap broken into phases. Each phase builds a working piece, and by the end you have a complete, self‑hosted platform.
+
+---
+
+🧱 Hardware Foundation (One‑Time Setup)
+
+Item Recommendation Approx Cost (R)
+Server Refurbished Dell OptiPlex (i5, 8GB RAM, 256GB SSD) R2,500 – R4,000
+Backup drive External USB HDD (1TB) R800
+UPS 650VA – 1500VA (for load shedding) R1,500 – R3,000
+Internet Fibre (20+ Mbps down, 5+ Mbps up) + LTE backup R700 – R1,200/month
+Static IP From your ISP (or use DuckDNS for dynamic IP) R0 – R100/month
+Domain e.g., shepherdai.co.za ~R100/year
+
+Total initial hardware ≈ R5,000 – R9,000 (excluding monthly internet).
+
+---
+
+🧩 Software Stack (All Free / Open Source)
+
+Layer Choice Why
+OS Ubuntu Server 22.04 LTS Stable, free, well‑supported
+Web server Nginx Lightweight reverse proxy
+App server Node.js + Express Same language as frontend
+Database SQLite File‑based, no separate server – perfect for MVP
+Process manager PM2 Keeps Node.js running
+SSL Let's Encrypt (Certbot) Free trusted certificates
+Backup rsync + cron Native, reliable
+Firewall ufw + fail2ban Basic security
+
+No Docker, no Kubernetes, no cloud – just bare metal.
+
+---
+
+🗺️ Infrastructure Roadmap (Phased)
+
+Phase 0: Home Server Preparation (1 day)
+
+· Buy / repurpose an old desktop or laptop.
+· Install Ubuntu Server (boot from USB).
+· Connect to your home network (Ethernet preferred).
+· Set up SSH access (disable password login, use key).
+· Update system: sudo apt update && sudo apt upgrade -y
+
+Phase 1: Basic Web Server & Local Access (2 days)
+
+· Install Nginx, Node.js, npm, SQLite3.
+· Create a simple hello world Node.js app on port 3000.
+· Configure Nginx as reverse proxy (proxy_pass http://127.0.0.1:3000).
+· Test by accessing http://<your-server-local-ip> from another device on your network.
+· Set up PM2 to keep Node.js running after reboot.
+
+Deliverable: Your brochure website (static HTML) can be served from this server.
+
+Phase 2: Public Access & HTTPS (2 days)
+
+· Configure port forwarding on your router: forward ports 80 and 443 to your server’s local IP.
+· Get a domain (or use free DuckDNS for a dynamic IP).
+· Install Certbot: sudo apt install certbot python3-certbot-nginx
+· Run sudo certbot --nginx -d yourdomain.com to get SSL.
+· Test https://yourdomain.com from outside your home network (e.g., using mobile data).
+
+Deliverable: Your website is live with HTTPS, accessible from anywhere.
+
+Phase 3: User Authentication & Database (3 days)
+
+· Create SQLite database (farm.db) with tables: users, reports, payments.
+· Build /signup and /login endpoints (Node.js + Express).
+· Hash passwords with bcrypt.
+· Use express‑session to keep users logged in.
+· Create simple dashboard page (HTML) that shows “Welcome, [email]”.
+
+Deliverable: Users can sign up, log in, and see a protected dashboard.
+
+Phase 4: Farm Input Form & Model Integration (3 days)
+
+· Create an HTML form for farm inputs (land, flock, breed, etc.) with smart defaults.
+· On submit, send data to /api/calculate endpoint.
+· Integrate your SheepFarmModel (the JavaScript code we built) – run it on the server.
+· Store the raw results JSON in the reports table (linked to user).
+· Display a basic “Your net profit is R…” page (non‑PDF for now).
+
+Deliverable: Logged‑in users can enter farm data and see profitability results.
+
+Phase 5: Payment Gateway (PayFast) – 3 days
+
+· Register for PayFast (no monthly fee, only transaction).
+· Add a “Pay R499” button on the results page (or before calculation).
+· Implement PayFast HTML redirect form with your merchant ID and a unique m_payment_id.
+· Create a PayFast ITN (Instant Transaction Notification) webhook endpoint on your server.
+· When payment succeeds, mark the report as paid and generate a PDF (using puppeteer or pdfkit).
+· Email the PDF to the user (Nodemailer + your own SMTP, e.g., Gmail or your ISP’s mail server).
+
+Deliverable: Users can pay once and receive their personalised one‑page action sheet PDF.
+
+Phase 6: Membership (Recurring Payments) – 3 days
+
+· Add ecosystem_member column to users table.
+· Use PayFast’s subscription feature (recurring billing) or manually handle monthly invoices.
+· Create a “Become a member (R99/month)” button on dashboard.
+· For members, allow re‑running the report with updated benchmarks (quarterly).
+· Add a simple private WhatsApp group link (or Telegram) for members.
+
+Deliverable: Farmers can subscribe and get ongoing value.
+
+Phase 7: Offline Payment Methods (Vouchers & MoMo) – 4 days
+
+· Voucher system: Generate unique 12‑digit codes. Store voucher_code table with used flag. Create a “Pay with voucher” page where user enters code. After validation, mark report as paid.
+· MoMo Pay: Register as MTN MoMo merchant (free). Integrate their API (or use a simple “pay by MoMo” instruction + manual verification initially).
+· Airtime conversion: Provide a manual process – user sends airtime to a specific number, you receive SMS, you manually generate a voucher code for them.
+
+Deliverable: Farmers without bank accounts can pay.
+
+Phase 8: Backup & Monitoring (Ongoing)
+
+· Set up daily cron job: sqlite3 farm.db ".backup /backup/farm_$(date +%Y%m%d).db"
+· Use rsync to copy backups to external USB drive.
+· Install netdata for monitoring (optional).
+· Configure logrotate for Node.js logs.
+
+Deliverable: You can recover from disk failure or accidental deletion.
+
+---
+
+🚀 Immediate Next Steps (For You, This Week)
+
+1. Get the hardware – even an old laptop works (install Ubuntu Server).
+2. Set up port forwarding & dynamic DNS – get your server reachable.
+3. Install Node.js and Nginx – serve the brochure website we built.
+4. Test the core model (the JavaScript code) on the server – ensure it runs under Node.
+5. Build the sign‑in + farm form – use the code snippets we already have.
+
+Within two weeks of dedicated evenings/weekends, you can have Phases 0‑4 working (sign‑in, farm form, model calculation). Then add payment.
+
+---
+
+📦 Minimal File Structure on Your Server
+
+```
+/home/ubuntu/shepherdai/
+├── public/               # static files (HTML, CSS, JS frontend)
+│   ├── index.html        # brochure website
+│   ├── dashboard.html
+│   ├── farm-form.html
+│   └── style.css
+├── server.js             # main Express app
+├── models/
+│   └── sheepFarmModel.js # your core model (can be required)
+├── db/
+│   └── farm.db           # SQLite database
+├── reports/              # generated PDFs
+├── backups/              # daily DB backups
+└── node_modules/
+```
+
+---
+
+⚠️ Critical Risks & Mitigation (At Home)
+
+Risk Mitigation
+Load shedding UPS + automatic graceful shutdown script.
+Internet outage LTE backup (use a router with failover) or accept downtime.
+Static IP changes Use DuckDNS with a cron job to update IP every 5 minutes.
+Disk failure Daily backups to external HDD + second copy at friend's house (off‑site).
+Fire / theft Off‑site backup (encrypted USB drive stored elsewhere).
+Payment webhook missed Implement a cron job that checks for unpaid but completed orders every hour (query PayFast API).
+
+---
+
+✅ Success Criteria (MVP)
+
+· A farmer can visit https://shepherdai.co.za from their phone.
+· They can download a free sample report (static PDF).
+· They can sign up with email + password.
+· They can enter farm data (10 fields, with defaults).
+· They can pay R499 via PayFast.
+· After payment, they receive a personalised one‑page action sheet PDF by email.
+· They can log in and see their past reports.
+· They can upgrade to R99/month membership (PayFast subscription).
+· You can manually issue a voucher code for cash payments (spaza shop).
+
+---
+
+You now have a complete infrastructure roadmap that you can execute at home, with minimal cost and no vendor lock‑in. Start with Phase 0 this weekend. I can provide the exact server.js code, Nginx config, and SQLite schema to match this roadmap – just ask.

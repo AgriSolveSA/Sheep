@@ -1,0 +1,240 @@
+You want a self‑hosted, vendor‑free infrastructure – no external APIs, no paid cloud dependencies, everything under your control. Below is a complete infrastructure architecture plan with a risk register, open‑source component choices, and a step‑by‑step deployment blueprint.
+
+---
+
+🏗️ Infrastructure Architecture (In‑House, No Vendor Lock‑In)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         FARMER'S DEVICE                         │
+│                   (Phone / Tablet / Laptop)                      │
+│                         Web Browser                              │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │ HTTPS (self‑signed or Let's Encrypt)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     YOUR ON‑PREMISE SERVER                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │  Nginx /     │  │  Node.js /   │  │  SQLite / PostgreSQL │   │
+│  │  Caddy       │◄─┤  Express     │◄─┤  (open source)        │   │
+│  │  (reverse    │  │  (API +      │  │                       │   │
+│  │   proxy)     │  │   static     │  └──────────────────────┘   │
+│  └──────────────┘  │   files)     │                             │
+│                    └──────────────┘                             │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  Optional: Background job processor (Bull + Redis)       │   │
+│  │  for email reminders, PDF generation                     │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     LOCAL NETWORK / BACKUP                       │
+│  • Daily backups to external HDD                                │
+│  • UPS for power outages                                        │
+│  • Secondary internet line (failover)                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+📦 Open‑Source Component Stack (Zero Licensing Cost)
+
+Layer Technology License Why
+Web server Nginx or Caddy BSD / Apache 2.0 Lightweight, high performance, free
+Application server Node.js + Express MIT JavaScript end‑to‑end, no context switching
+Database SQLite (default) or PostgreSQL Public domain / PostgreSQL License SQLite is file‑based – no separate server. PostgreSQL for larger scale.
+Background jobs Bull (Redis) + Node.js MIT Optional – only if you need scheduled reminders
+SSL certificate Let's Encrypt (via Certbot) Free / ISC Provides trusted HTTPS without buying certs
+Operating system Ubuntu Server 22.04 LTS GPL / Free Stable, well‑documented, free
+Backup tool rsync + cron + sqlite3 .backup GPL / Public domain Native tools, no extra software
+Monitoring Netdata (optional) GPL Real‑time server metrics, self‑hosted
+
+---
+
+🧱 Hardware & Networking Requirements (Risk Register)
+
+Component Minimum Spec Risk if missing Mitigation
+Public static IP address 1 IPv4 from your ISP Users cannot reach your app from outside Use Dynamic DNS (DuckDNS, afraid.org) + port forwarding – free but less reliable. Or rent a cheap VPS as a reverse proxy tunnel.
+Internet connection 20 Mbps down / 5 Mbps up, <50ms latency Slow or dropped connections frustrate users Get a business fibre line with SLA. Add second line (LTE failover).
+Server hardware 4 CPU cores, 8 GB RAM, 100 GB SSD Model calculations slow, DB corruption Use a refurbished Dell Optiplex or Intel NUC (R3k‑R8k). RAID 1 (mirroring) for disks.
+Power backup UPS (1500VA) with 30+ min runtime Power outage = downtime APC or Eaton UPS. For longer outages, small generator or solar + battery.
+Firewall / security Basic router firewall + ufw on server Unauthorised access, data theft Disable password SSH, use key auth. Run fail2ban. Keep OS updated.
+Database backups External USB HDD (1 TB) Disk failure loses all data Daily cron job: backup SQLite file to second disk and to another building (off‑site).
+Cooling & dust Clean, ventilated room Overheating crashes server Place in cabinet with fan. Monitor temps via Netdata.
+
+---
+
+🧩 Database Schema (Open Source – SQLite / PostgreSQL)
+
+Keep it simple. Here’s a minimal schema:
+
+```sql
+-- Farms table (user profiles)
+CREATE TABLE farms (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  land_ha REAL,
+  flock_size INTEGER,
+  breed TEXT,
+  production_system TEXT,
+  market_channel TEXT,
+  feed_source TEXT,
+  stud_operation BOOLEAN,
+  agri_tourism BOOLEAN,
+  custom_feed_cost REAL,
+  custom_vet_bill REAL,
+  custom_labour_rate REAL,
+  insurance_per_ewe REAL,
+  distance_to_market_km REAL,
+  rainfall_mm REAL,
+  soil_type TEXT
+);
+
+-- Calculation results (cached)
+CREATE TABLE results (
+  id INTEGER PRIMARY KEY,
+  farm_id INTEGER,
+  calculated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  net_profit REAL,
+  profit_margin REAL,
+  break_even_lambs INTEGER,
+  raw_json TEXT,  -- full model output as JSON
+  FOREIGN KEY(farm_id) REFERENCES farms(id)
+);
+
+-- User actions (for feedback loop)
+CREATE TABLE actions (
+  id INTEGER PRIMARY KEY,
+  farm_id INTEGER,
+  action_id TEXT,   -- e.g., "ineff_veterinary"
+  completed BOOLEAN DEFAULT 0,
+  completed_at DATETIME,
+  FOREIGN KEY(farm_id) REFERENCES farms(id)
+);
+```
+
+No ORM needed – use sqlite3 package in Node.js (built‑in).
+
+---
+
+🔧 Step‑by‑Step Deployment Plan (Self‑Hosted)
+
+1. Set up Ubuntu Server
+
+· Install Ubuntu 22.04 on your hardware.
+· Configure static IP (or DHCP reservation).
+· Enable SSH with key authentication.
+
+2. Install Dependencies
+
+```bash
+sudo apt update && sudo apt install -y nginx certbot nodejs npm sqlite3
+sudo npm install -g pm2  # process manager
+```
+
+3. Deploy Your App
+
+· Copy all files (index.html, sheepFarmModel.js, server.js, etc.) to /var/www/sheepapp/.
+· Install Node dependencies: npm install express sqlite3.
+
+4. Create the API Server (server.js)
+
+```javascript
+const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+app.use(express.static('public'));  // your frontend files
+
+// Endpoint to run model
+app.post('/api/calculate', (req, res) => {
+  const inputs = req.body;
+  const model = new SheepFarmModel(inputs);
+  const result = model.getReport();
+  // Save to DB
+  const db = new sqlite3.Database('farm.db');
+  db.run(`INSERT INTO results (farm_id, net_profit, profit_margin, break_even_lambs, raw_json) VALUES (?, ?, ?, ?, ?)`,
+    [inputs.farmId || 1, result.summary.netProfit, result.summary.profitMargin, result.summary.breakEvenLambs, JSON.stringify(result)]);
+  res.json(result);
+});
+
+app.listen(port, () => console.log(`API running on port ${port}`));
+```
+
+5. Configure Nginx Reverse Proxy
+
+```nginx
+server {
+    listen 80;
+    server_name yourfarmapp.local;  # or your public IP / domain
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+    }
+}
+```
+
+6. Set up HTTPS (Let's Encrypt)
+
+```bash
+sudo certbot --nginx -d yourfarmapp.yourdomain.com
+```
+
+7. Automate Backups (cron)
+
+```bash
+# Daily at 2am
+0 2 * * * /usr/bin/sqlite3 /var/www/sheepapp/farm.db ".backup '/backup/farm_$(date +\%Y\%m\%d).db'"
+```
+
+8. Monitor with Netdata (optional)
+
+```bash
+bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+```
+
+---
+
+⚠️ Risk Register (In‑House Deployment)
+
+Risk Probability Impact Mitigation
+Power outage Medium (SA load shedding) High UPS + generator / solar + battery. Ensure graceful shutdown.
+Internet outage Medium High Second LTE/5G line as failover. Or allow offline use (PWA with local storage, sync later).
+Hardware failure (disk) Low (if new) Critical RAID 1 mirroring + daily off‑site backup.
+Theft / fire Low Critical Off‑site backup (encrypted USB drive stored elsewhere).
+SSL certificate expiry Low (auto‑renew) Medium Set up certbot auto‑renew cron job.
+Software bug Medium Medium Unit tests + staging environment on separate machine.
+User data loss Low (with backups) High Test restore procedure every 3 months.
+DDoS / malicious attack Very low (small app) Medium Basic rate limiting in Nginx + fail2ban.
+
+---
+
+💡 Recommendations for Staying Vendor‑Free
+
+· Do NOT use: Cloud databases (AWS RDS, Firebase), third‑party auth (Auth0), external APIs (Google Maps – use OpenStreetMap locally if needed).
+· Do use: SQLite (no server), Nginx (self‑hosted), Let's Encrypt (free, but relies on external CA – acceptable because it’s just certs).
+· Optional offline mode: Build a Progressive Web App that saves inputs and results in localStorage, then syncs to your server when online.
+
+---
+
+✅ Final Checklist Before You Build
+
+· Obtain a static public IP from your ISP (or use DuckDNS with dynamic IP).
+· Purchase a small server (e.g., Intel NUC or old desktop) – budget R5k.
+· Install Ubuntu Server and secure it (SSH key, firewall).
+· Port forward 80/443 from your router to the server.
+· Register a domain (optional – you can use IP address directly, but HTTPS needs domain).
+· Test the full flow: user browser → your public IP → Nginx → Node.js → SQLite.
+
+This architecture gives you full control, no monthly fees, and no vendor lock‑in. You own everything.
+
+Would you like me to produce the complete server.js code, Nginx config, and backup scripts as ready‑to‑use files?

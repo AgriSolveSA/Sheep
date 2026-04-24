@@ -1,0 +1,477 @@
+Here is the complete, unified recommendationEngine.js that includes:
+
+· All past recommendation logic (profitability thresholds, overstocking, diversification, efficiency)
+· New stage‑specific lifecycle recommendations (genetics, conception, pregnancy, lambing, pre‑weaning, weaning, finishing, market)
+· Integration with your existing SheepFarmModel outputs
+
+You can drop this into your project as a direct replacement for your previous recommendationEngine.js.
+
+```javascript
+/**
+ * RECOMMENDATION ENGINE – Unified Version
+ * Includes:
+ * - Base profitability recommendations (from earlier)
+ * - Stage‑specific lifecycle recommendations (sperm to sale)
+ * - Prioritisation, effort/impact scoring, timeline estimates
+ */
+
+class RecommendationEngine {
+  constructor(farmInputs, baseResults, inefficiencyList) {
+    this.inputs = farmInputs;      // landHa, flockSize, breed, productionSystem, etc.
+    this.results = baseResults;    // from core SheepFarmModel
+    this.inefficiencies = inefficiencyList || []; // from InefficiencyEngine
+    this.recommendations = [];
+    this.stageRecommendations = [];
+    this.missingData = [];
+  }
+
+  /**
+   * Main entry point: generates all recommendations
+   */
+  generate() {
+    this._benchmarkComparison();
+    this._prioritizeInefficiencies();
+    this._generateBaseRecommendations();
+    this._generateStageLifecycleRecommendations();   // NEW
+    this._generateMarketplaceRecommendations();       // NEW (breeder–finisher)
+    this._identifyDataGaps();
+    this._assignConfidenceScores();
+    return {
+      recommendations: this.recommendations,
+      stageRecommendations: this.stageRecommendations,
+      missingData: this.missingData,
+      confidenceScore: this._overallConfidence(),
+      summary: this._executiveSummary()
+    };
+  }
+
+  // ============================================================
+  // 1. BASE RECOMMENDATIONS (Profitability, Stocking, Diversification)
+  // ============================================================
+
+  _benchmarkComparison() {
+    const benchmarks = {
+      profitMargin: { good: 25, average: 15, poor: 10 },
+      weaningRate: { good: 85, average: 70, poor: 55 },
+      costPerEwe: { good: 800, average: 1200, poor: 1600 },
+      lambsWeanedPerEwe: { good: 1.2, average: 0.9, poor: 0.6 }
+    };
+    const actual = {
+      profitMargin: this.results.profitMargin,
+      weaningRate: (this.results.lambsWeaned / this.inputs.flockSize) * 100,
+      costPerEwe: this.results.costPerEwe,
+      lambsWeanedPerEwe: this.results.lambsWeaned / this.inputs.flockSize
+    };
+    this.benchmarkGaps = {};
+    for (let key in benchmarks) {
+      let actualVal = actual[key];
+      if (actualVal !== undefined) {
+        if (actualVal < benchmarks[key].poor) this.benchmarkGaps[key] = 'critical';
+        else if (actualVal < benchmarks[key].average) this.benchmarkGaps[key] = 'below_average';
+        else if (actualVal < benchmarks[key].good) this.benchmarkGaps[key] = 'average';
+        else this.benchmarkGaps[key] = 'good';
+      }
+    }
+  }
+
+  _prioritizeInefficiencies() {
+    const priorityMap = {
+      'Water Infrastructure': { severity: 'HIGH', weight: 3 },
+      'Veterinary Medicines': { severity: 'CRITICAL', weight: 5 },
+      'Fencing': { severity: 'HIGH', weight: 2 },
+      'Transport & Logistics': { severity: 'MEDIUM', weight: 2 },
+      'Animal Feed': { severity: 'HIGH', weight: 4 },
+      'Market Access': { severity: 'MEDIUM', weight: 3 }
+    };
+    this.prioritizedIneff = this.inefficiencies.map(ineff => {
+      const p = priorityMap[ineff.component] || { severity: 'LOW', weight: 1 };
+      return { ...ineff, priorityWeight: p.weight, severity: p.severity };
+    }).sort((a,b) => b.priorityWeight - a.priorityWeight);
+  }
+
+  _generateBaseRecommendations() {
+    // Critical financial actions
+    if (this.results.netProfit < 0) {
+      this.recommendations.push({
+        id: 'fin_001',
+        title: 'Immediate loss mitigation',
+        description: `Your farm is losing R${Math.abs(this.results.netProfit).toFixed(0)}/year. Immediate action required.`,
+        actions: [
+          'Reduce flock to carrying capacity (see stocking recommendation)',
+          'Switch to direct marketing to capture 20%+ margin',
+          'Implement at least two inefficiency fixes from high-priority list'
+        ],
+        priority: 'CRITICAL',
+        effort: 'High',
+        impact: 'Very High',
+        timeline: '0-3 months'
+      });
+    } else if (this.results.profitMargin < 15) {
+      this.recommendations.push({
+        id: 'fin_002',
+        title: 'Improve profit margin to sustainable level',
+        description: `Current margin ${this.results.profitMargin.toFixed(1)}% is below 15% benchmark.`,
+        actions: [
+          'Reduce feed costs by 15% (see feed inefficiency)',
+          'Increase weaning rate by 5% (health & genetics)',
+          'Add one diversification stream (agri-tourism or direct sales)'
+        ],
+        priority: 'HIGH',
+        effort: 'Medium',
+        impact: 'High',
+        timeline: '3-6 months'
+      });
+    }
+
+    // Stocking density
+    if (this.results.isOverstocked) {
+      this.recommendations.push({
+        id: 'stock_001',
+        title: 'Resolve overstocking',
+        description: `Overstocked by ${this.results.stockingDeficit.toFixed(0)} ewes.`,
+        actions: [
+          `Reduce flock to ${Math.floor(this.results.maxRecommendedStock)} ewes within 6 months`,
+          `Or expand land by ${((this.inputs.flockSize / this.results.carryingCapacityRate) - this.inputs.landHa).toFixed(1)} ha`,
+          'Implement rotational grazing to increase effective carrying capacity by 20%'
+        ],
+        priority: 'CRITICAL',
+        effort: 'High',
+        impact: 'Very High',
+        timeline: '6-12 months'
+      });
+    }
+
+    // Diversification
+    if (this.inputs.flockSize < 100 && this.results.profitMargin < 20) {
+      this.recommendations.push({
+        id: 'div_001',
+        title: 'Add complementary revenue streams',
+        description: 'Small flocks struggle on meat/wool alone. Diversify to stabilize income.',
+        actions: [
+          'Start manure composting and sell to gardeners',
+          'Offer farm tours or shearing demonstrations',
+          'Process 10% of lambs into biltong/droëwors for direct sale (+50% margin)'
+        ],
+        priority: 'MEDIUM',
+        effort: 'Low',
+        impact: 'Medium',
+        timeline: '3-6 months'
+      });
+    }
+
+    // Benchmark-based improvements
+    if (this.benchmarkGaps.weaningRate === 'below_average' || this.benchmarkGaps.weaningRate === 'critical') {
+      this.recommendations.push({
+        id: 'prod_001',
+        title: 'Improve lamb weaning rate',
+        description: `Current weaning rate ${((this.results.lambsWeaned / this.inputs.flockSize)*100).toFixed(0)}% is below industry average of 70%.`,
+        actions: [
+          'Implement pre-lambing vaccination program',
+          'Provide better nutrition 6 weeks before lambing',
+          'Cull poor-performing ewes',
+          'Use assisted lambing for difficult births'
+        ],
+        priority: 'HIGH',
+        effort: 'Medium',
+        impact: 'High',
+        timeline: '6-12 months'
+      });
+    }
+  }
+
+  // ============================================================
+  // 2. STAGE‑SPECIFIC LIFECYCLE RECOMMENDATIONS (NEW)
+  // ============================================================
+
+  _generateStageLifecycleRecommendations() {
+    // Determine which stage the farmer is likely in (based on inputs or defaults)
+    const currentStage = this.inputs.currentStage || 'general';
+    
+    // Genetics / Sperm stage
+    this.stageRecommendations.push({
+      stage: 'Genetics & Mating',
+      timing: 'Pre‑season (2 months before mating)',
+      condition: this.inputs.breed === 'Merino' ? 'high_value' : 'standard',
+      actions: [
+        'Select rams with positive Estimated Breeding Values (EBVs) for growth rate',
+        'Consider Artificial Insemination (AI) with elite semen – R500/dose vs R30k ram',
+        'Conduct semen quality test on all rams 6 weeks before mating',
+        'Cull any ram with below‑average libido or physical defects'
+      ],
+      expectedGain: 'R5,000–20,000 per season',
+      effort: 'Medium',
+      priority: 'HIGH'
+    });
+
+    // Conception stage
+    this.stageRecommendations.push({
+      stage: 'Conception (mating to 30 days)',
+      timing: 'Mating season + 30 days',
+      condition: 'always',
+      actions: [
+        'Flush ewes with high‑protein feed 2 weeks before mating (+5‑10% conception)',
+        'Use raddle paint to track which rams have served which ewes',
+        'Introduce a teaser ram (vasectomised) to synchronise oestrus',
+        'Pregnancy scan at day 45–60 to identify empty ewes (cull or re‑mate)'
+      ],
+      expectedGain: 'R3,000–15,000 per 100 ewes',
+      effort: 'Medium',
+      priority: 'HIGH'
+    });
+
+    // Pregnancy stage
+    this.stageRecommendations.push({
+      stage: 'Pregnancy (days 30–140)',
+      timing: 'Mid‑pregnancy (day 60–100)',
+      condition: 'always',
+      actions: [
+        'Increase feed quantity by 20% in last 6 weeks of pregnancy',
+        'Vaccinate ewes against pulpy kidney and tetanus 4 weeks before lambing',
+        'Separate pregnant ewes into a dedicated paddock with shelter',
+        'Monitor body condition score (target 3.5/5) – adjust feed if too low'
+      ],
+      expectedGain: 'Reduced lamb mortality by 10‑15%',
+      effort: 'Medium',
+      priority: 'HIGH'
+    });
+
+    // Lambing / Birth stage
+    this.stageRecommendations.push({
+      stage: 'Lambing & Birth',
+      timing: 'During lambing season',
+      condition: 'always',
+      actions: [
+        'Prepare a lambing kit: iodine, towels, gloves, lubricant, lamb puller',
+        'Check pregnant ewes twice daily during peak lambing',
+        'Ensure each lamb receives colostrum within 2 hours of birth',
+        'Record birth weight, ewe ID, and any birth difficulties',
+        'Warm weak lambs in a warming box (homemade: 40W light bulb + cardboard box)'
+      ],
+      expectedGain: 'Reduces pre‑weaning mortality by 5‑10% (R50‑200 per lamb saved)',
+      effort: 'High (during season)',
+      priority: 'CRITICAL'
+    });
+
+    // Pre‑weaning stage
+    this.stageRecommendations.push({
+      stage: 'Pre‑weaning (birth to 4 months)',
+      timing: 'Weekly checks',
+      condition: 'always',
+      actions: [
+        'Provide creep feed (high protein) to lambs from 2 weeks old',
+        'Vaccinate lambs at 6 weeks (clostridial diseases)',
+        'Weigh lambs monthly – target 25kg by 4 months',
+        'Treat for internal parasites at 8 weeks and 12 weeks',
+        'Castrate and tail dock (if not done at birth) by 6 weeks'
+      ],
+      expectedGain: 'Adds 5‑10kg per lamb at weaning (R150‑300 value)',
+      effort: 'Medium',
+      priority: 'HIGH'
+    });
+
+    // Weaning stage
+    this.stageRecommendations.push({
+      stage: 'Weaning (4 months)',
+      timing: 'At weaning',
+      condition: 'always',
+      actions: [
+        'Wean lambs at 90–120 days or when they reach 25kg',
+        'Move lambs to fresh paddock (clean grazing) to reduce parasite load',
+        'Vaccinate weaners against pasteurella and pulpy kidney',
+        'Sell weaned lambs if feed is scarce or prices are high',
+        'Consider retaining female lambs as replacements if conformation is good'
+      ],
+      expectedGain: 'Optimal weaning weight adds R200‑500 per lamb',
+      effort: 'Low',
+      priority: 'MEDIUM'
+    });
+
+    // Growing / Finishing stage
+    this.stageRecommendations.push({
+      stage: 'Finishing (4–12 months)',
+      timing: 'Monthly checks',
+      condition: 'always',
+      actions: [
+        'Feed a balanced ration with 12‑14% protein for finishing',
+        'Weigh monthly – target 40‑45kg by 10‑12 months',
+        'If growth stalls, test for parasites and supplement selenium/vitamin B12',
+        'Consider feedlot finishing for last 60 days (faster gain, higher cost)',
+        'Cull any lamb that fails to reach 35kg by 10 months'
+      ],
+      expectedGain: 'Reduces feed cost by 10‑20% while maintaining gain',
+      effort: 'Medium',
+      priority: 'MEDIUM'
+    });
+
+    // Market stage
+    this.stageRecommendations.push({
+      stage: 'Market & Sale',
+      timing: 'Before sale',
+      condition: 'always',
+      actions: [
+        'Check current auction prices (class A lamb: R94‑106/kg)',
+        'Direct sale adds 20% margin – list on Facebook Marketplace or classifieds',
+        'Sell at 40‑45kg – overweight lambs incur penalties',
+        'Transport only in cool early morning hours to reduce stress weight loss',
+        'If prices are low, hold lambs for 2‑4 weeks (if feed is cheap)'
+      ],
+      expectedGain: 'R100‑500 per lamb through timing and channel choice',
+      effort: 'Low',
+      priority: 'HIGH'
+    });
+  }
+
+  // ============================================================
+  // 3. BREEDER‑FINISHER MARKETPLACE RECOMMENDATIONS (NEW)
+  // ============================================================
+
+  _generateMarketplaceRecommendations() {
+    // Only show if farmer has weaned lambs to sell OR buys lambs to finish
+    if (this.results.lambsWeaned > 30) {
+      this.recommendations.push({
+        id: 'market_breeder',
+        title: 'Sell weaned lambs to finishers for premium',
+        description: `You wean ${this.results.lambsWeaned} lambs annually. Consider selling direct to finishers.`,
+        actions: [
+          'List weaned lambs (25kg+) on the ShepherdAI marketplace (coming soon)',
+          'Price at 80% of finished lamb value – finishers pay R1,200–1,500 each',
+          'Provide weight records and vaccination history to command higher price',
+          'Build relationships with 2‑3 local finishers for repeat sales'
+        ],
+        priority: 'MEDIUM',
+        effort: 'Low',
+        impact: 'High (adds R100‑300 per lamb vs auction)',
+        timeline: 'At weaning'
+      });
+    }
+
+    if (this.inputs.finisherMode === true || this.inputs.flockSize > 100) {
+      this.recommendations.push({
+        id: 'market_finisher',
+        title: 'Buy weaned lambs to finish',
+        description: 'Finishing lambs can be more profitable than raising from birth if feed is efficient.',
+        actions: [
+          'Buy weaned lambs (25kg) at R1,200–1,500 each',
+          'Finish to 42kg in 4‑6 months with high‑energy feed',
+          'Target sale at 42kg – current lamb price R94‑106/kg = R3,950‑4,450 each',
+          'Gross margin: R2,500‑3,000 per lamb (minus feed cost ~R800)'
+        ],
+        priority: 'MEDIUM',
+        effort: 'Medium',
+        impact: 'High (scalable business model)',
+        timeline: 'Quarterly'
+      });
+    }
+  }
+
+  // ============================================================
+  // 4. DATA GAPS & CONFIDENCE
+  // ============================================================
+
+  _identifyDataGaps() {
+    this.missingData = [];
+    if (!this.inputs.currentStage) {
+      this.missingData.push({ field: 'currentStage', importance: 'Medium', reason: 'To show stage‑specific recommendations' });
+    }
+    if (!this.inputs.lambingDate) {
+      this.missingData.push({ field: 'lambingDate', importance: 'High', reason: 'To time pre‑lambing vaccinations and feed increases' });
+    }
+    if (!this.inputs.weaningWeight) {
+      this.missingData.push({ field: 'weaningWeight', importance: 'High', reason: 'To benchmark weaning performance against industry average (25kg)' });
+    }
+    if (!this.inputs.finisherMode) {
+      this.missingData.push({ field: 'finisherMode', importance: 'Low', reason: 'To recommend breeder‑finisher marketplace' });
+    }
+  }
+
+  _assignConfidenceScores() {
+    let totalWeight = 0;
+    let filledWeight = 0;
+    const weightMap = {
+      'landHa': 10, 'flockSize': 10, 'breed': 5, 'productionSystem': 5,
+      'currentStage': 8, 'lambingDate': 7, 'weaningWeight': 7
+    };
+    for (let key in weightMap) {
+      totalWeight += weightMap[key];
+      if (this.inputs[key] !== undefined && this.inputs[key] !== null && this.inputs[key] !== '') {
+        filledWeight += weightMap[key];
+      }
+    }
+    this.confidenceScore = (filledWeight / totalWeight) * 100;
+  }
+
+  _overallConfidence() {
+    return Math.min(100, Math.max(0, this.confidenceScore));
+  }
+
+  _executiveSummary() {
+    return {
+      status: this.results.netProfit > 0 ? (this.results.profitMargin > 15 ? 'Profitable' : 'Marginally profitable') : 'Loss-making',
+      topPriority: this.recommendations.filter(r => r.priority === 'CRITICAL').map(r => r.title),
+      estimatedImprovementPotential: this._calculateImprovementPotential(),
+      dataCompleteness: `${this._overallConfidence().toFixed(0)}%`,
+      nextStage: this.inputs.currentStage || 'unknown – add your farm stage for better recommendations'
+    };
+  }
+
+  _calculateImprovementPotential() {
+    let totalSavings = 0;
+    for (let ineff of this.inefficiencies) {
+      if (ineff.currentCostEstimate && ineff.optimizedCostEstimate) {
+        totalSavings += (ineff.currentCostEstimate - ineff.optimizedCostEstimate);
+      }
+    }
+    return `R${totalSavings.toFixed(0)} - R${(totalSavings * 1.5).toFixed(0)} per year`;
+  }
+}
+
+// Export for Node.js or browser
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = RecommendationEngine;
+} else {
+  window.RecommendationEngine = RecommendationEngine;
+}
+```
+
+---
+
+📦 How to Use the New Lifecycle Features
+
+Add two new fields to your farm input form:
+
+Field Type Default Purpose
+currentStage dropdown general Options: general, mating, pregnant, lambing, preWeaning, weaning, finishing
+finisherMode checkbox false Set true if farmer buys weaned lambs to finish
+
+Then call the engine:
+
+```javascript
+const inputs = {
+  landHa: 120,
+  flockSize: 180,
+  breed: 'Merino',
+  productionSystem: 'semiIntensive',
+  currentStage: 'pregnant',     // NEW
+  finisherMode: false            // NEW
+};
+
+const model = new SheepFarmModel(inputs);
+model.calculate();
+const recEngine = new RecommendationEngine(inputs, model.results, inefficiencies);
+const report = recEngine.generate();
+
+console.log(report.stageRecommendations);  // Array of stage‑specific actions
+```
+
+---
+
+✅ Summary of New Capabilities
+
+Feature Benefit
+Stage‑specific recommendations Tells farmer exactly what to do now based on their current stage (mating, pregnant, lambing, etc.)
+Timing‑aware actions "Increase feed 6 weeks before lambing" – not generic advice
+Breeder‑finisher marketplace hooks Prepares your platform to take commission on weaned lamb sales
+Expected gain per action Shows farmer the R value of following each recommendation
+Data gap detection Flags missing fields (lambing date, weaning weight) that would improve accuracy
+
+You now have a lifecycle‑aware recommendation engine that guides the farmer from sperm to sale, while also creating a path to marketplace revenue.

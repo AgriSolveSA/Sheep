@@ -1,0 +1,203 @@
+You now have a single‑vertical product (sheep). To build longevity and recurring value, you need a branching strategy that adds new livestock types, then mixed farming, then cropping – without rewriting the core engine.
+
+Below is a modular expansion roadmap that keeps your codebase clean, your infrastructure unchanged, and your sales funnel reusable.
+
+---
+
+🌿 Branching Strategy Overview
+
+```
+                    ┌─────────────────────────────────────┐
+                    │         CORE ENGINE (exists)        │
+                    │  - Profitability model              │
+                    │  - Inefficiency Engine (SI)         │
+                    │  - Recommendation Engine            │
+                    │  - One‑page action sheet generator  │
+                    └──────────────┬──────────────────────┘
+                                   │
+          ┌────────────────────────┼────────────────────────┐
+          │                        │                        │
+          ▼                        ▼                        ▼
+    ┌───────────┐           ┌───────────┐           ┌───────────┐
+    │   Sheep   │           │   Cattle  │           │   Goats   │
+    │  Module   │           │  Module   │           │  Module   │
+    └─────┬─────┘           └─────┬─────┘           └─────┬─────┘
+          │                       │                       │
+          └───────────────────────┼───────────────────────┘
+                                  │
+                          ┌───────┴───────┐
+                          │ Mixed Farming │
+                          │    Module     │
+                          └───────┬───────┘
+                                  │
+                          ┌───────┴───────┐
+                          │   Cropping    │
+                          │    Module     │
+                          └───────────────┘
+```
+
+Each module is a data layer (lookup tables, breed parameters, cost structures) that plugs into the same core engine. The user selects their enterprise type on the farm form, and the engine loads the correct module.
+
+---
+
+🧩 Module Architecture (Technical)
+
+Core Engine (unchanged)
+
+· profitability.js – formulas (revenue, costs, margins)
+· inefficiency.js – SI calculations
+· recommendation.js – action prioritisation
+· output.js – one‑page action sheet
+
+Module Registry (modules.json)
+
+```json
+{
+  "sheep": {
+    "lookupTables": "sheepTables.js",
+    "defaultInputs": "sheepDefaults.js",
+    "inefficiencyRules": "sheepInefficiencies.js",
+    "outputTemplate": "sheepActionSheet.html"
+  },
+  "cattle": { ... },
+  "goats": { ... },
+  "pigs": { ... },
+  "poultry": { ... }
+}
+```
+
+When a user selects “Cattle – Beef” on the form, the engine loads cattleTables.js (carrying capacity, feed conversion, market prices, etc.) and runs the same formulas.
+
+---
+
+🐄 Module 2: Cattle (Beef & Dairy)
+
+Sub‑module Unique Data Points Source of Benchmarks
+Beef Carrying capacity (ha/cow), weaning rate (%), feedlot conversion, beef prices (R/kg), hide value Red Meat Levy SA, SAMIC, feedlot studies
+Dairy Litres/cow/day, milk price (R/L), calving interval, AI costs, veterinary protocols Milk SA, Lactodata
+
+Timeline to build: 3‑4 weeks (once sheep module is stable).
+
+Key inefficiencies (high SI) for cattle:
+
+· Feedlot rations – similar to sheep (SI ≈ 2‑4)
+· Veterinary (especially dairy) – antibiotics, supplements (SI ≈ 8‑10)
+· Water infrastructure – even larger demand (SI ≈ 10)
+· Breeding (bulls) – similar SI to stud rams (8‑12)
+
+Action sheet will include: rotational grazing plans, AI vs bull economics, milk cooling efficiency.
+
+---
+
+🐐 Module 3: Goats
+
+Sub‑module Unique Data Benchmarks
+Boer / Meat Carrying capacity (ha/goat), kidding rate (%), meat price (R/kg), hide/skin value Mohair SA, Boer Goat Breeders’ Association
+Angora (mohair) Mohair yield (kg/goat), price (R/kg), shearing twice/year Cape Mohair, SAMIC
+
+Timeline: 2‑3 weeks (similar to sheep, simpler production).
+
+Inefficiencies: similar to sheep but lower feed costs; mohair processing markups (SI high).
+
+---
+
+🐖 Module 4: Pigs
+
+Data Points Farrowing rate, weaning to finish conversion, feed cost (pig meal), pork prices (R/kg)
+Sources SAPPO (South African Pork Producers’ Organisation)
+
+Timeline: 2 weeks.
+
+Key inefficiencies: feed conversion (largest cost), housing ventilation (electricity), veterinary (SI high for vaccines).
+
+---
+
+🐔 Module 5: Poultry (Broilers & Layers)
+
+Sub‑module Data Sources
+Broilers Day‑old chick price, feed conversion (2:1), slaughter age (42 days), breast meat price SAPA (SA Poultry Association)
+Layers Eggs/hen/day, feed cost per dozen, culling value EggSA
+
+Timeline: 2 weeks.
+
+Inefficiencies: feed (60‑70% of cost), mortality (high in broilers), egg grading and packaging markups.
+
+---
+
+🌾 Module 6: Mixed Farming (Sheep + Crops)
+
+This module integrates sheep and cropping. The engine calculates:
+
+· Crop residues (maize stalks, sorghum) as winter feed → reduces purchased feed cost.
+· Manure from sheep as fertiliser for crops → reduces fertiliser cost.
+· Rotational grazing on fallow land → improves soil health.
+
+Timeline: 4 weeks (requires crop yield tables, fertiliser prices, soil type adjustments).
+
+Inefficiencies: over‑purchased fertiliser, under‑utilised residues, transport of manure.
+
+---
+
+🌽 Module 7: Pure Cropping (Arable)
+
+Crop Types Maize, wheat, soybeans, sunflowers, lucerne (forage)
+Data Yield per ha, input costs (seed, fertiliser, chemicals), market price per ton, storage costs
+Sources Grain SA, SAGIS, AMT
+
+Timeline: 4‑6 weeks.
+
+Inefficiencies (SI):
+
+· Fertiliser (raw materials R5/kg → delivered R15/kg → SI 3)
+· Seed (genetically modified premiums)
+· Chemicals (similar to vet meds – SI 8‑10)
+· Transport to silo
+
+---
+
+🚀 Implementation Roadmap (After Sheep MVP)
+
+Phase Module Time Revenue Opportunity
+1 Sheep (done) – One‑time R499 + membership
+2 Cattle (beef first) 3‑4 weeks New customer segment, upsell to existing
+3 Goats 2‑3 weeks Low‑cost entry for smallholders
+4 Mixed farming (sheep + crops) 4 weeks Higher price point (R699)
+5 Pigs + Poultry 4 weeks Urban/peri‑urban farmers
+6 Pure cropping 6 weeks Large‑scale arable farmers
+
+Pricing strategy per module:
+
+· Single module: R499
+· Two modules (e.g., sheep + cattle): R799
+· All livestock: R1,299
+· Mixed farming + cropping: R1,499
+
+Membership stays R99/month for unlimited access to all modules (once purchased individually or bundled).
+
+---
+
+🧠 Technical Reuse (Don’t Rewrite)
+
+Component Reused Across All Modules
+User auth, dashboard, payment, email 100%
+One‑page action sheet template 90% (different content)
+Inefficiency Engine logic 100% (different SI thresholds per module)
+Recommendation priority algorithm 100%
+PDF generator 100%
+
+Only data tables and output text templates change per module. This is a configuration‑driven system, not a rewrite.
+
+---
+
+✅ Immediate Next Step
+
+1. Finish sheep MVP (brochure site, sign‑in, payment, one‑page PDF).
+2. Document all data sources for cattle (we can provide a template).
+3. Build a “Module Manager” in your admin dashboard – toggle which modules are active, set prices.
+4. Launch cattle module as a separate product (same code, different DB tables).
+
+---
+
+You now have a clear branching strategy to turn a sheep‑only tool into a multi‑species, mixed‑farming platform. The core engine stays unchanged; you only add data and templates. This keeps development linear, maintenance low, and revenue diversified.
+
+Would you like me to produce the data schema and lookup tables for the cattle module as a ready‑to‑use JavaScript file?

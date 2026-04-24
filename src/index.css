@@ -1,0 +1,111 @@
+/*
+ * Agrimodel Pro — base stylesheet
+ * Theme colours are mirrored in the PALETTE constant in App.jsx.
+ * Edit both places if you change a colour.
+ *
+ * Background stack:  --bg  →  --surface  →  --card
+ * Text stack:        --text (headings)  →  --muted (body labels)  →  --dim (captions/hints)
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ── Theme tokens ─────────────────────────────────────────────────────── */
+:root {
+  --bg:         #0a0c0a;   /* near-black, minimal green cast                */
+  --surface:    #131713;   /* very dark surface                             */
+  --card:       #1a201a;   /* dark card                                     */
+  --border:     #2c3c2c;   /* subtle border                                 */
+  --accent:     #7acc3a;   /* lime green  — positive numbers, active states */
+  --gold:       #d4b55a;   /* amber gold  — capital, payback                */
+  --text:       #f0ece0;   /* warm white  — headings, primary values        */
+  --muted:      #aca89c;   /* warm gray   — labels, secondary text          */
+  --dim:        #6e6a60;   /* medium gray — captions, hints, footnotes      */
+  --danger:     #e06848;   /* orange-red  — losses, warnings                */
+}
+
+/* ── Reset ────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+svg { display: block; }
+input:focus, select:focus { outline: none; }
+button { touch-action: manipulation; }
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+html        { font-size: 16px; }
+html, body  { height: 100%; background: var(--bg); }
+body        { font-family: 'DM Mono', 'Courier New', monospace; color: var(--text); line-height: 1.6; }
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar             { width: 4px; height: 4px; }
+::-webkit-scrollbar-track       { background: var(--bg); }
+::-webkit-scrollbar-thumb       { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* ── Animations ───────────────────────────────────────────────────────── */
+.slide-up { animation: su 0.4s cubic-bezier(0.22, 0.68, 0, 1.12) both; }
+@keyframes su { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.fade-in  { animation: fi 0.3s ease both; }
+@keyframes fi { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes spin  { to { transform: rotate(360deg); } }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+
+.map-loading { animation: pulse 1.8s ease-in-out infinite; }
+.loading-bar { animation: slide 1.8s linear infinite; }
+
+/* ── Interactive ──────────────────────────────────────────────────────── */
+.glow-btn { transition: all 0.2s; }
+.glow-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(200, 168, 75, 0.45) !important;
+}
+.tab-btn:hover  { background: var(--card) !important; }
+.pill-btn:hover { border-color: var(--accent) !important; color: var(--accent) !important; }
+
+/* ── Risk labels (climate cards) ──────────────────────────────────────── */
+/*    Displayed on dark --card backgrounds — all values pass WCAG AA.     */
+.risk-low  { color: #8ade4e; }   /* lime  — favourable condition  */
+.risk-med  { color: #c8a84b; }   /* amber — moderate              */
+.risk-high { color: #e05c3a; }   /* red   — problematic           */
+
+/* ── Map tooltips ─────────────────────────────────────────────────────── */
+.prov-tip {
+  background: rgba(10, 12, 10, 0.96) !important;
+  border: 1px solid #2c3c2c !important;
+  color: #f0ece0 !important;           /* warm white on near-black */
+  font-family: 'DM Mono', 'Courier New', monospace !important;
+  font-size: 13px !important;
+  padding: 3px 8px !important;
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+.prov-tip::before { display: none !important; }
+
+/* ── Leaflet overrides ────────────────────────────────────────────────── */
+.leaflet-container     { font-family: 'DM Mono', 'Courier New', monospace; }
+.leaflet-control-zoom  { border: 1px solid #2c3c2c !important; }
+.leaflet-control-zoom a {
+  background: #1a201a !important;
+  color: #7acc3a !important;
+  border-bottom: 1px solid #2c3c2c !important;
+}
+.leaflet-control-zoom a:hover { background: #2c3c2c !important; }
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .leaflet-container   { height: 44vh !important; }
+  .report-kpi-grid     { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* ── Print ────────────────────────────────────────────────────────────── */
+@media print {
+  .no-print             { display: none !important; }
+  body                  { background: #fff !important; color: #000 !important; }
+  [style*="background"] { background: transparent !important; }
+  [style*="color"]      { color: #000 !important; }
+  [style*="border"]     { border-color: #ccc !important; }
+  button                { display: none !important; }
+  .leaflet-container    { display: none !important; }
+}

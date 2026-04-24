@@ -1,0 +1,147 @@
+You're absolutely right. A verified identity is the single strongest deterrent to fraud on a classifieds platform. By requiring KYC before allowing any ad posting, you shift from "anonymous marketplace" to trusted community – which is exactly what farmers need.
+
+Below is a KYC‑enforced sign‑up flow that integrates with your existing user registration. It's practical, privacy‑aware, and builds trust from day one.
+
+---
+
+🔐 Tiered Access Based on KYC Status
+
+User Status Can Browse Can Inquire Can Post Ads Can Receive Payments
+Guest (no account) ✅ Yes ❌ No (must sign up) ❌ No ❌ No
+Registered, KYC pending ✅ Yes ✅ Yes (limited) ❌ No ❌ No
+KYC verified (basic) ✅ Yes ✅ Yes ✅ Yes (free/basic ads) ✅ Yes (manual payout)
+KYC verified (premium) ✅ Yes ✅ Yes ✅ Yes (all ad types) ✅ Yes (automated)
+
+This creates a clear incentive: “Verify your identity to sell on our marketplace.”
+
+---
+
+📋 What KYC Information to Collect
+
+Field Required For How to Verify
+Full name & surname All users Match with ID document
+South African ID number All users Validate checksum (Luhn‑like algorithm for SA ID)
+Mobile number All users SMS OTP (one‑time PIN)
+Email address All users Click verification link
+Physical address Sellers (to post ads) Proof of address (municipal bill, bank statement, lease agreement) – upload PDF/photo
+Bank account details Sellers (to receive payments) Bank confirmation letter or small test deposit (R0.01)
+ID document copy Sellers Upload photo of ID front/back; optional automated check via ScreenlyyID (free tier)
+
+You do not need to collect all of this upfront. A progressive KYC approach is less intimidating:
+
+1. Sign‑up: Name + email + mobile (SMS OTP).
+2. To browse & inquire: No further docs.
+3. To post first ad: Ask for ID number + upload ID photo + proof of address.
+4. To receive payout: Ask for bank account details.
+
+This way, a user who only wants to browse or ask a question never hits the heavy KYC wall.
+
+---
+
+🛡️ How to Store KYC Data (Securely & Compliantly)
+
+Requirement Implementation
+Data encryption at rest Use AES‑256 for stored documents (e.g., crypto in Node.js, or store files outside web root with random names)
+Data encryption in transit HTTPS only (Let's Encrypt)
+Access control Only admin users (you) can view full KYC documents; regular users see only their own
+Retention policy Keep for 5 years after account closure (per FICA) then permanently delete
+Privacy policy Must state: “We collect ID, address, bank details for fraud prevention and to comply with South African law. We do not sell your data.”
+Data breach notification Have a procedure to notify affected users and the Information Regulator within 72 hours (POPIA requirement)
+
+You can use SQLite to store metadata (verified flags, document hashes), but store the actual uploaded files on disk (not in the database). Example folder structure:
+
+```
+/data/kyc/
+   user_123/
+      id_front.jpg
+      id_back.jpg
+      proof_of_address.pdf
+   user_456/
+      ...
+```
+
+---
+
+🤖 Automated KYC Checks (Free / Low‑Cost)
+
+Service What It Does Cost
+ScreenlyyID ID document authenticity check, face match (if you add selfie), AML watchlist screening Free for startups (up to 1,000 checks/month)
+Liveness.com Verify that the ID photo is of a real person (not a printed copy) – optional Free tier available
+Internal SA ID validation Check ID number format, date of birth, gender, citizenship Free (implement yourself – standard algorithm)
+
+You can start with manual review for the first 50 users (you check the uploaded files yourself) to keep costs at zero. Then add ScreenlyyID once volume grows.
+
+---
+
+📝 User Experience Flow
+
+Step 1: Sign‑up form (minimal)
+
+```
+Full name: [________]
+Email: [________]
+Mobile: [________]  (send OTP)
+Password: [________]
+```
+
+After OTP verification, user is logged in with KYC status = pending.
+
+Step 2: Dashboard shows KYC progress
+
+```
+Your account is not yet verified. To post ads, please complete:
+✅ Mobile number verified
+⬜ Upload ID document
+⬜ Upload proof of address
+⬜ Link bank account
+
+[Start verification] button
+```
+
+Step 3: Verification form (one page)
+
+· Upload ID (front + back) – drag & drop or camera capture.
+· Upload proof of address (PDF or photo) – utility bill, bank statement, lease (dated within last 3 months).
+· Enter bank account details (account holder, bank, branch code, account number).
+
+Submit → Status changes to “KYC under review (typically 24 hours)”.
+
+Step 4: Admin review (you)
+
+· Log into admin panel, see pending verifications.
+· Check that uploaded documents are legible and match the user’s name/address.
+· Approve or reject with reason (e.g., “Proof of address is older than 3 months”).
+
+Step 5: Approval notification
+
+· Email + dashboard alert: “Your account is now verified. You can post ads.”
+· User can now access ad posting form.
+
+---
+
+⚖️ Legal & Compliance Notes
+
+Law Relevance
+FICA (Financial Intelligence Centre Act) If you facilitate payments between buyers and sellers (e.g., escrow or direct payouts), you must register as an accountable institution with the FIC. KYC is mandatory.
+POPIA (Protection of Personal Information Act) You must have a privacy policy, get consent to collect KYC data, and allow users to request deletion of their data (subject to legal retention).
+Consumer Protection Act If a user is defrauded on your platform despite KYC, you may have residual liability. Add terms of use that limit your liability and require users to report disputes.
+
+Recommendation: Spend R5,000–10,000 on a one‑time legal review of your KYC and terms of use. It will save you much more in potential fines or lawsuits.
+
+---
+
+✅ Summary: Your KYC-Enforced Marketplace
+
+Feature Implementation
+Minimum to sign up Name + email + mobile (SMS OTP)
+To browse ads No KYC needed
+To contact a seller Logged in only (KYC pending allowed)
+To post an ad Full KYC (ID, address, bank) required
+To receive payouts Bank account verified
+Automated checks Optional: ScreenlyyID free tier
+Manual review You approve first 100 users manually
+Data storage Encrypted files + SQLite metadata
+
+This system deters 99% of casual scammers while keeping the barrier low for legitimate farmers. The moment a user knows they have to upload their ID, they think twice before posting a fake tractor ad.
+
+Would you like me to produce the HTML/JavaScript for the KYC upload form and the admin review dashboard as ready‑to‑use code?

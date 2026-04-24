@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(grep -E \"\\\\.\\(js|html|css\\)$\")",
+      "Bash(sort -k2 -n)",
+      "Bash(grep -Eo '[0-9]+$')",
+      "Bash(sed -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)6\\\\\\([^0-9]\\\\\\)/fontSize:\\\\111\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)7\\\\\\([^0-9]\\\\\\)/fontSize:\\\\112\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)8\\\\\\([^0-9]\\\\\\)/fontSize:\\\\113\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)9\\\\\\([^0-9]\\\\\\)/fontSize:\\\\114\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)10\\\\\\([^0-9]\\\\\\)/fontSize:\\\\115\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)11\\\\\\([^0-9]\\\\\\)/fontSize:\\\\116\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)12\\\\\\([^0-9]\\\\\\)/fontSize:\\\\116\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)13\\\\\\([^0-9]\\\\\\)/fontSize:\\\\117\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)14\\\\\\([^0-9]\\\\\\)/fontSize:\\\\118\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)15\\\\\\([^0-9]\\\\\\)/fontSize:\\\\119\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)16\\\\\\([^0-9]\\\\\\)/fontSize:\\\\120\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)17\\\\\\([^0-9]\\\\\\)/fontSize:\\\\121\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)18\\\\\\([^0-9]\\\\\\)/fontSize:\\\\122\\\\2/g' src/App.jsx)",
+      "Bash(mv src/App.jsx.new src/App.jsx)",
+      "Bash(cp src/App.jsx.bak src/App.jsx)",
+      "Bash(sed -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)18\\\\\\([^0-9]\\\\\\)/fontSize:\\\\122\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)17\\\\\\([^0-9]\\\\\\)/fontSize:\\\\121\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)16\\\\\\([^0-9]\\\\\\)/fontSize:\\\\120\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)15\\\\\\([^0-9]\\\\\\)/fontSize:\\\\119\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)14\\\\\\([^0-9]\\\\\\)/fontSize:\\\\118\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)13\\\\\\([^0-9]\\\\\\)/fontSize:\\\\117\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)12\\\\\\([^0-9]\\\\\\)/fontSize:\\\\116\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)11\\\\\\([^0-9]\\\\\\)/fontSize:\\\\116\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)10\\\\\\([^0-9]\\\\\\)/fontSize:\\\\115\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)9\\\\\\([^0-9]\\\\\\)/fontSize:\\\\114\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)8\\\\\\([^0-9]\\\\\\)/fontSize:\\\\113\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)7\\\\\\([^0-9]\\\\\\)/fontSize:\\\\112\\\\2/g' -e 's/fontSize:\\\\\\([[:space:]]*\\\\\\)6\\\\\\([^0-9]\\\\\\)/fontSize:\\\\111\\\\2/g' src/App.jsx)",
+      "Bash(node -e ' *)"
     ]
   }
 }
