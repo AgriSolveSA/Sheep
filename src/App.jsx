@@ -846,11 +846,14 @@ function RestoreModal({ onClose, onRestore }) {
 // ── PITCH CONTENT — per livestock type ────────────────────────────────────────
 const PITCH_CONTENT = {
   sheep: {
+    typeLabel: "Sheep Farm Report",
+    headline: "Your banker will take\nthis report seriously.",
+    subHeadline: "9 sections. What a consultant charges R3,500–R5,000 to write. Ready in 30 seconds.",
     bullets: [
-      "✓ 9-section bankable AI feasibility report (ready in 30s)",
-      "✓ Cashflow · capital structure · sensitivity analysis",
-      "✓ Risk assessment · market outlook · breed ranking",
-      "✓ All 9 SA provinces · every commercial breed",
+      "✓ 9-section bankable AI feasibility report",
+      "✓ 36-month cashflow · capital structure · sensitivity",
+      "✓ Breed ranking · risk assessment · market outlook",
+      "✓ All 9 SA provinces · Land Bank quality",
     ],
     stream: {
       title: "Hidden income stream: Carbon credits + freezer-lamb",
@@ -858,11 +861,14 @@ const PITCH_CONTENT = {
     },
   },
   cattle: {
+    typeLabel: "Beef Cattle Farm Report",
+    headline: "Know if your herd\nis bankable — before\nyou buy a single cow.",
+    subHeadline: "9 sections. What a consultant charges R3,500–R5,000 to write. Ready in 30 seconds.",
     bullets: [
-      "✓ 9-section bankable AI feasibility report (ready in 30s)",
+      "✓ 9-section bankable AI feasibility report",
       "✓ 36-month cashflow · capital structure · breakeven",
-      "✓ Tick-borne disease risk by province · breed performance",
-      "✓ All 9 SA provinces · Bonsmara, Nguni, Angus & more",
+      "✓ Tick-borne disease risk by province · breed analysis",
+      "✓ All 9 SA provinces · Land Bank quality",
     ],
     stream: {
       title: "Hidden income stream: Bull leasing + carbon credits",
@@ -870,11 +876,14 @@ const PITCH_CONTENT = {
     },
   },
   bees: {
+    typeLabel: "Apiary Feasibility Report",
+    headline: "Most beekeepers sell\nonly honey. Your report\nshows you what else exists.",
+    subHeadline: "9 sections. What a consultant charges R3,500–R5,000 to write. Ready in 30 seconds.",
     bullets: [
-      "✓ 9-section bankable AI feasibility report (ready in 30s)",
-      "✓ Honey variety · harvest timing · province-specific placement",
-      "✓ Pollination service contracts · wax & value-add income",
-      "✓ All 9 SA provinces · full equipment capital breakdown",
+      "✓ 9-section bankable AI feasibility report",
+      "✓ Harvest timing · province-specific placement",
+      "✓ Pollination service contracts · wax & value-add",
+      "✓ All 9 SA provinces · full equipment breakdown",
     ],
     stream: {
       title: "Hidden income stream: Nuc sales + queen rearing",
@@ -1003,13 +1012,14 @@ function PayModal({ region, livestockType, onClose, onSuccess }) {
       <div className="fade-in" style={W}>
         <div style={{background:"linear-gradient(135deg,#111811,#1a2414)",padding:"24px 24px 20px",borderBottom:`1px solid ${PALETTE.faint}`}}>
           <div style={{fontSize:14,color:PALETTE.gold,letterSpacing:3,textTransform:"uppercase",marginBottom:8}}>
-            Agrimodel Pro · {prov.name || "SA"} Feasibility Report
+            Agrimodel Pro · {prov.name || "SA"} {pitchContent.typeLabel || "Feasibility Report"}
           </div>
-          <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:900,color:"#f0ece0",lineHeight:1.3}}>
-            Get your bankable<br/>AI feasibility report
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:900,color:"#f0ece0",lineHeight:1.3,whiteSpace:"pre-line"}}>
+            {pitchContent.headline}
           </div>
-          <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,fontWeight:900,color:PALETTE.gold,marginTop:12}}>
-            R 497 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · full platform access</span>
+          <div style={{fontSize:14,color:PALETTE.muted,marginTop:6,lineHeight:1.6}}>{pitchContent.subHeadline}</div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,fontWeight:900,color:PALETTE.gold,marginTop:10}}>
+            R 497 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · ready in 30 seconds</span>
           </div>
         </div>
         <div style={{padding:"20px 24px"}}>
@@ -1026,7 +1036,12 @@ function PayModal({ region, livestockType, onClose, onSuccess }) {
             style={{width:"100%",padding:"14px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 20px rgba(200,168,75,.3)`,transition:"all .2s"}}>
             Get My Report — R 497 →
           </button>
-          <button onClick={onClose} style={{width:"100%",marginTop:8,padding:"9px",background:"none",color:PALETTE.muted,border:"none",fontSize:15,cursor:"pointer"}}>Keep exploring the map</button>
+          <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:10,fontSize:13,color:PALETTE.dim}}>
+            <span>🔒 PayFast secure</span>
+            <span>🏦 Land Bank quality</span>
+            <span>⚡ 30 seconds</span>
+          </div>
+          <button onClick={onClose} style={{width:"100%",marginTop:8,padding:"9px",background:"none",color:PALETTE.muted,border:"none",fontSize:14,cursor:"pointer"}}>Keep exploring the map →</button>
         </div>
       </div>
     </div>
@@ -2541,8 +2556,8 @@ function AgrimodelPro() {
             ) : (
               <button className="glow-btn" onClick={()=>setShowPay(true)}
                 style={{padding:"7px 14px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:18,fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:`0 2px 12px rgba(200,168,75,.28)`}}>
-                <span className="hdr-btn-full">🔓 Unlock R 147.95 →</span>
-                <span className="hdr-btn-short">🔓 R 147.95</span>
+                <span className="hdr-btn-full">🔓 Unlock R 497 →</span>
+                <span className="hdr-btn-short">🔓 R 497</span>
               </button>
             )}
           </div>
@@ -3169,7 +3184,7 @@ function AgrimodelPro() {
                       </div>
                       <button className="glow-btn" onClick={()=>setShowPay(true)}
                         style={{width:"100%",padding:"13px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.3)`}}>
-                        📄 Get Bankable Report — R 147.95 →
+                        📄 Get Bankable Report — R 497 →
                       </button>
                     </div>
                   )}
@@ -3307,7 +3322,9 @@ function AgrimodelPro() {
 
                       <button className="glow-btn" onClick={()=>setShowPay(true)}
                         style={{width:"100%",padding:"12px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.3)`}}>
-                        Get Full AI Feasibility Report — R 147.95 →
+                        {auditResult?.totalAnnualSaving > 0
+                          ? `Get the R${auditResult.totalAnnualSaving.toLocaleString("en-ZA")} action plan — R 497 →`
+                          : `Get Full AI Feasibility Report — R 497 →`}
                       </button>
                     </div>
 
@@ -3321,9 +3338,22 @@ function AgrimodelPro() {
         {/* ── NO SELECTION ── */}
         {!selected && (
           <div style={{flex:1,overflow:"auto",minHeight:0,padding:"12px 16px 20px",overscrollBehavior:"contain"}}>
+            <div style={{background:"linear-gradient(135deg,#111811,#1a2414)",border:`1px solid ${PALETTE.borderHover}`,borderRadius:10,padding:"14px 16px",marginBottom:14}}>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,color:"#f0ece0",marginBottom:6}}>
+                {mod.emoji} Is your {mod.label.toLowerCase()} operation bankable?
+              </div>
+              <div style={{fontSize:14,color:PALETTE.muted,lineHeight:1.7}}>
+                Select a province to see breed rankings, carrying capacity, and a real financial model — then get the full AI feasibility report your bank will accept.
+              </div>
+              <div style={{display:"flex",gap:12,marginTop:10,fontSize:13,color:PALETTE.dim}}>
+                <span>📊 36-month cashflow</span>
+                <span>⚡ Hidden income streams</span>
+                <span>🏦 Land Bank quality</span>
+              </div>
+            </div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.5}}>
-                9 {mod.labelPlural} Provinces — tap any to explore
+                9 provinces — tap any to explore
               </div>
               <div style={{fontSize:13,color:PALETTE.faint}}>↑ or click map</div>
             </div>
@@ -3360,7 +3390,9 @@ function AgrimodelPro() {
           <div style={{position:"fixed",bottom:0,left:0,right:0,padding:"10px 16px 14px",background:`linear-gradient(to top,${PALETTE.bg} 70%,transparent)`,zIndex:100}}>
             <button className="glow-btn" onClick={()=>setShowPay(true)}
               style={{width:"100%",padding:"13px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:11,fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 24px rgba(200,168,75,.4)`}}>
-              📄 Get Bankable Report — R 147.95 →
+              {auditResult?.totalAnnualSaving > 0
+                ? `⚡ R${auditResult.totalAnnualSaving.toLocaleString("en-ZA")} savings found — Full Report R 497 →`
+                : `📄 Get Bankable Report — R 497 →`}
             </button>
           </div>
         )}
