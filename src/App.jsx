@@ -308,7 +308,7 @@ const PF = {
   returnUrl:   "https://agrimodel.co.za/success",
   cancelUrl:   "https://agrimodel.co.za/",
   notifyUrl:   "https://agrimodel.co.za/api/payfast-notify",
-  sandbox:     true,   // ← set false + add real creds in .env to go live
+  sandbox:     false,
   price:       147.95,
 };
 
@@ -1433,6 +1433,18 @@ function AgrimodelPro() {
       }
     } catch {}
   }, []);
+
+  // Detect PayFast return redirect — grant access when user lands on /success
+  useEffect(() => {
+    if (window.location.pathname !== "/success") return;
+    try {
+      const s = JSON.parse(localStorage.getItem("agri_session") || "{}");
+      if (!s.paid) {
+        handlePaySuccess(s.name || "Valued Client", s.email || "", s.accessCode || "");
+      }
+    } catch {}
+    window.history.replaceState({}, "", "/");
+  }, [handlePaySuccess]);
 
   // Save province + core inputs to localStorage whenever they change
   useEffect(() => {
