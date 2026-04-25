@@ -2626,7 +2626,7 @@ function AgrimodelPro() {
                 {TABS.map((t,i)=>(
                   <button key={i} className="tab-btn" onClick={()=>setActiveTab(i)}
                     style={{flex:1,padding:"8px 4px",background:"none",border:"none",borderBottom:activeTab===i?`2px solid ${PALETTE.accent}`:"2px solid transparent",color:activeTab===i?PALETTE.accent:PALETTE.muted,fontSize:14,textTransform:"uppercase",letterSpacing:.5,cursor:"pointer",transition:"all .15s",whiteSpace:"nowrap"}}>
-                    {t}
+                    {i===1 ? (T.unit==="hive" ? "Products" : t) : t}
                   </button>
                 ))}
               </div>
