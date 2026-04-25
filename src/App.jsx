@@ -4,7 +4,7 @@ import { ZAR, PCT, SGN, MONTHS } from "./utils.js";
 import { runInefficiencyAudit } from "./inefficiencyEngine.js";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 
 // Fix Leaflet default icon URLs broken by Vite bundling
 delete L.Icon.Default.prototype._getIconUrl;
@@ -395,6 +395,18 @@ const PAY_METHODS = [
   {id:"snap",    icon:"📱", label:"SnapScan / Zapper",    sub:"Scan QR with your banking app"},
   {id:"payshap", icon:"⚡", label:"PayShap",              sub:"Real-time · All major SA banks"},
 ];
+
+// Calls Leaflet invalidateSize after map wrapper expands so tiles redraw correctly
+function MapSizeTracker({ collapsed }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!collapsed) {
+      const t = setTimeout(() => map.invalidateSize(), 400);
+      return () => clearTimeout(t);
+    }
+  }, [collapsed, map]);
+  return null;
+}
 
 // ── ERROR BOUNDARY ────────────────────────────────────────────────────────────
 class ErrorBoundary extends Component {
@@ -1646,33 +1658,36 @@ function AgrimodelPro() {
         </div>
 
         {/* ── MAP ── */}
-        <div style={{position:"relative",flexShrink:0,overflow:"hidden"}}>
-          {!mapCollapsed && !provGeo && !geoError && (
+        {/* Wrapper controls height — MapContainer ignores style changes after mount */}
+        <div style={{
+          position:"relative", flexShrink:0, overflow:"hidden",
+          height: mapCollapsed ? 0 : (selected ? "28vh" : "50vh"),
+          transition:"height .35s cubic-bezier(.4,0,.2,1)",
+        }}>
+          {!provGeo && !geoError && (
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,pointerEvents:"none"}}>
               <span className="map-loading" style={{fontSize:14,color:PALETTE.muted,letterSpacing:1.5,textTransform:"uppercase",background:"rgba(8,15,6,.82)",padding:"5px 14px",borderRadius:20,border:`1px solid ${PALETTE.faint}`}}>
                 ⟳ Loading province boundaries…
               </span>
             </div>
           )}
-          {!mapCollapsed && geoError && (
+          {geoError && (
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,pointerEvents:"none"}}>
               <span style={{fontSize:14,color:PALETTE.danger,letterSpacing:1,background:"rgba(8,15,6,.82)",padding:"5px 12px",borderRadius:20,border:`1px solid rgba(224,92,58,.3)`}}>
                 ⚠ Province boundaries unavailable — use list below
               </span>
             </div>
           )}
-          {/* Collapse toggle — overlaid bottom-centre of map */}
-          {!mapCollapsed && (
-            <button
-              onClick={() => setMapCollapsed(true)}
-              style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",zIndex:1000,background:"rgba(8,15,6,.82)",border:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,borderRadius:16,padding:"4px 14px",fontSize:13,cursor:"pointer",letterSpacing:.5}}>
-              ▲ Hide map
-            </button>
-          )}
+          {/* Collapse button — sits at bottom of map */}
+          <button
+            onClick={() => setMapCollapsed(true)}
+            style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",zIndex:1000,background:"rgba(8,15,6,.82)",border:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,borderRadius:16,padding:"4px 14px",fontSize:13,cursor:"pointer",letterSpacing:.5}}>
+            ▲ Hide map
+          </button>
           <MapContainer
             bounds={[[-35.5, 16.2], [-21.5, 33.5]]}
             boundsOptions={{padding:[0,0]}}
-            style={{width:"100%", height:mapCollapsed?0:(selected?"28vh":"50vh"), background:"#0a1520", transition:"height .35s cubic-bezier(.4,0,.2,1)"}}
+            style={{width:"100%", height:"100%", background:"#0a1520"}}
             attributionControl={false}
             zoomControl={true}
             scrollWheelZoom={false}
@@ -1691,6 +1706,7 @@ function AgrimodelPro() {
                 onEachFeature={onEachProvince}
               />
             )}
+            <MapSizeTracker collapsed={mapCollapsed} />
           </MapContainer>
         </div>
 
