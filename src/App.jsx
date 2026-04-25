@@ -679,7 +679,7 @@ const PF = {
   cancelUrl:   "https://agrisolvesa.netlify.app/",
   notifyUrl:   "https://agrisolvesa.netlify.app/api/payfast-notify",
   sandbox:     false,
-  price:       147.95,
+  price:       497,
 };
 
 function buildPFUrl(name, email, region) {
@@ -843,8 +843,48 @@ function RestoreModal({ onClose, onRestore }) {
   );
 }
 
+// ── PITCH CONTENT — per livestock type ────────────────────────────────────────
+const PITCH_CONTENT = {
+  sheep: {
+    bullets: [
+      "✓ 9-section bankable AI feasibility report (ready in 30s)",
+      "✓ Cashflow · capital structure · sensitivity analysis",
+      "✓ Risk assessment · market outlook · breed ranking",
+      "✓ All 9 SA provinces · every commercial breed",
+    ],
+    stream: {
+      title: "Hidden income stream: Carbon credits + freezer-lamb",
+      body: "Direct freezer-lamb at R90–110/kg vs R52/kg abattoir. Holistic grazing unlocks Verra VCS carbon credits — R22k–240k/yr on 500ha. Most sheep farmers don't know these exist.",
+    },
+  },
+  cattle: {
+    bullets: [
+      "✓ 9-section bankable AI feasibility report (ready in 30s)",
+      "✓ 36-month cashflow · capital structure · breakeven",
+      "✓ Tick-borne disease risk by province · breed performance",
+      "✓ All 9 SA provinces · Bonsmara, Nguni, Angus & more",
+    ],
+    stream: {
+      title: "Hidden income stream: Bull leasing + carbon credits",
+      body: "Lease your registered bull at R3k–R5k/month during mating season. Add holistic grazing carbon credits via AgriCarbon — R22k–240k/yr on 500ha. Two income lines most cattle farmers leave on the table.",
+    },
+  },
+  bees: {
+    bullets: [
+      "✓ 9-section bankable AI feasibility report (ready in 30s)",
+      "✓ Honey variety · harvest timing · province-specific placement",
+      "✓ Pollination service contracts · wax & value-add income",
+      "✓ All 9 SA provinces · full equipment capital breakdown",
+    ],
+    stream: {
+      title: "Hidden income stream: Nuc sales + queen rearing",
+      body: "Sell 6–8 nucleus colonies/year at R800–R1,500 each — demand exceeds supply nationally. Add queen rearing (R250–R450/queen, 10–15/batch × 6 months = R21k–R52k/yr). Most beekeepers sell only honey.",
+    },
+  },
+};
+
 // ── PAY MODAL ─────────────────────────────────────────────────────────────────
-function PayModal({ region, onClose, onSuccess }) {
+function PayModal({ region, livestockType, onClose, onSuccess }) {
   const [step, setStep]       = useState("pitch");
   const [name, setName]       = useState("");
   const [email, setEmail]     = useState("");
@@ -852,6 +892,7 @@ function PayModal({ region, onClose, onSuccess }) {
   const [emailErr, setEmailErr] = useState(false);
   const [genCode]             = useState(() => Math.random().toString(36).slice(2,8).toUpperCase());
   const prov = PROVINCE_DATA[region] || {};
+  const pitchContent = PITCH_CONTENT[livestockType] ?? PITCH_CONTENT.sheep;
   const validEmail = v => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const canPay = name.trim().length >= 2 && (email === "" || validEmail(email));
   const W = {background:"#0e120e",border:`1px solid ${PALETTE.faint}`,borderRadius:16,maxWidth:"min(400px, calc(100vw - 32px))",width:"100%",overflow:"hidden"};
@@ -921,7 +962,7 @@ function PayModal({ region, onClose, onSuccess }) {
         }}
         className={canPay?"glow-btn":""}
         style={{width:"100%",padding:"13px",background:canPay?PALETTE.gold:PALETTE.faint,color:canPay?PALETTE.bg:PALETTE.muted,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,cursor:canPay?"pointer":"default",transition:"all .2s"}}>
-        Pay R 147.95 →
+        Pay R 497 →
       </button>
       <button onClick={()=>setStep("methods")} style={{width:"100%",marginTop:8,padding:"8px",background:"none",color:PALETTE.muted,border:"none",fontSize:15,cursor:"pointer"}}>← Back</button>
     </>
@@ -933,7 +974,7 @@ function PayModal({ region, onClose, onSuccess }) {
         <div style={{fontSize:14,color:PALETTE.gold,letterSpacing:3,textTransform:"uppercase",marginBottom:6}}>Agrimodel Pro</div>
         <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:900,color:"#f0ece0"}}>Choose how to pay</div>
         <div style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:900,color:PALETTE.gold,marginTop:8}}>
-          R 147.95 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · bankable AI report</span>
+          R 497 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · bankable AI report</span>
         </div>
       </div>
       {PAY_METHODS.map(m=>(
@@ -968,26 +1009,22 @@ function PayModal({ region, onClose, onSuccess }) {
             Get your bankable<br/>AI feasibility report
           </div>
           <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,fontWeight:900,color:PALETTE.gold,marginTop:12}}>
-            R 147.95 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · full platform access</span>
+            R 497 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · full platform access</span>
           </div>
         </div>
         <div style={{padding:"20px 24px"}}>
-          {[
-            "✓ 9-section bankable AI feasibility report (ready in 30s)",
-            "✓ Cashflow · capital structure · sensitivity analysis",
-            "✓ Risk assessment · market outlook · breed ranking",
-            "✓ All 9 SA provinces · every commercial breed",
-          ].map((txt,i)=>(
+          {pitchContent.bullets.map((txt,i)=>(
             <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
               <span style={{fontSize:15,color:PALETTE.text,lineHeight:1.5}}>{txt}</span>
             </div>
           ))}
-          <div style={{background:PALETTE.surface,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"10px 12px",margin:"12px 0",fontSize:15,color:PALETTE.muted,lineHeight:1.7}}>
-            💡 The map shows 3 teaser numbers. This report is what a senior agricultural consultant would charge R3,000–R5,000 to write. You get it for R 147.95 — and it's ready in 30 seconds.
+          <div style={{background:"rgba(30,80,20,.25)",border:`1px solid rgba(122,204,58,.35)`,borderRadius:8,padding:"10px 12px",margin:"12px 0"}}>
+            <div style={{fontSize:13,color:PALETTE.accent,textTransform:"uppercase",letterSpacing:.8,fontWeight:600,marginBottom:4}}>💡 {pitchContent.stream.title}</div>
+            <div style={{fontSize:14,color:PALETTE.muted,lineHeight:1.7}}>{pitchContent.stream.body}</div>
           </div>
           <button className="glow-btn" onClick={()=>setStep("methods")}
             style={{width:"100%",padding:"14px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 20px rgba(200,168,75,.3)`,transition:"all .2s"}}>
-            Get My Report — R 147.95 →
+            Get My Report — R 497 →
           </button>
           <button onClick={onClose} style={{width:"100%",marginTop:8,padding:"9px",background:"none",color:PALETTE.muted,border:"none",fontSize:15,cursor:"pointer"}}>Keep exploring the map</button>
         </div>
@@ -1090,7 +1127,7 @@ function printSummaryPDF({ prov, result, T, mod, flockSize, carcass, productionS
   <div class="cta">
     <div class="cta-eyebrow">Agrimodel Pro · Full Report</div>
     <div class="cta-title">9-Section Bankable AI<br/>Feasibility Report</div>
-    <div class="cta-price">R&nbsp;147.95 <span class="cta-once">once-off · ready in 30s</span></div>
+    <div class="cta-price">R&nbsp;497 <span class="cta-once">once-off · ready in 30s</span></div>
     <div class="cta-feats">
       ✓ Complete 36-month cashflow projection<br/>
       ✓ Capital structure + bank-grade sensitivity analysis<br/>
@@ -2379,7 +2416,7 @@ function AgrimodelPro() {
         } catch {}
         showToast("Access restored — welcome back!");
       }}/>}
-      {showPay && <PayModal region={selected} onClose={()=>setShowPay(false)} onSuccess={handlePaySuccess}/>}
+      {showPay && <PayModal region={selected} livestockType={livestockType} onClose={()=>setShowPay(false)} onSuccess={handlePaySuccess}/>}
       {showAdvisor && (
         <AdvisorWizard
           prov={prov} result={result} carryingCapacity={carryingCapacity} dataCompleteness={dataCompleteness}
