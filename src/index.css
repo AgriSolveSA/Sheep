@@ -99,6 +99,22 @@ body        { font-family: 'DM Mono', 'Courier New', monospace; color: var(--tex
   .report-kpi-grid     { grid-template-columns: repeat(3, 1fr) !important; }
 }
 
+@media (max-width: 600px) {
+  /* Header: hide subtitle so logo + buttons fit on one line */
+  .hdr-sub { display: none !important; }
+
+  /* Tab bar: tighten font so 4 tabs fit without wrapping */
+  .tab-btn { font-size: 12px !important; letter-spacing: 0 !important; padding: 8px 2px !important; }
+
+  /* Button text: hide full labels, show short ones */
+  .hdr-btn-full  { display: none !important; }
+  .hdr-btn-short { display: inline !important; }
+}
+
+@media (min-width: 601px) {
+  .hdr-btn-short { display: none !important; }
+}
+
 /* ── Print ────────────────────────────────────────────────────────────── */
 @media print {
   .no-print             { display: none !important; }

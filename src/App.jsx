@@ -404,7 +404,7 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.error) return (
       <div style={{ background: "#080f06", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Mono',monospace" }}>
-        <div style={{ background: "#0e120e", border: "1px solid #1a3a0e", borderRadius: 16, padding: "32px 24px", maxWidth: 400, width: "100%", textAlign: "center" }}>
+        <div style={{ background: "#0e120e", border: "1px solid #1a3a0e", borderRadius: 16, padding: "32px 24px", maxWidth: "min(400px, calc(100vw - 32px))", width: "100%", textAlign: "center" }}>
           <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
           <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 21, fontWeight: 700, color: "#f0ece0", marginBottom: 8 }}>Something went wrong</div>
           <div style={{ fontSize: 15, color: "#aca89c", marginBottom: 20, lineHeight: 1.7 }}>{String(this.state.error.message)}</div>
@@ -423,7 +423,7 @@ class ErrorBoundary extends Component {
 function RestoreModal({ onClose, onRestore }) {
   const [code, setCode] = useState("");
   const [err,  setErr]  = useState(false);
-  const W = {background:"#0e120e",border:`1px solid ${PALETTE.faint}`,borderRadius:16,maxWidth:360,width:"100%",padding:"24px"};
+  const W = {background:"#0e120e",border:`1px solid ${PALETTE.faint}`,borderRadius:16,maxWidth:"min(360px, calc(100vw - 32px))",width:"100%",padding:"24px"};
   const try_ = () => {
     const c = code.trim().toUpperCase();
     if (/^[A-Z0-9]{6}$/.test(c)) { onRestore(c); onClose(); }
@@ -462,7 +462,7 @@ function PayModal({ region, onClose, onSuccess }) {
   const prov = PROVINCE_DATA[region] || {};
   const validEmail = v => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const canPay = name.trim().length >= 2 && (email === "" || validEmail(email));
-  const W = {background:"#0e120e",border:`1px solid ${PALETTE.faint}`,borderRadius:16,maxWidth:400,width:"100%",overflow:"hidden"};
+  const W = {background:"#0e120e",border:`1px solid ${PALETTE.faint}`,borderRadius:16,maxWidth:"min(400px, calc(100vw - 32px))",width:"100%",overflow:"hidden"};
   const wrap = ch => (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16,overflowY:"auto"}}>
       <div className="fade-in" style={{...W,padding:step==="pitch"?0:"24px"}}>{ch}</div>
@@ -967,7 +967,7 @@ function ReportLoading({ provName }) {
       <div style={{fontSize:14,color:PALETTE.muted,marginBottom:8,textAlign:"center",lineHeight:1.8,minHeight:40}}>
         {steps[step]}
       </div>
-      <div style={{width:240,height:3,background:PALETTE.faint,borderRadius:2,overflow:"hidden",marginBottom:8}}>
+      <div style={{width:"min(240px,80vw)",height:3,background:PALETTE.faint,borderRadius:2,overflow:"hidden",marginBottom:8}}>
         <div className="loading-bar" style={{height:"100%",background:PALETTE.accent,borderRadius:2,width:"35%"}}/>
       </div>
       <div style={{fontSize:13,color:PALETTE.dim,textAlign:"center"}}>
@@ -983,7 +983,7 @@ function Toast({ msg, type }) {
   const bdr = type === "error" ? PALETTE.danger     : type === "warn" ? PALETTE.gold           : PALETTE.accent;
   const ico = type === "error" ? "⚠" : type === "warn" ? "💡" : "✓";
   return (
-    <div className="fade-in" style={{position:"fixed",bottom:76,left:"50%",transform:"translateX(-50%)",background:bg,border:`1px solid ${bdr}`,borderRadius:10,padding:"10px 18px",zIndex:10001,fontSize:15,color:PALETTE.text,boxShadow:"0 4px 24px rgba(0,0,0,.55)",whiteSpace:"nowrap",pointerEvents:"none",display:"flex",alignItems:"center",gap:8}}>
+    <div className="fade-in" style={{position:"fixed",bottom:76,left:"50%",transform:"translateX(-50%)",background:bg,border:`1px solid ${bdr}`,borderRadius:10,padding:"10px 18px",zIndex:10001,fontSize:15,color:PALETTE.text,boxShadow:"0 4px 24px rgba(0,0,0,.55)",maxWidth:"calc(100vw - 32px)",pointerEvents:"none",display:"flex",alignItems:"center",gap:8}}>
       <span style={{color:bdr,fontWeight:700}}>{ico}</span>{msg}
     </div>
   );
@@ -1172,7 +1172,7 @@ function AdvisorWizard({
 
   if (completed) return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div className="slide-up" style={{background:PALETTE.surface,border:`1px solid ${PALETTE.borderHover}`,borderRadius:16,padding:"28px 20px",maxWidth:400,width:"100%",textAlign:"center"}}>
+      <div className="slide-up" style={{background:PALETTE.surface,border:`1px solid ${PALETTE.borderHover}`,borderRadius:16,padding:"28px 20px",maxWidth:"min(400px, calc(100vw - 32px))",width:"100%",textAlign:"center"}}>
         <div style={{fontSize:48,marginBottom:10}}>🎉</div>
         <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:900,color:"#f0ece0",marginBottom:6}}>Model Complete!</div>
         <div style={{fontSize:15,color:PALETTE.muted,lineHeight:1.8,marginBottom:14}}>
@@ -1592,13 +1592,14 @@ function AgrimodelPro() {
         <div style={{background:PALETTE.surface,borderBottom:`1px solid ${PALETTE.faint}`,padding:"11px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
           <div>
             <span style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:"#f0ece0"}}>🐑 Agrimodel Pro</span>
-            <span style={{fontSize:13,color:PALETTE.dim,letterSpacing:2,textTransform:"uppercase",marginLeft:10}}>SA Breed Recommender + Feasibility</span>
+            <span className="hdr-sub" style={{fontSize:13,color:PALETTE.dim,letterSpacing:2,textTransform:"uppercase",marginLeft:10}}>SA Breed Recommender + Feasibility</span>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             {!isPaid && (
               <button onClick={()=>setShowRestore(true)}
                 style={{padding:"7px 12px",background:"none",border:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,borderRadius:18,fontSize:14,cursor:"pointer"}}>
-                Restore Access
+                <span className="hdr-btn-full">Restore Access</span>
+                <span className="hdr-btn-short">Restore</span>
               </button>
             )}
             {isPaid ? (
@@ -1606,12 +1607,17 @@ function AgrimodelPro() {
                 onClick={selected ? regenerateReport : undefined}
                 title={selected ? "" : "Select a province on the map first"}
                 style={{padding:"7px 14px",background:selected?PALETTE.borderHover:PALETTE.faint,color:selected?"#f0ece0":PALETTE.muted,border:`1px solid ${selected?PALETTE.borderHover:PALETTE.faint}`,borderRadius:18,fontSize:15,fontWeight:700,cursor:selected?"pointer":"default",transition:"all .2s"}}>
-                {selected ? `Get ${prov?.name} Report →` : "Select Province →"}
+                {selected ? (
+                  <><span className="hdr-btn-full">Get {prov?.name} Report →</span><span className="hdr-btn-short">Report →</span></>
+                ) : (
+                  <><span className="hdr-btn-full">Select Province →</span><span className="hdr-btn-short">Select →</span></>
+                )}
               </button>
             ) : (
               <button className="glow-btn" onClick={()=>setShowPay(true)}
                 style={{padding:"7px 14px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:18,fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:`0 2px 12px rgba(200,168,75,.28)`}}>
-                🔓 Unlock R 147.95 →
+                <span className="hdr-btn-full">🔓 Unlock R 147.95 →</span>
+                <span className="hdr-btn-short">🔓 R 147.95</span>
               </button>
             )}
           </div>
@@ -1716,7 +1722,7 @@ function AgrimodelPro() {
               <div style={{display:"flex",borderBottom:`1px solid ${PALETTE.faint}`,marginBottom:14}}>
                 {TABS.map((t,i)=>(
                   <button key={i} className="tab-btn" onClick={()=>setActiveTab(i)}
-                    style={{flex:1,padding:"8px 4px",background:"none",border:"none",borderBottom:activeTab===i?`2px solid ${PALETTE.accent}`:"2px solid transparent",color:activeTab===i?PALETTE.accent:PALETTE.muted,fontSize:15,textTransform:"uppercase",letterSpacing:.8,cursor:"pointer",transition:"all .15s"}}>
+                    style={{flex:1,padding:"8px 4px",background:"none",border:"none",borderBottom:activeTab===i?`2px solid ${PALETTE.accent}`:"2px solid transparent",color:activeTab===i?PALETTE.accent:PALETTE.muted,fontSize:14,textTransform:"uppercase",letterSpacing:.5,cursor:"pointer",transition:"all .15s",whiteSpace:"nowrap"}}>
                     {t}
                   </button>
                 ))}
