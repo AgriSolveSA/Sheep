@@ -695,7 +695,7 @@ function buildPFUrl(name, email, region) {
     m_payment_id: `AGRI-${region}-${Date.now()}`,
     amount: PF.price.toFixed(2),
     item_name: `Agrimodel Pro — Full Platform Access`,
-    item_description: "Lifetime access: sheep model, inefficiency engine + AI feasibility report",
+    item_description: "Lifetime access: all livestock modules, inefficiency engine + AI feasibility report",
   });
   return `${base}?${p.toString()}`;
 }
@@ -1094,7 +1094,7 @@ function printSummaryPDF({ prov, result, T, mod, flockSize, carcass, productionS
     <div class="cta-feats">
       ✓ Complete 36-month cashflow projection<br/>
       ✓ Capital structure + bank-grade sensitivity analysis<br/>
-      ✓ Risk assessment · market outlook · breed ranking<br/>
+      ✓ Risk assessment · market outlook · ${T.unit==="hive"?"honey type analysis":"breed ranking"}<br/>
       ✓ Printable — Land Bank &amp; investor ready
     </div>
     <div class="cta-url">agrimodel.co.za</div>
@@ -1791,7 +1791,7 @@ function AdvisorWizard({
         : null,
       insightColor: result ? (flockSize < result.breakeven ? PALETTE.danger : PALETTE.accent) : PALETTE.muted,
       renderInput: () => (
-        <Field label="Flock Size" value={flockSize} onChange={setFlockSize}
+        <Field label={`${T.group.charAt(0).toUpperCase()+T.group.slice(1)} Size`} value={flockSize} onChange={setFlockSize}
           suf={T.units} hint={result?.breakeven ? `MVO = ${result.breakeven}` : T.units} min={1} max={10000}/>
       ),
     },
@@ -1998,9 +1998,9 @@ function AdvisorWizard({
         {result && (
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
             {[
-              {l:"Profit / Ewe",    v:`${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}`,          c:result.profitPerEwe>=0?PALETTE.accent:PALETTE.danger},
-              {l:"Annual ROI",      v:PCT(result.roi),                                                    c:result.roi>=0?PALETTE.accent:PALETTE.danger},
-              {l:"Flock Profit/yr", v:`${SGN(result.flockProfit)}${ZAR(Math.abs(result.flockProfit))}`,  c:result.flockProfit>=0?PALETTE.accent:PALETTE.danger},
+              {l:`Profit / ${T.unit}`, v:`${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}`,         c:result.profitPerEwe>=0?PALETTE.accent:PALETTE.danger},
+              {l:"Annual ROI",        v:PCT(result.roi),                                                   c:result.roi>=0?PALETTE.accent:PALETTE.danger},
+              {l:`${T.group.charAt(0).toUpperCase()+T.group.slice(1)} Profit/yr`, v:`${SGN(result.flockProfit)}${ZAR(Math.abs(result.flockProfit))}`, c:result.flockProfit>=0?PALETTE.accent:PALETTE.danger},
               {l:"Capital Needed",  v:ZAR(result.capital),                                                c:PALETTE.gold},
             ].map((s,i)=>(
               <div key={i} style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"9px 8px",textAlign:"center"}}>
@@ -2648,7 +2648,10 @@ function AgrimodelPro() {
                   {/* Avoid */}
                   {prov.avoid.length > 0 && (
                     <div style={{background:PALETTE.dangerBg,border:"1px solid rgba(224,92,58,.25)",borderRadius:8,padding:"8px 12px",marginBottom:12}}>
-                      <span style={{fontSize:15,color:PALETTE.danger}}>⚠ Avoid in {prov.name}: <strong>{prov.avoid.join(", ")}</strong></span>
+                      {T.unit === "hive"
+                        ? <div style={{fontSize:15,color:PALETTE.danger}}>⚠ Placement to avoid in {prov.name}:<ul style={{margin:"6px 0 0 0",paddingLeft:18}}>{prov.avoid.map((a,i)=><li key={i} style={{fontSize:14,color:"#c07060",lineHeight:1.5}}>{a}</li>)}</ul></div>
+                        : <span style={{fontSize:15,color:PALETTE.danger}}>⚠ Avoid in {prov.name}: <strong>{prov.avoid.join(", ")}</strong></span>
+                      }
                     </div>
                   )}
 
@@ -2898,7 +2901,7 @@ function AgrimodelPro() {
                     {/* Additional costs toggle */}
                     <button onClick={()=>setShowCosts(v=>!v)}
                       style={{width:"100%",marginTop:8,padding:"6px 10px",background:"transparent",border:`1px solid ${PALETTE.faint}`,borderRadius:6,color:PALETTE.muted,fontSize:14,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span>Additional costs (bond · feed · meds · fencing · misc)</span>
+                      <span>{T.unit === "hive" ? "Additional costs (bond · syrup · hive health · misc)" : "Additional costs (bond · feed · meds · fencing · misc)"}</span>
                       <span style={{color:PALETTE.accent,fontWeight:700}}>{showCosts?"▲":"▼"}</span>
                     </button>
 
@@ -2909,10 +2912,10 @@ function AgrimodelPro() {
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                           <Field label="Bond repayment/mo" value={bondMonthly||""} onChange={v=>setBondMonthly(v||0)} pre="R" hint="Finance instalment" min={0} max={500000}/>
-                          <Field label="Fencing/infra/mo"  value={fencingMonthly||""} onChange={v=>setFencingMonthly(v||0)} pre="R" hint="Maint + repairs" min={0} max={100000}/>
-                          <Field label={`Feed/${T.unit}/yr`}     value={feedOverride!==null?feedOverride:prov.feed} onChange={v=>setFeedOverride(v)} pre="R"
+                          {T.unit !== "hive" && <Field label="Fencing/infra/mo" value={fencingMonthly||""} onChange={v=>setFencingMonthly(v||0)} pre="R" hint="Maint + repairs" min={0} max={100000}/>}
+                          <Field label={T.unit==="hive" ? `Syrup/${T.unit}/yr` : `Feed/${T.unit}/yr`} value={feedOverride!==null?feedOverride:prov.feed} onChange={v=>setFeedOverride(v)} pre="R"
                             hint={`Default: ${ZAR(prov.feed)}`} min={0} max={10000}/>
-                          <Field label={`Meds+vet/${T.unit}/yr`} value={healthOverride!==null?healthOverride:prov.health} onChange={v=>setHealthOverride(v)} pre="R"
+                          <Field label={T.unit==="hive" ? `Hive health/${T.unit}/yr` : `Meds+vet/${T.unit}/yr`} value={healthOverride!==null?healthOverride:prov.health} onChange={v=>setHealthOverride(v)} pre="R"
                             hint={`Default: ${ZAR(prov.health)}`} min={0} max={5000}/>
                           <Field label="Misc/mo"            value={miscMonthly||""} onChange={v=>setMiscMonthly(v||0)} pre="R" hint="Other fixed costs" min={0} max={100000}/>
                         </div>
@@ -3030,7 +3033,7 @@ function AgrimodelPro() {
                         {[
                           {l:"Start with",     v:`${result.breakeven} ${T.units}`, c:PALETTE.text},
                           {l:"Capital needed", v:ZAR(result.mvoCapital),        c:PALETTE.gold},
-                          {l:"First revenue",  v:"Month 13",                    c:PALETTE.accent},
+                          {l:"First revenue",  v:T.unit==="hive"?`Month ${prov.woolMonth}`:"Month 13", c:PALETTE.accent},
                         ].map((s,i)=>(
                           <div key={i} style={{background:PALETTE.bg,borderRadius:5,padding:"5px 4px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                             <div style={{fontSize:16,fontWeight:700,color:s.c,fontFamily:"'Playfair Display',serif"}}>{s.v}</div>
@@ -3088,7 +3091,7 @@ function AgrimodelPro() {
                       ))}
                     </div>
                     <div style={{fontSize:13,color:PALETTE.dim,marginTop:6,lineHeight:1.5}}>
-                      Bars = monthly profit/loss · Gold line = cumulative balance from Day 0 · Dashed = {T.saleMonthLabel} (13, 25) · Green dot = payback
+                      Bars = monthly profit/loss · Gold line = cumulative balance from Day 0 · Dashed = {T.saleMonthLabel} ({T.unit==="hive"?`${prov.woolMonth}, ${prov.woolMonth+12}`:"13, 25"}) · Green dot = payback
                     </div>
                   </div>
 
