@@ -2241,7 +2241,10 @@ function AgrimodelPro() {
     showToast("Access unlocked — building your report…", "success");
     setReportStatus("loading");
     try {
-      const rd = buildReportData(mod.provinceData[selected || "limpopo"], flockSize, labourMode, carcass);
+      const rd = buildReportData(mod.provinceData[selected || "limpopo"], flockSize, labourMode, carcass, {
+        feedOverride, healthOverride, labourOverride: labour,
+        productionSystem, marketChannel, feedSource,
+      });
       const r  = generateProReport(rd, buyerName || "Valued Client", T);
       setReport({ ...r, buyerEmail, terms: T, livestockType });
       setReportStatus("ready");
@@ -2249,7 +2252,7 @@ function AgrimodelPro() {
       console.error("Report generation failed:", err);
       setReportStatus("error");
     }
-  }, [selected, flockSize, carcass, labourMode, mod]);
+  }, [selected, flockSize, carcass, labourMode, labour, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod]);
 
   // Reset carcass price and flock size when livestock type changes
   useEffect(() => {
@@ -2397,12 +2400,15 @@ function AgrimodelPro() {
     try { const s = JSON.parse(localStorage.getItem("agri_session") || "{}"); storedName = s.name || storedName; storedEmail = s.email || ""; } catch {}
     setReportStatus("loading");
     try {
-      const rd = buildReportData(mod.provinceData[selected], flockSize, labourMode, carcass);
+      const rd = buildReportData(mod.provinceData[selected], flockSize, labourMode, carcass, {
+        feedOverride, healthOverride, labourOverride: labour,
+        productionSystem, marketChannel, feedSource,
+      });
       const r  = generateProReport(rd, storedName, T);
       setReport({ ...r, buyerEmail: storedEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch { setReportStatus("error"); }
-  }, [selected, flockSize, labourMode, carcass, mod]);
+  }, [selected, flockSize, labourMode, labour, carcass, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod]);
 
   return (
     <>

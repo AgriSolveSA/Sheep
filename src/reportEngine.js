@@ -96,13 +96,29 @@ export function generateSandboxReport(reportData, buyerName) {
 }
 
 // ── PROVINCE DATA FIELD MAPPING ───────────────────────────────────────────────
-export function buildReportData(r, flock, lm, carcass) {
-  const lab = lm === "owner" ? r.labour : r.hired;
+export function buildReportData(r, flock, lm, carcass, inputs = {}) {
+  const {
+    feedOverride    = null,
+    healthOverride  = null,
+    labourOverride  = null,
+    productionSystem = "extensive",
+    marketChannel    = "auction",
+    feedSource       = "mixed",
+  } = inputs;
+
+  // Apply client inputs with floors and fallbacks
+  const MIN_OWNER_LABOUR = 1500;
+  const lab = lm === "hired"
+    ? r.hired
+    : Math.max(MIN_OWNER_LABOUR, labourOverride !== null ? labourOverride : r.labour);
+  const feedCost   = feedOverride   !== null ? feedOverride   : r.feed;
+  const healthCost = healthOverride !== null ? healthOverride : r.health;
+
   const ck  = r.liveKg * (r.dressing / 100);
   const lpe = (r.lambing / 100) * (r.survival / 100) * 0.85;
   const fa  = (lab + r.oh) * 12;
   const revPE = lpe * ck * carcass + r.wool;
-  const varPE = r.feed + r.health + r.ewePrice * (r.rep / 100);
+  const varPE = feedCost + healthCost + r.ewePrice * (r.rep / 100);
   const vm    = revPE - varPE;
   const be    = vm > 0 ? Math.ceil(fa / vm) : null;
   const pp    = revPE - varPE - fa / flock;
@@ -124,7 +140,7 @@ export function buildReportData(r, flock, lm, carcass) {
     ? (m === 12 || m === 13 || m === 24 || m === 25)
     : (m === 13 || m === 14 || m === 25 || m === 26) || (r.lambing >= 140 && (m === 21 || m === 22));
   const isWool = m => r.wool > 0 && r.woolMonth && (m === r.woolMonth + 1 || m === r.woolMonth + 13);
-  const mc  = (lab + r.oh) + (r.feed / 12 + r.health / 12) * flock + r.ewePrice * (r.rep / 100) * flock / 12;
+  const mc  = (lab + r.oh) + (feedCost / 12 + healthCost / 12) * flock + r.ewePrice * (r.rep / 100) * flock / 12;
   const lrm = Math.floor(flock * lpe * 0.5) * ck * carcass;
   const wrm = r.wool * flock;
   let cum = 0;
@@ -155,6 +171,7 @@ export function buildReportData(r, flock, lm, carcass) {
     r, flock, lm, carcass,
     lab, ck, lpe, fa, revPE, varPE, vm, be, pp, capital, npv5,
     scaleRows, cfRows, firstPositive, sensRows, mc,
+    feedCost, healthCost, productionSystem, marketChannel, feedSource,
     yr1: cfRows[11]?.cum ?? 0,
     yr2: cfRows[23]?.cum ?? 0,
     yr3: cfRows[35]?.cum ?? 0,
@@ -164,10 +181,18 @@ export function buildReportData(r, flock, lm, carcass) {
 // ── SHEEP REPORT ──────────────────────────────────────────────────────────────
 function generateSheepReport(reportData, buyerName, T) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
-          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc } = reportData;
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
   const lmNote = lm === "owner"
-    ? "owner-operated (notional R1,500/mo — BCEA 2024 hired benchmark R5,594/mo for reference)"
-    : "hired worker at R5,594/mo (BCEA 2024 Sectoral Determination + UIF + SDL + housing allowance R800)";
+    ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo for reference)`
+    : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL + housing allowance R800)`;
+  const feedNote   = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/ewe/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/ewe/yr — Land Bank extensive benchmark including salt, drought supplement, creep feed`;
+  const healthNote = healthCost !== r.health
+    ? `${ZAR(healthCost)}/ewe/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/ewe/yr — ProAgri 3-cycle dosing schedule plus foot care and annual vet`;
+  const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
   const s20 = sensRows.find(s => s.pct === -20);
   const s10 = sensRows.find(s => s.pct === -10);
   const scaleVi = scaleRows.find(rw => rw.ok);
@@ -178,8 +203,8 @@ function generateSheepReport(reportData, buyerName, T) {
   const ccGuide = PROV_CC[r.name] || `4–8 ha/ewe depending on rainfall zone — obtain a professional carrying-capacity assessment before stocking`;
   const breedSource = (BREED_SOURCES[r.breed] || BREED_SOURCES["_default"]).replace(/\$\{r => ZAR\(r\.wool\)\}/g, ZAR(r.wool));
   const droughtAdvice = (r.drought === "Severe, frequent" || r.drought === "Frequent")
-    ? `Drought is the defining operational risk in ${r.name}. Carry a 90-day supplementary feed reserve at all times — ${ZAR(Math.round(r.feed / 12 * 3 * flock))} for your flock at current feed cost. AgriSure CP (Comprehensive Plan) coverage is mandatory — register before the production season opens. Set a trigger stocking rate reduction at 50% of normal rainfall.`
-    : `Drought is a periodic risk in ${r.name}, manageable with preparation. Maintain a 60-day supplementary feed reserve (${ZAR(Math.round(r.feed / 12 * 2 * flock))} for your flock). AgriSure CP is strongly recommended. Key discipline: sell the right animals at the right time rather than holding through drought waiting for better prices.`;
+    ? `Drought is the defining operational risk in ${r.name}. Carry a 90-day supplementary feed reserve at all times — ${ZAR(Math.round(feedCost / 12 * 3 * flock))} for your flock at current feed cost. AgriSure CP (Comprehensive Plan) coverage is mandatory — register before the production season opens. Set a trigger stocking rate reduction at 50% of normal rainfall.`
+    : `Drought is a periodic risk in ${r.name}, manageable with preparation. Maintain a 60-day supplementary feed reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your flock). AgriSure CP is strongly recommended. Key discipline: sell the right animals at the right time rather than holding through drought waiting for better prices.`;
   const scaleStr = scaleRows.filter((_, i) => i % 2 === 0)
     .map(rw => `${rw.n} ewes: profit/ewe ${ZAR(rw.pp)} · flock profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.15 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
     .join("\n");
@@ -198,7 +223,7 @@ function generateSheepReport(reportData, buyerName, T) {
   const bodies = [
     `${viabilityVerdict}
 
-Operation profile: ${flock} ${r.breed} ewes in ${r.name}, ${lmNote}. Carcass price basis: R${carcass}/kg A2 (AgriOrbit Apr 2025).
+Operation profile: ${flock} ${r.breed} ewes in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg A2 (AgriOrbit Apr 2025).
 
 Key financials: Revenue ${ZAR(revPE)}/ewe/yr · Variable cost ${ZAR(varPE)}/ewe/yr · Variable margin ${ZAR(vm)}/ewe · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} ewes · Profit/ewe ${ZAR(pp)} · Flock profit ${ZAR(pp * flock)}/yr · ROI on stock capital ${PCT(pp / r.ewePrice)} · Capital required ${ZAR(capital)} · 5-year NPV at 10% discount rate: ${ZAR(npv5)}.
 
@@ -241,7 +266,7 @@ Where to source ${r.breed} in ${r.name}: ${breedSource}
 
 At ${flock} ewes, a commercial flock is appropriate — no reason to maintain a stud. Use performance-tested stud rams (1:35 ratio = ${Math.ceil(flock / 35)} rams) sourced from a recording-scheme stud. Stud overhead adds cost without proportionate benefit below 500 ewes.
 
-Health priorities for ${r.breed} in ${r.name}: ${r.parasites !== "Very low" && r.parasites !== "Low" ? `Internal parasite management is the primary ongoing cost driver. Implement FAMACHA-based dosing — this reduces anthelmintic use by 30–40% and delays resistance development. The health budget of ${ZAR(r.health)}/ewe/yr assumes 3 strategic dosings per year. Maintain a ${ZAR(Math.round(r.health * 0.5 * flock))} contingency for outbreak years.` : `Low parasite pressure in ${r.name} reduces health costs. Maintain prophylactic dosing at minimum 2 cycles/year and monitor for Bluetongue in summer months.`}
+Health priorities for ${r.breed} in ${r.name}: ${r.parasites !== "Very low" && r.parasites !== "Low" ? `Internal parasite management is the primary ongoing cost driver. Implement FAMACHA-based dosing — this reduces anthelmintic use by 30–40% and delays resistance development. The health budget of ${ZAR(healthCost)}/ewe/yr assumes 3 strategic dosings per year. Maintain a ${ZAR(Math.round(healthCost * 0.5 * flock))} contingency for outbreak years.` : `Low parasite pressure in ${r.name} reduces health costs. Maintain prophylactic dosing at minimum 2 cycles/year and monitor for Bluetongue in summer months.`}
 
 HIDDEN INCOME STREAM — Carbon credits + direct freezer-lamb sales:
 Most sheep operations in ${r.name} leave two significant income streams untapped. First: register your veld under a voluntary carbon programme (Verra VCS or BioCarbon Fund at agricarbon.co.za for the SA verification pathway). Holistic planned grazing on 500ha of degraded veld generates R22,500–R60,000/year in verified carbon credits — pure income addition with no reduction in livestock numbers, no extra land required. Second: direct freezer-lamb sales to urban consumers at R90–110/kg deadweight vs R52/kg abattoir price add R1,500–R2,300 per animal. A WhatsApp order group in your nearest town and a licensed mobile abattoir booking (R250–R400/animal) is the entire infrastructure required. Start with 5% of your crop — price discovery is immediate.`,
@@ -257,8 +282,8 @@ Revenue assumptions:
 • Wool: ${r.wool > 0 ? ZAR(r.wool) + "/ewe/yr — clip weight × current Cape Wools A-grade price" : "R0 — hair breed"}
 
 Cost assumptions:
-• Feed: ${ZAR(r.feed)}/ewe/yr — Land Bank extensive benchmark including salt, drought supplement, creep feed
-• Health: ${ZAR(r.health)}/ewe/yr — ProAgri 3-cycle dosing schedule plus foot care and annual vet
+• Feed: ${feedNote}
+• Health: ${healthNote}
 • Replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/ewe = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/ewe/yr
 • Overhead: ${ZAR(r.oh)}/mo — water, fuel, repairs, electricity, insurance
 • Labour: ${lmNote}
@@ -383,7 +408,8 @@ FIVE ACTIONS THIS WEEK:
 // ── BEES REPORT ───────────────────────────────────────────────────────────────
 function generateBeesReport(reportData, buyerName, T) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
-          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc } = reportData;
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
 
   const harvestMo  = r.woolMonth || 4;
   const harvestName = MONTHS[(harvestMo - 1) % 12];
@@ -392,8 +418,15 @@ function generateBeesReport(reportData, buyerName, T) {
   const grossRevHive = honeyRevHive + waxRevHive;
   const calvsPerHive = Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.85);
   const lmNote = lm === "owner"
-    ? "owner-managed (notional R1,500/mo labour allowance)"
-    : `hired worker at R${r.hired.toLocaleString("en-ZA")}/mo (BCEA 2024 rate)`;
+    ? `owner-managed (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo)`
+    : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 rate)`;
+  const feedNote   = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/hive/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/hive/yr — off-season syrup during dearth periods. Migratory placement eliminates this cost entirely.`;
+  const healthNote = healthCost !== r.health
+    ? `${ZAR(healthCost)}/hive/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/hive/yr — oxalic acid vaporisation + monitoring supplies. Switching from synthetic miticides reduces this by 60–70%.`;
+  const profileLine = `Management style: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
   const s20 = sensRows.find(s => s.pct === -20);
   const s10 = sensRows.find(s => s.pct === -10);
   const scaleVi = scaleRows.find(rw => rw.ok);
@@ -426,7 +459,7 @@ function generateBeesReport(reportData, buyerName, T) {
   const bodies = [
     `${viabilityVerdict}
 
-Operation profile: ${flock} hives in ${r.name}, ${lmNote}. Honey price basis: R${carcass}/kg (${r.name} bulk market — direct retail ${r.name === "Western Cape" ? "R150–200" : "R90–150"}/kg for labelled origin honey).
+Operation profile: ${flock} hives in ${r.name}. ${profileLine}. Labour: ${lmNote}. Honey price basis: R${carcass}/kg (${r.name} bulk market — direct retail ${r.name === "Western Cape" ? "R150–200" : "R90–150"}/kg for labelled origin honey).
 
 Revenue per hive:
 • Primary honey: ${r.liveKg}kg/hive/yr × R${carcass}/kg = ${ZAR(honeyRevHive)}/hive
@@ -488,8 +521,8 @@ Revenue assumptions:
 • Beeswax/by-product income: ${ZAR(waxRevHive)}/hive/yr — conservative. Refined cosmetic-grade beeswax adds R50–R120/hive/yr.
 
 Cost assumptions:
-• Supplemental feeding (syrup): ${ZAR(r.feed)}/hive/yr — off-season syrup during dearth periods. Migratory placement eliminates this cost entirely.
-• Varroa & hive health: ${ZAR(r.health)}/hive/yr — oxalic acid vaporisation at R0.80–R1.20/treatment + monitoring supplies. Switching from synthetic miticides to oxalic acid protocol reduces this by 60–70%.
+• Supplemental feeding (syrup): ${feedNote}
+• Varroa & hive health: ${healthNote}
 • Hive replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/hive = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/hive/yr — covers colony losses, equipment replacement, and splits that don't return to honey production
 • Overhead: ${ZAR(r.oh)}/mo — transport, vehicle wear (hive inspections), packaging, utilities
 • Labour: ${lmNote}
@@ -639,14 +672,22 @@ FIVE ACTIONS THIS WEEK:
 // ── CATTLE REPORT ─────────────────────────────────────────────────────────────
 function generateCattleReport(reportData, buyerName, T) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
-          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc } = reportData;
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
 
   const calvesPerYear = Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.85);
   const carcassKg     = Math.round(r.liveKg * r.dressing / 100);
   const revPerAnimal  = Math.round(carcassKg * carcass);
   const lmNote = lm === "owner"
-    ? `owner-operated (notional R${r.labour.toLocaleString("en-ZA")}/mo — BCEA 2024 hired benchmark R${r.hired.toLocaleString("en-ZA")}/mo)`
-    : `hired manager at R${r.hired.toLocaleString("en-ZA")}/mo (BCEA 2024 Farm Worker Sectoral Determination)`;
+    ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo)`
+    : `hired manager at ${ZAR(r.hired)}/mo (BCEA 2024 Farm Worker Sectoral Determination)`;
+  const feedNote   = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/cow/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/cow/yr — Land Bank extensive benchmark including salt licks, drought supplement, and creep feed for calves. Actual costs in drought years can reach ${ZAR(Math.round(feedCost * 2))}/cow.`;
+  const healthNote = healthCost !== r.health
+    ? `${ZAR(healthCost)}/cow/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/cow/yr — covers tick control, dipping/pour-on, annual vaccinations, pregnancy diagnosis, and emergency vet allowance. High-tick-pressure environments regularly reach ${ZAR(Math.round(healthCost * 1.4))}.`;
+  const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
   const s20 = sensRows.find(s => s.pct === -20);
   const s10 = sensRows.find(s => s.pct === -10);
   const scaleVi = scaleRows.find(rw => rw.ok);
@@ -682,7 +723,7 @@ function generateCattleReport(reportData, buyerName, T) {
   const bodies = [
     `${viabilityVerdict}
 
-Operation profile: ${flock} ${r.breed} cows in ${r.name}, ${lmNote}. Carcass price basis: R${carcass}/kg A2 dressed beef (AgriOrbit Apr 2025 benchmark).
+Operation profile: ${flock} ${r.breed} cows in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg A2 dressed beef (AgriOrbit Apr 2025 benchmark).
 
 Production economics:
 • Calving rate: ${r.lambing}% · Weaning survival: ${r.survival}% · Calves marketed per 100 cows: ${Math.round(r.lambing * r.survival * 0.85 / 100)}
@@ -749,8 +790,8 @@ Revenue assumptions:
 • Carcass price: R${carcass}/kg A2 (AgriOrbit Apr 2025 benchmark — verify current price; feedlot contracts at R22–28/kg live weight for weaners are an alternative).
 
 Cost assumptions:
-• Feed: ${ZAR(r.feed)}/cow/yr — Land Bank extensive benchmark. Includes salt licks, drought supplement, and creep feed for calves. Actual costs in drought years can reach ${ZAR(Math.round(r.feed * 2))}/cow.
-• Health: ${ZAR(r.health)}/cow/yr — covers tick control (primary cost), strategic dipping/pour-on, annual vaccinations (Lumpy Skin, Bluetongue, CBPP), pregnancy diagnosis, and an emergency vet allowance. In high-tick-pressure environments this regularly reaches ${ZAR(Math.round(r.health * 1.4))}.
+• Feed: ${feedNote}
+• Health: ${healthNote}
 • Replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/cow = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/cow/yr
 • Overhead: ${ZAR(r.oh)}/mo — water, vehicle, maintenance, electricity, insurance
 • Labour: ${lmNote}
