@@ -185,7 +185,205 @@ const PROVINCE_DEFAULTS = {
   northern_cape: { system:"extensive",     market:"auction",   feed:"purchased" },
 };
 
-function calcFull(reg, carcass, flockSize, labour, overhead = reg.oh ?? 600, extraCosts = {}) {
+// ─── BEEF CATTLE MODULE ────────────────────────────────────────────────────────
+// Field names mirror sheep (lambing=calving%, survival=weaning%, ewePrice=cowPrice)
+// so calcFull and buildReportData work unchanged for both species.
+
+const CATTLE_PROVINCE_DATA = {
+  limpopo: {
+    name:"Limpopo", short:"Limpopo",
+    fill:"#2a7a1a", stroke:"#1a5010", hoverFill:"#369424",
+    climate:"Bushveld · Semi-arid · 400–600mm summer rain · Hot",
+    rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low",
+    parasites:"High", drought:"Frequent", cattleDensity:"High",
+    primary:["Bonsmara","Brahman","Beefmaster"],
+    secondary:["Nguni","Simbra"],
+    avoid:["Angus","Hereford"],
+    why:"Limpopo is SA's Bonsmara heartland. The breed was designed for exactly these conditions — bushveld heat, tick pressure, and summer rainfall. Brahman crosses dominate large commercial operations. European breeds suffer heat stress and require expensive supplementation in summer.",
+    tip:"Mokopane to Lephalale: prime Bonsmara country. Budget 4–6 ha per LSU on good bushveld. Water infrastructure unlocks carrying capacity — a good solar borehole system pays back in 2–3 seasons.",
+    breed:"Bonsmara", type:"Beef", market:"Polokwane sale yard · Mokopane abattoir · Beefcor",
+    rep:15, oh:1200, labour:2800, hired:8500,
+    lambing:78, survival:82, liveKg:480, dressing:54, wool:0, woolMonth:0,
+    feed:1800, health:480, ewePrice:18000, be:18,
+  },
+  north_west: {
+    name:"North West", short:"N. West",
+    fill:"#b87a10", stroke:"#7a5008", hoverFill:"#d09020",
+    climate:"Semi-arid Bushveld · 300–500mm · Hot and dry",
+    rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low",
+    parasites:"Medium", drought:"Very frequent", cattleDensity:"Medium",
+    primary:["Bonsmara","Beefmaster","Simmentaler"],
+    secondary:["Brahman","Drakensberger"],
+    avoid:["Angus","Charolais"],
+    why:"North West is one of SA's top commercial beef provinces. Bonsmara and Beefmaster dominate feedlot supply. The Marico region has excellent natural pasture quality. Drought management is critical — destocking strategies separate successful from marginal operations.",
+    tip:"Vryburg to Zeerust: the commercial beef corridor. Most successful operations supply feedlots directly. Weaner calf contracts at R22–28/kg live weight offer predictable cash flow.",
+    breed:"Bonsmara", type:"Beef", market:"Vryburg sale yard · Lichtenburg · Vleissentraal feedlots",
+    rep:15, oh:1200, labour:2800, hired:8500,
+    lambing:75, survival:80, liveKg:460, dressing:53, wool:0, woolMonth:0,
+    feed:1800, health:440, ewePrice:16000, be:22,
+  },
+  gauteng: {
+    name:"Gauteng", short:"Gauteng",
+    fill:"#1a70b0", stroke:"#104678", hoverFill:"#2288cc",
+    climate:"Highveld · 700mm summer rain · Moderate",
+    rainfall:"700mm", season:"Summer", frost:"Moderate", humidity:"Medium",
+    parasites:"Medium", drought:"Occasional", cattleDensity:"Very low",
+    primary:["Bonsmara","Angus","Simmentaler"],
+    secondary:["Charolais"],
+    avoid:[],
+    why:"Gauteng is SA's primary consumption market, not a production province. Proximity to the Johannesburg fresh beef market adds R3–5/kg premium on dressed carcass. Small to medium intensive operations with strong market access are viable.",
+    tip:"Direct supply to Joburg fresh markets, restaurants, or butcheries. Farm-gate price advantage offsets high land values. Angus for premium branded beef or Bonsmara for feedlot supply.",
+    breed:"Angus", type:"Beef", market:"Karan Beef · Joburg fresh market · premium butcheries",
+    rep:15, oh:1400, labour:3000, hired:9000,
+    lambing:80, survival:84, liveKg:490, dressing:54, wool:0, woolMonth:0,
+    feed:2200, health:520, ewePrice:20000, be:24,
+  },
+  mpumalanga: {
+    name:"Mpumalanga", short:"Mpuma-\nlanga",
+    fill:"#228844", stroke:"#145228", hoverFill:"#2aa050",
+    climate:"Highveld + Lowveld · 600–800mm · Moderate–hot",
+    rainfall:"600–800mm", season:"Summer", frost:"Moderate highland", humidity:"High lowveld",
+    parasites:"Medium–high", drought:"Rare", cattleDensity:"High",
+    primary:["Simmentaler","Bonsmara","Nguni"],
+    secondary:["Charolais","Angus"],
+    avoid:[],
+    why:"Mpumalanga is a major beef production province. Highveld grasslands (Ermelo region) are ideal for Simmentaler and Bonsmara crosses. Good rainfall provides reliable pasture — most successful operations sell 7-month weaners at 200–240 kg live weight.",
+    tip:"Ermelo to Carolina: reliable weaner production. Average calving rates of 75–80% on well-managed highveld. Most operations market to feedlots via Ermelo or Standerton sale yards.",
+    breed:"Simmentaler", type:"Beef", market:"Ermelo sale yard · Carolina · Dawn Meats Standerton",
+    rep:15, oh:1200, labour:2800, hired:8500,
+    lambing:79, survival:83, liveKg:490, dressing:54, wool:0, woolMonth:0,
+    feed:1900, health:480, ewePrice:18000, be:19,
+  },
+  free_state: {
+    name:"Free State", short:"Free State",
+    fill:"#9aaa1a", stroke:"#607010", hoverFill:"#b2c422",
+    climate:"Grassland · 400–600mm · Cold winters · Hard frost",
+    rainfall:"400–600mm", season:"Summer", frost:"Heavy", humidity:"Low–medium",
+    parasites:"Low", drought:"Moderate", cattleDensity:"Very high",
+    primary:["Bonsmara","Simmentaler","Drakensberger"],
+    secondary:["Angus","Hereford","Charolais"],
+    avoid:["Brahman"],
+    why:"The Free State is SA's largest beef province by volume. Bonsmara dominates — the Bethlehem area has the highest concentration of stud beef operations in Africa. Cold winters exclude Brahman. Production costs here set the national benchmark for feedlot supply.",
+    tip:"Harrismith to Bethlehem: the stud beef heartland. Most feedlots in SA prefer Free State Bonsmara weaners. Target 75–80% calving rate and 200–230 kg weaning weight for top auction prices.",
+    breed:"Bonsmara", type:"Beef", market:"Harrismith · Bethlehem sale yards · Beefcor · RCL Foods",
+    rep:15, oh:1300, labour:2800, hired:8500,
+    lambing:77, survival:81, liveKg:470, dressing:53, wool:0, woolMonth:0,
+    feed:2000, health:480, ewePrice:17000, be:21,
+  },
+  kwazulu_natal: {
+    name:"KwaZulu-Natal", short:"KZN",
+    fill:"#127a54", stroke:"#0a5038", hoverFill:"#169868",
+    climate:"Subtropical coast + Drakensberg · High rainfall · Humid",
+    rainfall:"600–1200mm", season:"Summer", frost:"Highlands only", humidity:"High",
+    parasites:"Very high", drought:"Rare coastal", cattleDensity:"Medium",
+    primary:["Nguni","Brahman","Bonsmara"],
+    secondary:["Drakensberger","Simbra"],
+    avoid:["Hereford","Charolais"],
+    why:"KZN's high rainfall and humidity create severe tick and parasite pressure. Nguni cattle are indigenous to this environment — their tick resistance and heat tolerance are unmatched. Bonsmara × Nguni F1 crosses are popular commercially. European breeds have high mortality without intensive dipping.",
+    tip:"Nguni are the lowest-input option in KZN. They thrive on poor veld where other breeds fail. For commercial weaner production, a Bonsmara or Brahman terminal sire on a Nguni cow base gives excellent results.",
+    breed:"Nguni", type:"Beef", market:"Kokstad sale yard · Newcastle · Tongaat abattoir",
+    rep:15, oh:1100, labour:2800, hired:8500,
+    lambing:74, survival:78, liveKg:400, dressing:52, wool:0, woolMonth:0,
+    feed:1600, health:560, ewePrice:14000, be:26,
+  },
+  eastern_cape: {
+    name:"Eastern Cape", short:"E. Cape",
+    fill:"#8a6a10", stroke:"#5a4408", hoverFill:"#a07e18",
+    climate:"Karoo interior + Coastal · 200–700mm · Highly variable",
+    rainfall:"200–700mm", season:"Mixed", frost:"Karoo interior", humidity:"Variable",
+    parasites:"Low–medium", drought:"Karoo frequent", cattleDensity:"High",
+    primary:["Nguni","Drakensberger","Angus"],
+    secondary:["Bonsmara","Hereford"],
+    avoid:[],
+    why:"Eastern Cape is the Nguni heartland — this indigenous breed evolved here and in the Transkei communal farming system. The Drakensberger adapts well to the variable interior. Midlands suits Angus. Many farms use Nguni as a cow base with Angus or Simmentaler terminal sires for improved weaner prices.",
+    tip:"East London to Queenstown: traditional Nguni country. Nguni × Angus cross weaners command a premium at Queenstown and East London sale yards. Karoo areas: Drakensberger or Bonsmara for drought resilience.",
+    breed:"Nguni", type:"Beef", market:"Queenstown sale yard · East London abattoir · Rennie's",
+    rep:15, oh:1100, labour:2800, hired:8500,
+    lambing:72, survival:78, liveKg:420, dressing:52, wool:0, woolMonth:0,
+    feed:1700, health:440, ewePrice:15000, be:23,
+  },
+  western_cape: {
+    name:"Western Cape", short:"W. Cape",
+    fill:"#6a2a94", stroke:"#481a64", hoverFill:"#8038b0",
+    climate:"Mediterranean · Winter rainfall · 200–800mm · Cool winters",
+    rainfall:"200–800mm", season:"Winter (Cape)", frost:"Light–moderate", humidity:"Moderate",
+    parasites:"Low–medium", drought:"Summer droughts common", cattleDensity:"Low",
+    primary:["Angus","Hereford","Simmentaler"],
+    secondary:["Bonsmara","Drakensberger"],
+    avoid:["Brahman","Nguni"],
+    why:"Western Cape's winter rainfall system requires breeds adapted to seasonal pasture. Angus and Hereford excel on cereal stubble and improved pastures. The Swartland wheat-cattle rotation is a proven model. Angus weaners for the Cape Town premium market add R4–6/kg over national benchmarks.",
+    tip:"Swartland and Overberg: wheat/cattle rotation is highly profitable when managed precisely. Time your calving to coincide with wheat stubble availability. Angus dressed carcasses command a consistent premium from Cape Town retailers.",
+    breed:"Angus", type:"Beef", market:"Boland Agri · Paarl sale yard · Cape Town abattoirs · premium butcheries",
+    rep:15, oh:1400, labour:3000, hired:9000,
+    lambing:80, survival:84, liveKg:480, dressing:54, wool:0, woolMonth:0,
+    feed:2100, health:460, ewePrice:21000, be:20,
+  },
+  northern_cape: {
+    name:"Northern Cape", short:"N. Cape",
+    fill:"#9a1818", stroke:"#680e0e", hoverFill:"#b82020",
+    climate:"Karoo · Hyper-arid · 50–250mm · Extreme heat + cold",
+    rainfall:"50–250mm", season:"Erratic", frost:"Heavy nights", humidity:"Very low",
+    parasites:"Very low", drought:"Severe, frequent", cattleDensity:"Very low",
+    primary:["Drakensberger","Bonsmara","Beefmaster"],
+    secondary:["Nguni"],
+    avoid:["Angus","Hereford","Simmentaler","Charolais"],
+    why:"Northern Cape is the most challenging beef environment in SA. Budget 6–20 ha per LSU on natural Karoo. Drakensberger was bred in this province — its drought metabolism and fat reserves are unmatched. Scale requirements are high: 100+ cows to cover fixed costs.",
+    tip:"Upington to Britstown: ultra-extensive Drakensberger country. Capital costs are low but land requirements are extreme. Solar-powered borehole systems are the single biggest enabling investment for sustainable stocking.",
+    breed:"Drakensberger", type:"Beef", market:"Upington · De Aar sale yards · long-haul to Gauteng feedlots",
+    rep:15, oh:1000, labour:2800, hired:8500,
+    lambing:68, survival:74, liveKg:420, dressing:51, wool:0, woolMonth:0,
+    feed:1400, health:360, ewePrice:13000, be:32,
+  },
+};
+
+const CATTLE_CARRYING_CAPACITY = {
+  extensive:     { limpopo:0.5, north_west:0.35, gauteng:0.7, mpumalanga:0.7, free_state:0.65, kwazulu_natal:0.6, eastern_cape:0.45, western_cape:0.7, northern_cape:0.12 },
+  semiIntensive: { limpopo:1.2, north_west:0.9,  gauteng:1.8, mpumalanga:1.8, free_state:1.6,  kwazulu_natal:1.5, eastern_cape:1.2,  western_cape:1.8,  northern_cape:0.35 },
+  intensive:     { limpopo:3.0, north_west:2.5,  gauteng:4.0, mpumalanga:4.0, free_state:3.5,  kwazulu_natal:3.5, eastern_cape:3.0,  western_cape:4.0,  northern_cape:1.0  },
+};
+
+const CATTLE_PROVINCE_DEFAULTS = {
+  limpopo:       { system:"extensive",     market:"auction",   feed:"purchased" },
+  north_west:    { system:"extensive",     market:"auction",   feed:"purchased" },
+  gauteng:       { system:"intensive",     market:"direct",    feed:"purchased" },
+  mpumalanga:    { system:"semiIntensive", market:"auction",   feed:"mixed" },
+  free_state:    { system:"semiIntensive", market:"auction",   feed:"mixed" },
+  kwazulu_natal: { system:"extensive",     market:"auction",   feed:"purchased" },
+  eastern_cape:  { system:"extensive",     market:"auction",   feed:"purchased" },
+  western_cape:  { system:"semiIntensive", market:"direct",    feed:"mixed" },
+  northern_cape: { system:"extensive",     market:"auction",   feed:"purchased" },
+};
+
+// ─── LIVESTOCK MODULE REGISTRY ─────────────────────────────────────────────────
+// Each module is a self-contained slice. Add new species here.
+const LIVESTOCK_MODULES = {
+  sheep: {
+    id:"sheep", emoji:"🐑", label:"Sheep", labelPlural:"SA Sheep",
+    terms:{ unit:"ewe", units:"ewes", group:"flock", young:"lamb", youngs:"lambs",
+            rateLabel:"Lambing", priceLabel:"Ewe price", saleMonthLabel:"Lamb sale months" },
+    provinceData: PROVINCE_DATA,
+    carryingCapacity: CARRYING_CAPACITY,
+    provinceDefaults: PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [20, 50, 100, 200, 500, 1000, 2000]),
+    carcassDefault: 52,
+    carcassLabel: "Carcass R/kg",
+  },
+  cattle: {
+    id:"cattle", emoji:"🐄", label:"Beef Cattle", labelPlural:"SA Beef Cattle",
+    terms:{ unit:"cow", units:"cows", group:"herd", young:"calf", youngs:"calves",
+            rateLabel:"Calving", priceLabel:"Cow price", saleMonthLabel:"Calf sale months" },
+    provinceData: CATTLE_PROVINCE_DATA,
+    carryingCapacity: CATTLE_CARRYING_CAPACITY,
+    provinceDefaults: CATTLE_PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [5, 10, 20, 50, 100, 200, 500]),
+    carcassDefault: 52,
+    carcassLabel: "Carcass R/kg",
+  },
+};
+
+function calcFull(reg, carcass, flockSize, labour, overhead = reg.oh ?? 600, extraCosts = {}, scalePoints = [20, 50, 100, 200, 500, 1000, 2000]) {
   // ── Extra farmer-entered costs ────────────────────────────────────────────
   const {
     bond        = 0,    // monthly bond / finance repayment
@@ -240,8 +438,8 @@ function calcFull(reg, carcass, flockSize, labour, overhead = reg.oh ?? 600, ext
     misc:     { label: "Miscellaneous",    annual: misc * 12,                    perEwe: (misc * 12) / flockSize },
   };
 
-  // ── Scale rows: MVO → 2 000 ewes ─────────────────────────────────────────
-  const scaleRows = [20, 50, 100, 200, 500, 1000, 2000].map(n => {
+  // ── Scale rows ───────────────────────────────────────────────────────────
+  const scaleRows = scalePoints.map(n => {
     const ls   = (labour * 12) / n;
     const os   = ((overhead + extraFixed) * 12) / n;
     const cost = feedCost + healthCost + ls + os + replaceCost;
@@ -305,9 +503,9 @@ const PF = {
   merchantId:  import.meta.env?.VITE_PF_MERCHANT_ID  || "REPLACE_MERCHANT_ID",
   merchantKey: import.meta.env?.VITE_PF_MERCHANT_KEY || "REPLACE_MERCHANT_KEY",
   passphrase:  import.meta.env?.VITE_PF_PASSPHRASE   || "REPLACE_PASSPHRASE",
-  returnUrl:   "https://agrimodel.co.za/success",
-  cancelUrl:   "https://agrimodel.co.za/",
-  notifyUrl:   "https://agrimodel.co.za/api/payfast-notify",
+  returnUrl:   "https://agrisolvesa.netlify.app/success",
+  cancelUrl:   "https://agrisolvesa.netlify.app/",
+  notifyUrl:   "https://agrisolvesa.netlify.app/api/payfast-notify",
   sandbox:     false,
   price:       147.95,
 };
@@ -388,6 +586,15 @@ const CSS = `
 
 // Module-level constants — avoids recreation on every render
 const TABS = ["Overview", "Breeds", "Model", "Savings"];
+
+const LIVESTOCK_TYPES = [
+  { id:"sheep",   emoji:"🐑", label:"Sheep",        sub:"Wool, meat & dual-purpose breeds",  status:"active" },
+  { id:"cattle",  emoji:"🐄", label:"Beef Cattle",   sub:"Commercial & stud beef operations", status:"active" },
+  { id:"goats",   emoji:"🐐", label:"Goats",         sub:"Boer goat & dairy operations",      status:"soon"   },
+  { id:"pigs",    emoji:"🐖", label:"Pigs",          sub:"Commercial piggery models",          status:"soon"   },
+  { id:"poultry", emoji:"🐓", label:"Poultry",       sub:"Broiler & layer operations",         status:"soon"   },
+  { id:"dairy",   emoji:"🐮", label:"Dairy Cattle",  sub:"Milk production feasibility",        status:"soon"   },
+];
 const riskLabel = v => v === "Low" || v === "Very low" || v === "None" ? "risk-low" : v === "High" || v === "Very high" || v === "Severe, frequent" ? "risk-high" : "risk-med";
 const PAY_METHODS = [
   {id:"card",    icon:"💳", label:"Credit / Debit Card",  sub:"Visa · Mastercard · All SA banks"},
@@ -738,11 +945,277 @@ function MiniCashflow36({ cf36, ewePurchase }) {
   );
 }
 
+// ── PDF PRINT ──────────────────────────────────────────────────────────────────
+function printReport(report) {
+  const { sections, reportData, buyerName, generatedAt, isSandbox } = report;
+  const { r, flock, lm, carcass, pp, capital, npv5, be, scaleRows, cfRows, sensRows, firstPositive, revPE, varPE, vm, fa } = reportData;
+  const PT = report.terms ?? LIVESTOCK_MODULES.sheep.terms;
+
+  const fmt  = n => `R ${Math.abs(n).toLocaleString("en-ZA", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const pct  = n => `${(n * 100).toFixed(1)}%`;
+  const sgn  = n => n >= 0 ? "+" : "−";
+  const date = new Date(generatedAt).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
+
+  const kpis = [
+    { l: `${PT.group.charAt(0).toUpperCase()+PT.group.slice(1)} Size`, v: `${flock} ${PT.units}`, c: "#1a5c08" },
+    { l: `Profit / ${PT.unit}`, v: `${sgn(pp)}${fmt(pp)}`,             c: pp >= 0 ? "#1a5c08" : "#c0392b" },
+    { l: "Breakeven",    v: be ? `${be} ${PT.units}` : "N/A",           c: "#7a5c00" },
+    { l: "Capital Req.", v: fmt(capital),                                c: "#7a5c00" },
+    { l: "5-Year NPV",   v: `${sgn(npv5)}${fmt(Math.abs(npv5))}`,       c: npv5 >= 0 ? "#1a5c08" : "#c0392b" },
+  ];
+
+  const cfTableRows = cfRows.map((row, i) => {
+    const prev    = cfRows[i - 1];
+    const isFirst = row.cum >= 0 && (prev?.cum ?? -1) < 0;
+    const hasRev  = row.rev > 0;
+    const rowCls  = hasRev ? "hl-rev" : "";
+    return `<tr class="${rowCls}">
+      <td style="text-align:right;color:#666;">${row.m}</td>
+      <td style="text-align:right;font-weight:${hasRev?700:400};color:${hasRev?"#1a5c08":"#333"};">${row.mo}</td>
+      <td style="text-align:right;color:#666;">${row.yr}</td>
+      <td style="color:#2d6a4f;">${row.events || "—"}</td>
+      <td style="text-align:right;color:${row.rev>0?"#1a5c08":"#aaa"};font-weight:${hasRev?700:400};">${row.rev>0?fmt(row.rev):"—"}</td>
+      <td style="text-align:right;color:#c0392b;">${fmt(row.cost)}</td>
+      <td style="text-align:right;font-weight:600;color:${row.profit>=0?"#1a5c08":"#c0392b"};">${sgn(row.profit)}${fmt(Math.abs(row.profit))}</td>
+      <td style="text-align:right;font-weight:${isFirst?700:400};color:${row.cum>=0?"#1a5c08":"#c0392b"};">${isFirst?"★ ":""}${sgn(row.cum)}${fmt(Math.abs(row.cum))}</td>
+    </tr>`;
+  }).join("");
+
+  const scaleTableRows = scaleRows.map((row, i) => {
+    const isBE    = be && Math.abs(row.n - be) <= 3;
+    const isYours = Math.abs(row.n - flock) <= 5;
+    const rowCls  = isYours ? "hl-yours" : isBE ? "hl-be" : "";
+    return `<tr class="${rowCls}">
+      <td style="text-align:right;font-weight:700;">${row.n}${isBE?'<span style="font-size:7pt;color:#1a5c08;"> BE</span>':""}${isYours?'<span style="font-size:7pt;color:#7a5c00;"> ◄ yours</span>':""}</td>
+      <td style="text-align:right;color:#1a5c08;font-weight:700;">${fmt(row.rev)}</td>
+      <td style="text-align:right;color:${row.pp>=0?"#1a5c08":"#c0392b"};">${sgn(row.pp)}${fmt(Math.abs(row.pp))}</td>
+      <td style="text-align:right;font-weight:700;color:${row.fp>=0?"#1a5c08":"#c0392b"};">${sgn(row.fp)}${fmt(Math.abs(row.fp))}</td>
+      <td style="text-align:right;font-weight:600;color:${row.roi>0.15?"#1a5c08":row.roi>0?"#7a5c00":"#c0392b"};">${pct(row.roi)}</td>
+      <td style="text-align:right;color:#555;">${fmt(row.cap)}</td>
+      <td style="text-align:right;"><span style="font-size:7pt;padding:1.5pt 5pt;border-radius:6pt;border:0.75pt solid ${row.ok?"#1a5c08":"#c0392b"};color:${row.ok?"#1a5c08":"#c0392b"};">${row.ok?(row.roi>0.15?"Strong":"Viable"):"Below BE"}</span></td>
+    </tr>`;
+  }).join("");
+
+  const sensTableRows = sensRows.map((s, i) => `<tr class="${s.pct===0?"hl-base":""}">
+    <td style="text-align:right;font-weight:600;color:${s.pct===0?"#7a5c00":s.pct>0?"#1a5c08":"#c0392b"};">${s.pct>0?"+":""}${s.pct}%${s.pct===0?" ★":""}</td>
+    <td style="text-align:right;">R${s.adj.toFixed(0)}/kg</td>
+    <td style="text-align:right;color:${s.pp>=0?"#1a5c08":"#c0392b"};">${sgn(s.pp)}${fmt(Math.abs(s.pp))}</td>
+    <td style="text-align:right;font-weight:700;color:${s.fp>=0?"#1a5c08":"#c0392b"};">${sgn(s.fp)}${fmt(Math.abs(s.fp))}</td>
+    <td style="text-align:right;font-weight:600;color:${s.roi>0?"#1a5c08":"#c0392b"};">${pct(s.roi)}</td>
+    <td style="text-align:right;color:#7a5c00;">${s.be?s.be+" "+PT.units:"∞"}</td>
+  </tr>`).join("");
+
+  const secHtml = sections.map((s, i) => {
+    const body = s.body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    let extra = "";
+    if (i === 4) {
+      extra = `<div class="tbl-wrap">
+        <p class="tbl-title">36-Month Cashflow — ${flock} ${PT.units} · ${lm === "owner" ? "Owner-operated" : "Hired worker"} · R${carcass}/kg</p>
+        <table class="cf-table">
+          <colgroup>
+            <col class="cf-col-mo"><col class="cf-col-month"><col class="cf-col-yr">
+            <col class="cf-col-ev"><col class="cf-col-rev"><col class="cf-col-cost">
+            <col class="cf-col-pl"><col class="cf-col-cum">
+          </colgroup>
+          <thead><tr>
+            <th>Mo</th><th>Month</th><th>Yr</th>
+            <th class="left">Events</th>
+            <th>Revenue</th><th>Op. Cost</th><th>P&amp;L</th><th>Cumulative</th>
+          </tr></thead>
+          <tbody>${cfTableRows}</tbody>
+        </table>
+        <p class="tbl-note">★ = Cashflow positive · All costs include labour, overhead, feed, health &amp; replacement reserve</p>
+      </div>`;
+    }
+    if (i === 5) {
+      const GN = PT.group.charAt(0).toUpperCase()+PT.group.slice(1);
+      const UN = PT.unit.charAt(0).toUpperCase()+PT.unit.slice(1);
+      extra = `<div class="tbl-wrap">
+        <p class="tbl-title">Scale Projection — Fixed costs diluted across ${PT.group} sizes</p>
+        <table>
+          <thead><tr>
+            <th>${GN}</th><th>Annual Rev</th><th>Profit/${UN}</th>
+            <th>${GN} Profit</th><th>ROI</th><th>Capital</th><th>Status</th>
+          </tr></thead>
+          <tbody>${scaleTableRows}</tbody>
+        </table>
+        <p class="tbl-note">BE = breakeven · ◄ = your ${PT.group} · vs Prime 11.5% (SARB 2025)</p>
+      </div>`;
+    }
+    if (i === 6) {
+      const GN2 = PT.group.charAt(0).toUpperCase()+PT.group.slice(1);
+      const UN2 = PT.unit.charAt(0).toUpperCase()+PT.unit.slice(1);
+      extra = `<div class="tbl-wrap">
+        <p class="tbl-title">Sensitivity Analysis — 9 Carcass Price Scenarios at ${flock} ${PT.units}</p>
+        <table>
+          <thead><tr>
+            <th>Scenario</th><th>R/kg</th><th>Profit/${UN2}</th>
+            <th>${GN2} Profit</th><th>ROI</th><th>Breakeven</th>
+          </tr></thead>
+          <tbody>${sensTableRows}</tbody>
+        </table>
+        <p class="tbl-note">★ = base case (R${carcass}/kg) · All scenarios at ${flock} ${PT.units}</p>
+      </div>`;
+    }
+    return `<div class="section${i === 0 ? " first" : ""}">
+      <h2>${i + 1}. ${s.title}</h2>
+      <div class="section-body">${body}</div>
+      ${extra}
+    </div>`;
+  }).join("");
+
+  const kpiHtml = kpis.map(k => `
+    <div class="kpi-card" style="border-top-color:${k.c};">
+      <div class="kpi-val" style="color:${k.c};">${k.v}</div>
+      <div class="kpi-lbl">${k.l}</div>
+    </div>`).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Agrimodel Pro — Feasibility Report · ${r.name} · ${buyerName}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page {
+      size: A4 portrait;
+      margin: 22mm 18mm 26mm 18mm;
+    }
+    @page {
+      @bottom-left  { content: "AGRIMODEL PRO  ·  PROFESSIONAL FEASIBILITY REPORT  ·  CONFIDENTIAL"; font-size: 6.5pt; color: #bbb; font-family: 'Courier New', monospace; }
+      @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 6.5pt; color: #bbb; font-family: 'Courier New', monospace; }
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 10.5pt;
+      color: #1a1a1a;
+      background: #fff;
+      line-height: 1.65;
+      orphans: 3;
+      widows: 3;
+    }
+
+    /* Cover header */
+    .report-header { border-bottom: 2.5pt solid #1a5c08; padding-bottom: 11pt; margin-bottom: 0; }
+    .hdr-eyebrow { font-size: 7.5pt; color: #1a5c08; letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 5pt; font-family: 'Courier New', monospace; }
+    .hdr-title   { font-size: 19pt; font-weight: 700; color: #111; line-height: 1.2; }
+    .hdr-sub     { font-size: 8.5pt; color: #555; margin-top: 4pt; font-family: 'Courier New', monospace; }
+
+    /* KPI strip */
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6pt; margin-top: 11pt; }
+    .kpi-card { border: 0.75pt solid #ddd; border-top-width: 2.5pt; border-radius: 2pt; padding: 7pt 4pt; text-align: center; page-break-inside: avoid; }
+    .kpi-val  { font-size: 12pt; font-weight: 700; line-height: 1.2; font-family: Georgia, serif; }
+    .kpi-lbl  { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.4pt; color: #666; margin-top: 2pt; font-family: 'Courier New', monospace; }
+
+    /* Sections */
+    .section { page-break-before: always; padding-top: 2pt; }
+    .section.first { page-break-before: auto; }
+    .section h2 {
+      font-size: 12.5pt; font-weight: 700; color: #111;
+      border-bottom: 2pt solid #1a5c08; padding-bottom: 4pt; margin-bottom: 10pt;
+      page-break-after: avoid; font-family: Georgia, 'Times New Roman', serif;
+    }
+    .section-body {
+      font-family: 'Courier New', 'Lucida Console', monospace;
+      font-size: 9pt; line-height: 1.8; white-space: pre-wrap;
+      word-break: break-word; color: #222;
+    }
+
+    /* Tables */
+    .tbl-wrap  { margin-top: 11pt; }
+    .tbl-title { font-size: 8.5pt; font-weight: 700; color: #7a5c00; margin-bottom: 5pt; font-family: Georgia, serif; }
+    .tbl-note  { font-size: 7pt; color: #777; margin-top: 3pt; font-family: 'Courier New', monospace; }
+
+    table { border-collapse: collapse; width: 100%; }
+    thead { display: table-header-group; }
+    tr    { page-break-inside: avoid; }
+
+    th {
+      background-color: #1a5c08; color: #fff;
+      padding: 4pt 5pt; font-size: 7.5pt; font-weight: 600;
+      text-align: right; white-space: nowrap;
+      font-family: 'Courier New', monospace;
+    }
+    th.left { text-align: left; }
+    td {
+      border: 0.5pt solid #ddd; padding: 2.5pt 4.5pt;
+      font-size: 8pt; vertical-align: middle;
+      font-family: 'Courier New', monospace;
+    }
+    tr:nth-child(even) td { background: #f9f9f9; }
+    tr.hl-yours td { background: #fffbe6 !important; }
+    tr.hl-be    td { background: #f0faf0 !important; }
+    tr.hl-base  td { background: #fffbe6 !important; }
+    tr.hl-rev   td { background: #f0faf0 !important; }
+
+    /* Cashflow table — fixed-layout to guarantee fit on A4 */
+    .cf-table { table-layout: fixed; }
+    .cf-table th, .cf-table td { font-size: 7pt; padding: 2pt 3pt; }
+    .cf-col-mo    { width: 5%; }
+    .cf-col-month { width: 9%; }
+    .cf-col-yr    { width: 4%; }
+    .cf-col-ev    { width: 22%; text-align: left !important; }
+    .cf-col-rev   { width: 14%; }
+    .cf-col-cost  { width: 14%; }
+    .cf-col-pl    { width: 14%; }
+    .cf-col-cum   { width: 15%; }
+
+    /* Sandbox watermark */
+    ${isSandbox ? `.sb-mark {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%,-50%) rotate(-35deg);
+      font-size: 56pt; font-weight: 900;
+      color: rgba(192,57,43,0.06);
+      white-space: nowrap; pointer-events: none;
+      font-family: Georgia, serif; z-index: 9999;
+    }` : ""}
+
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  ${isSandbox ? '<div class="sb-mark">SANDBOX DEMO</div>' : ""}
+
+  <div class="report-header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10pt;">
+      <div style="flex:1;">
+        <div class="hdr-eyebrow">Agrimodel Pro · Professional Feasibility Report${isSandbox ? " · SANDBOX — NOT FOR SUBMISSION" : ""}</div>
+        <div class="hdr-title">${r.name} — ${r.breed}</div>
+        <div class="hdr-sub">Prepared for: <strong>${buyerName}</strong> &nbsp;·&nbsp; ${date}${isSandbox ? ' &nbsp;·&nbsp; <span style="color:#c0392b;font-weight:700;">SANDBOX DEMO</span>' : ""}</div>
+      </div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:8pt;color:#999;flex-shrink:0;">
+        <div style="font-size:18pt;line-height:1;margin-bottom:2pt;">🌿</div>
+        <div>agrisolvesa.netlify.app</div>
+      </div>
+    </div>
+    <div class="kpi-grid">${kpiHtml}</div>
+  </div>
+
+  ${secHtml}
+
+  <div style="margin-top:18pt;padding-top:7pt;border-top:0.5pt solid #ccc;font-size:7pt;color:#aaa;text-align:center;font-family:'Courier New',monospace;">
+    Generated by Agrimodel Pro · agrisolvesa.netlify.app · ${date} · Financial benchmarks based on AgriOrbit Apr 2025 carcass prices · For informational purposes only — not financial advice
+  </div>
+</body>
+</html>`;
+
+  const w = window.open("", "_blank");
+  if (!w) { alert("Allow pop-ups for this site to save the PDF."); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => { w.focus(); w.print(); }, 600);
+}
+
 // ── REPORT VIEWER ─────────────────────────────────────────────────────────────
 function ReportViewer({ report, onClose }) {
   const [sec, setSec] = useState(0);
   const { sections, reportData, buyerName, generatedAt, isSandbox } = report;
   const { r, flock, lm, carcass, pp, capital, npv5, be, scaleRows, cfRows, sensRows, firstPositive } = reportData;
+  const RT = report.terms ?? LIVESTOCK_MODULES.sheep.terms;
 
   const TITLES = sections.map(s => s.title);
 
@@ -768,9 +1241,9 @@ function ReportViewer({ report, onClose }) {
             )}
           </div>
           <div style={{display:"flex",gap:6,flexShrink:0}}>
-            <button onClick={()=>window.print()} title="Print or Save as PDF"
+            <button onClick={()=>printReport(report)} title="Save as PDF — opens print dialog"
               style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,borderRadius:8,padding:"6px 10px",fontSize:15,cursor:"pointer"}}>
-              🖨 Print
+              📄 Save PDF
             </button>
             <button onClick={onClose} style={{background:PALETTE.card,border:`1px solid ${PALETTE.dim}`,color:PALETTE.muted,borderRadius:8,padding:"6px 12px",fontSize:15,cursor:"pointer"}}>
               ✕ Close
@@ -780,9 +1253,9 @@ function ReportViewer({ report, onClose }) {
         {/* KPI band */}
         <div className="report-kpi-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:0}}>
           {[
-            {l:"Flock",      v:`${flock} ewes`,                          c:"#f0ece0"},
-            {l:"Profit/Ewe", v:`${SGN(pp)}${ZAR(pp)}`,                  c:pp>=0?PALETTE.accent:PALETTE.danger},
-            {l:"Breakeven",  v:`${be} ewes`,                             c:PALETTE.gold},
+            {l:RT.group.charAt(0).toUpperCase()+RT.group.slice(1), v:`${flock} ${RT.units}`, c:"#f0ece0"},
+            {l:`Profit/${RT.unit}`, v:`${SGN(pp)}${ZAR(pp)}`,           c:pp>=0?PALETTE.accent:PALETTE.danger},
+            {l:"Breakeven",  v:`${be} ${RT.units}`,                      c:PALETTE.gold},
             {l:"Capital",    v:ZAR(capital),                             c:PALETTE.gold},
             {l:"5-yr NPV",   v:`${SGN(npv5)}${ZAR(Math.abs(npv5))}`,   c:npv5>=0?PALETTE.accent:PALETTE.danger},
           ].map((s,i) => (
@@ -820,7 +1293,7 @@ function ReportViewer({ report, onClose }) {
         {sec === 4 && (
           <div style={{marginTop:8}}>
             <div style={{fontSize:16,fontWeight:600,color:PALETTE.gold,marginBottom:10,fontFamily:"'Playfair Display',serif"}}>
-              36-Month Cashflow — {flock} ewes · {lm === "owner" ? "Owner-operated" : "Hired worker"} · R{carcass}/kg
+              36-Month Cashflow — {flock} {RT.units} · {lm === "owner" ? "Owner-operated" : "Hired worker"} · R{carcass}/kg
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
@@ -860,12 +1333,12 @@ function ReportViewer({ report, onClose }) {
         {sec === 5 && (
           <div style={{marginTop:8}}>
             <div style={{fontSize:16,fontWeight:600,color:PALETTE.gold,marginBottom:10,fontFamily:"'Playfair Display',serif"}}>
-              Scale Projection Table — Fixed costs diluted across flock
+              Scale Projection Table — Fixed costs diluted across {RT.group}
             </div>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:15}}>
               <thead>
                 <tr style={{background:PALETTE.bg}}>
-                  {["Flock","Annual Rev","Profit/Ewe","Flock Profit","ROI","vs Prime 11.5%","Capital","Status"].map(h => (
+                  {[RT.group.charAt(0).toUpperCase()+RT.group.slice(1),"Annual Rev",`Profit/${RT.unit}`,`${RT.group.charAt(0).toUpperCase()+RT.group.slice(1)} Profit`,"ROI","vs Prime 11.5%","Capital","Status"].map(h => (
                     <th key={h} style={{padding:"6px 8px",color:PALETTE.muted,textAlign:"right",fontSize:13,textTransform:"uppercase",borderBottom:`1px solid ${PALETTE.faint}`,fontWeight:500}}>{h}</th>
                   ))}
                 </tr>
@@ -907,7 +1380,7 @@ function ReportViewer({ report, onClose }) {
         {sec === 6 && (
           <div style={{marginTop:8}}>
             <div style={{fontSize:16,fontWeight:600,color:PALETTE.gold,marginBottom:10,fontFamily:"'Playfair Display',serif"}}>
-              Sensitivity Analysis — 9 Carcass Price Scenarios at {flock} ewes
+              Sensitivity Analysis — 9 Carcass Price Scenarios at {flock} {RT.units}
             </div>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:15}}>
               <thead>
@@ -925,13 +1398,13 @@ function ReportViewer({ report, onClose }) {
                     <td style={{padding:"5px 8px",color:s.pp>=0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontFamily:"'Playfair Display',serif"}}>{SGN(s.pp)}{ZAR(Math.abs(s.pp))}</td>
                     <td style={{padding:"5px 8px",color:s.fp>=0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontFamily:"'Playfair Display',serif",fontWeight:700}}>{SGN(s.fp)}{ZAR(Math.abs(s.fp))}</td>
                     <td style={{padding:"5px 8px",color:s.roi>0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontWeight:600}}>{PCT(s.roi)}</td>
-                    <td style={{padding:"5px 8px",color:PALETTE.gold,textAlign:"right"}}>{s.be || "∞"} ewes</td>
+                    <td style={{padding:"5px 8px",color:PALETTE.gold,textAlign:"right"}}>{s.be || "∞"} {RT.units}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <div style={{fontSize:13,color:PALETTE.dim,marginTop:6}}>
-              ★ = base scenario (R{carcass}/kg AgriOrbit A2 Apr 2025) · All scenarios at {flock} ewes {lm === "owner" ? "owner-operated" : "hired worker"}
+              ★ = base scenario (R{carcass}/kg AgriOrbit A2 Apr 2025) · All scenarios at {flock} {RT.units} {lm === "owner" ? "owner-operated" : "hired worker"}
             </div>
           </div>
         )}
@@ -954,7 +1427,7 @@ function ReportViewer({ report, onClose }) {
 }
 
 // ── REPORT LOADING SCREEN ─────────────────────────────────────────────────────
-function ReportLoading({ provName }) {
+function ReportLoading({ provName, emoji = "🐑" }) {
   const steps = [
     `Analysing ${provName} regional data...`,
     "Calculating 36-month cashflow model...",
@@ -972,7 +1445,7 @@ function ReportLoading({ provName }) {
   }, []);
   return (
     <div style={{position:"fixed",inset:0,background:"#080f06",zIndex:9999,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,fontFamily:"'DM Mono',monospace"}}>
-      <div className="map-loading" style={{fontSize:52,marginBottom:20}}>🐑</div>
+      <div className="map-loading" style={{fontSize:52,marginBottom:20}}>{emoji}</div>
       <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:"#f0ece0",marginBottom:8,textAlign:"center"}}>
         Generating Your Report
       </div>
@@ -1009,27 +1482,28 @@ function AdvisorWizard({
   bondMonthly, setBondMonthly, setBondTouched,
   productionSystem, setProductionSystem,
   marketChannel, setMarketChannel, feedSource, setFeedSource,
-  onClose,
+  terms, onClose,
 }) {
+  const T = terms ?? LIVESTOCK_MODULES.sheep.terms;
   const [stepIdx,    setStepIdx]    = useState(0);
   const [completed,  setCompleted]  = useState(false);
 
   const STEPS = [
     {
       id:"flock", icon:"🐑", title:"Flock size",
-      question:`How many ewes are you planning to run on your ${prov?.name || ""} farm?`,
+      question:`How many ${T.units} are you planning to run on your ${prov?.name || ""} farm?`,
       why: result?.breakeven
-        ? `Your breakeven is ${result.breakeven} ewes. Every ewe above that earns pure margin — every ewe below subsidises fixed costs from your own pocket.`
-        : "Flock size is the single biggest lever in your model. Fixed costs dilute across every ewe — scale is the primary route to profitability.",
+        ? `Your breakeven is ${result.breakeven} ${T.units}. Every ${T.unit} above that earns pure margin — every ${T.unit} below subsidises fixed costs from your own pocket.`
+        : `${T.group.charAt(0).toUpperCase()+T.group.slice(1)} size is the single biggest lever in your model. Fixed costs dilute across every ${T.unit} — scale is the primary route to profitability.`,
       insight: result
         ? (flockSize < result.breakeven
-          ? `⚠  ${flockSize} ewes is below breakeven (${result.breakeven}). You need ${result.breakeven - flockSize} more ewes to cover fixed costs.`
-          : `✓  ${flockSize} ewes — ${flockSize - result.breakeven} above breakeven, earning ${ZAR(Math.round(result.profitPerEwe * flockSize))}/yr`)
+          ? `⚠  ${flockSize} ${T.units} is below breakeven (${result.breakeven}). You need ${result.breakeven - flockSize} more ${T.units} to cover fixed costs.`
+          : `✓  ${flockSize} ${T.units} — ${flockSize - result.breakeven} above breakeven, earning ${ZAR(Math.round(result.profitPerEwe * flockSize))}/yr`)
         : null,
       insightColor: result ? (flockSize < result.breakeven ? PALETTE.danger : PALETTE.accent) : PALETTE.muted,
       renderInput: () => (
         <Field label="Flock Size" value={flockSize} onChange={setFlockSize}
-          suf="ewes" hint={result?.breakeven ? `MVO = ${result.breakeven}` : "ewes"} min={1} max={10000}/>
+          suf={T.units} hint={result?.breakeven ? `MVO = ${result.breakeven}` : T.units} min={1} max={10000}/>
       ),
     },
     {
@@ -1038,13 +1512,13 @@ function AdvisorWizard({
       why:"Without land area I can't check if your flock is overstocking the veld — the #1 cause of long-term farm degradation in SA. I'll calculate carrying capacity and flag any overload.",
       insight: landHa && carryingCapacity !== null
         ? (flockSize > carryingCapacity
-          ? `⚠  ${landHa} ha at ${productionSystem} carries ${carryingCapacity} ewes max — you're ${flockSize - carryingCapacity} ewes over capacity`
-          : `✓  ${landHa} ha carries up to ${carryingCapacity} ewes — your flock is at ${Math.round((flockSize / carryingCapacity) * 100)}% capacity`)
+          ? `⚠  ${landHa} ha at ${productionSystem} carries ${carryingCapacity} ${T.units} max — you're ${flockSize - carryingCapacity} ${T.units} over capacity`
+          : `✓  ${landHa} ha carries up to ${carryingCapacity} ${T.units} — your ${T.group} is at ${Math.round((flockSize / carryingCapacity) * 100)}% capacity`)
         : "Enter your farm size to unlock the carrying capacity check",
       insightColor: landHa && carryingCapacity !== null ? (flockSize > carryingCapacity ? PALETTE.danger : PALETTE.accent) : PALETTE.muted,
       renderInput: () => (
         <Field label="Farm Size" value={landHa ?? ""} onChange={v => setLandHa(v > 0 ? v : null)}
-          suf="ha" hint={carryingCapacity !== null ? `cap. ${carryingCapacity} ewes` : "enter to check"} min={0} max={100000}/>
+          suf="ha" hint={carryingCapacity !== null ? `cap. ${carryingCapacity} ${T.units}` : "enter to check"} min={0} max={100000}/>
       ),
     },
     {
@@ -1052,7 +1526,7 @@ function AdvisorWizard({
       question:"How do you run your operation — extensive veld, supplemented, or intensive?",
       why:"This recalibrates carrying capacity, feed cost benchmarks, and every inefficiency finding. Getting it right changes the entire model calibration for your province.",
       insight: {
-        extensive:     "Extensive: natural veld only — lowest input cost, lowest stocking density. Standard for most SA sheep farms.",
+        extensive:     "Extensive: natural veld only — lowest input cost, lowest stocking density. Standard for most SA farms.",
         semiIntensive: "Semi-intensive: supplemented grazing — balanced input/output, the most common commercial system in SA.",
         intensive:     "Intensive: feedlot or irrigated pasture — highest input cost but maximum stocking. Suits peri-urban or high-value markets.",
       }[productionSystem] || "",
@@ -1078,9 +1552,9 @@ function AdvisorWizard({
       question:"Where do you currently sell your animals?",
       why:"Direct sales earn 15–25% more than auction. That's often the single fastest margin improvement available — no capital needed, no extra labour required.",
       insight: {
-        auction:  `Auction is convenient but the lowest-margin option. Direct relationships typically add R${result ? Math.round(result.totalRevPerEwe * 0.15) : 200}–${result ? Math.round(result.totalRevPerEwe * 0.25) : 350}/ewe over auction prices.`,
+        auction:  `Auction is convenient but the lowest-margin option. Direct relationships typically add R${result ? Math.round(result.totalRevPerEwe * 0.15) : 200}–${result ? Math.round(result.totalRevPerEwe * 0.25) : 350}/${T.unit} over auction prices.`,
         abattoir: "Abattoir: solid commercial baseline. Consider joining a buying group or co-op — they negotiate as a block and consistently earn better rates.",
-        direct:   `Direct: excellent. Building a buyer network takes effort but locks in the best long-term margins. ${result ? `That's ~${ZAR(Math.round(result.totalRevPerEwe * 0.20))}/ewe above auction.` : ""}`,
+        direct:   `Direct: excellent. Building a buyer network takes effort but locks in the best long-term margins. ${result ? `That's ~${ZAR(Math.round(result.totalRevPerEwe * 0.20))}/${T.unit} above auction.` : ""}`,
       }[marketChannel] || "",
       insightColor: marketChannel === "direct" ? PALETTE.accent : marketChannel === "abattoir" ? PALETTE.gold : PALETTE.muted,
       renderInput: () => (
@@ -1102,11 +1576,11 @@ function AdvisorWizard({
     {
       id:"feedSource", icon:"🌾", title:"Feed source",
       question:"Where does most of your feed come from?",
-      why: `Home-grown feed cuts costs 30–45%. For ${flockSize} ewes that's potentially ${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.35))}/yr saved — often the largest single saving on any SA sheep farm.`,
+      why: `Home-grown feed cuts costs 30–45%. For ${flockSize} ${T.units} that's potentially ${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.35))}/yr saved — often the largest single saving on any SA farm.`,
       insight: {
-        purchased: `Purchased feed at ~${ZAR(prov?.feed || 500)}/ewe/yr is the highest-cost option. Even shifting 30% to home-grown saves ~${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.30))}/yr.`,
+        purchased: `Purchased feed at ~${ZAR(prov?.feed || 500)}/${T.unit}/yr is the highest-cost option. Even shifting 30% to home-grown saves ~${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.30))}/yr.`,
         mixed:     `Mixed: a sensible balance. Every additional 10% shift home-grown saves ~${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.10))}/yr.`,
-        homeGrown: "Home-grown: the #1 cost-reduction lever in SA sheep farming. Monitor nutritional quality — deficiencies cost more in vet bills than the feed saving is worth.",
+        homeGrown: `Home-grown: the #1 cost-reduction lever in SA ${T.group} farming. Monitor nutritional quality — deficiencies cost more in vet bills than the feed saving is worth.`,
       }[feedSource] || "",
       insightColor: feedSource === "homeGrown" ? PALETTE.accent : feedSource === "mixed" ? PALETTE.gold : PALETTE.muted,
       renderInput: () => (
@@ -1127,39 +1601,39 @@ function AdvisorWizard({
     },
     {
       id:"feedCost", icon:"💰", title:"Actual feed cost",
-      question:"What do you actually pay for feed — per ewe, per year?",
-      why: `Province default is ${ZAR(prov?.feed || 500)}/ewe/yr. Real costs vary 20–40% depending on drought supplementation, pasture quality, and buying method. Your actual figure makes every savings calculation specific to your farm.`,
+      question:`What do you actually pay for feed — per ${T.unit}, per year?`,
+      why: `Province default is ${ZAR(prov?.feed || 500)}/${T.unit}/yr. Real costs vary 20–40% depending on drought supplementation, pasture quality, and buying method. Your actual figure makes every savings calculation specific to your farm.`,
       insight: feedOverride !== null
         ? (feedOverride < (prov?.feed || 500)
-          ? `✓  ${ZAR(feedOverride)}/ewe — ${ZAR((prov?.feed || 500) - feedOverride)} below benchmark. Saving ${ZAR(Math.round(((prov?.feed || 500) - feedOverride) * flockSize))}/yr vs province average.`
+          ? `✓  ${ZAR(feedOverride)}/${T.unit} — ${ZAR((prov?.feed || 500) - feedOverride)} below benchmark. Saving ${ZAR(Math.round(((prov?.feed || 500) - feedOverride) * flockSize))}/yr vs province average.`
           : feedOverride > (prov?.feed || 500)
-          ? `⚠  ${ZAR(feedOverride)}/ewe — ${ZAR(feedOverride - (prov?.feed || 500))} above benchmark. Investigate bulk-buying or growing your own to close this gap.`
+          ? `⚠  ${ZAR(feedOverride)}/${T.unit} — ${ZAR(feedOverride - (prov?.feed || 500))} above benchmark. Investigate bulk-buying or growing your own to close this gap.`
           : "Feed cost matches the province benchmark exactly.")
-        : `Province default: ${ZAR(prov?.feed || 500)}/ewe/yr. Enter your actual spend to calibrate the model.`,
+        : `Province default: ${ZAR(prov?.feed || 500)}/${T.unit}/yr. Enter your actual spend to calibrate the model.`,
       insightColor: feedOverride !== null
         ? (feedOverride < (prov?.feed || 500) ? PALETTE.accent : feedOverride > (prov?.feed || 500) ? PALETTE.danger : PALETTE.muted)
         : PALETTE.muted,
       renderInput: () => (
-        <Field label="Feed cost / ewe / year" value={feedOverride !== null ? feedOverride : (prov?.feed || 500)}
+        <Field label={`Feed cost / ${T.unit} / year`} value={feedOverride !== null ? feedOverride : (prov?.feed || 500)}
           onChange={v => setFeedOverride(v)} pre="R" hint={`Benchmark: ${ZAR(prov?.feed || 500)}`} min={0} max={10000}/>
       ),
     },
     {
       id:"healthCost", icon:"💊", title:"Vet & medicine costs",
-      question:"What do you spend on vet fees and medicines per ewe per year?",
-      why: `${prov?.name || "SA"} benchmark is ${ZAR(prov?.health || 180)}/ewe/yr. Costs range from ${ZAR(100)} (Northern Cape) to ${ZAR(300)}+ (KZN). Your actual spend reveals whether your protocol is cost-efficient or whether there's a real savings opportunity.`,
+      question:`What do you spend on vet fees and medicines per ${T.unit} per year?`,
+      why: `${prov?.name || "SA"} benchmark is ${ZAR(prov?.health || 180)}/${T.unit}/yr. Costs range from ${ZAR(100)} (Northern Cape) to ${ZAR(300)}+ (KZN). Your actual spend reveals whether your protocol is cost-efficient or whether there's a real savings opportunity.`,
       insight: healthOverride !== null
         ? (healthOverride < (prov?.health || 180)
-          ? `✓  ${ZAR(healthOverride)}/ewe — well managed. ${ZAR(Math.round(((prov?.health || 180) - healthOverride) * flockSize))}/yr below the total benchmark.`
+          ? `✓  ${ZAR(healthOverride)}/${T.unit} — well managed. ${ZAR(Math.round(((prov?.health || 180) - healthOverride) * flockSize))}/yr below the total benchmark.`
           : healthOverride > (prov?.health || 180)
-          ? `⚠  ${ZAR(healthOverride)}/ewe — ${ZAR(healthOverride - (prov?.health || 180))} above benchmark. Review vaccination scheduling, bulk drug purchasing, and whether a production-vet visit reduces reactive treatments.`
+          ? `⚠  ${ZAR(healthOverride)}/${T.unit} — ${ZAR(healthOverride - (prov?.health || 180))} above benchmark. Review vaccination scheduling, bulk drug purchasing, and whether a production-vet visit reduces reactive treatments.`
           : "Vet costs match the province benchmark.")
-        : `Province default: ${ZAR(prov?.health || 180)}/ewe/yr. Enter your actual spend.`,
+        : `Province default: ${ZAR(prov?.health || 180)}/${T.unit}/yr. Enter your actual spend.`,
       insightColor: healthOverride !== null
         ? (healthOverride < (prov?.health || 180) ? PALETTE.accent : healthOverride > (prov?.health || 180) ? PALETTE.danger : PALETTE.muted)
         : PALETTE.muted,
       renderInput: () => (
-        <Field label="Meds + vet / ewe / year" value={healthOverride !== null ? healthOverride : (prov?.health || 180)}
+        <Field label={`Meds + vet / ${T.unit} / year`} value={healthOverride !== null ? healthOverride : (prov?.health || 180)}
           onChange={v => setHealthOverride(v)} pre="R" hint={`Benchmark: ${ZAR(prov?.health || 180)}`} min={0} max={5000}/>
       ),
     },
@@ -1168,7 +1642,7 @@ function AdvisorWizard({
       question:"Do you have any monthly bond repayments or farm finance instalments?",
       why:"Finance costs are the most commonly omitted line in farm models. Leaving out a bond overstates your profit by exactly that amount every month — and produces incorrect Land Bank feasibility figures.",
       insight: bondMonthly > 0
-        ? `Bond of ${ZAR(bondMonthly)}/mo = ${ZAR(bondMonthly * 12)}/yr — that's ${ZAR(Math.round(bondMonthly * 12 / flockSize))}/ewe/yr impact on margin.`
+        ? `Bond of ${ZAR(bondMonthly)}/mo = ${ZAR(bondMonthly * 12)}/yr — that's ${ZAR(Math.round(bondMonthly * 12 / flockSize))}/${T.unit}/yr impact on margin.`
         : "No bond entered. If you carry finance, add it now — or enter 0 to confirm the operation is unencumbered.",
       insightColor: bondMonthly > 0 ? PALETTE.gold : PALETTE.dim,
       renderInput: () => (
@@ -1335,8 +1809,12 @@ function AgrimodelPro() {
   const [report,       setReport]       = useState(null);
   const [provGeo,      setProvGeo]      = useState(null);
   const [geoError,     setGeoError]     = useState(false);
-  const [mapCollapsed, setMapCollapsed] = useState(false);
-  const prov = selected ? PROVINCE_DATA[selected] : null;
+  const [mapCollapsed,       setMapCollapsed]       = useState(false);
+  const [showLivestockMenu,  setShowLivestockMenu]  = useState(false);
+  const [livestockType,      setLivestockType]      = useState("sheep");
+  const mod  = LIVESTOCK_MODULES[livestockType] ?? LIVESTOCK_MODULES.sheep;
+  const T    = mod.terms;
+  const prov = selected ? mod.provinceData[selected] : null;
 
   // Load accurate province boundaries from GADM 4.1 (authoritative SA demarcation data)
   useEffect(() => {
@@ -1352,7 +1830,7 @@ function AgrimodelPro() {
 
   const styleProvince = useCallback((feature) => {
     const id = PROV_NAME_MAP[feature.properties.NAME_1] || "";
-    const pd = PROVINCE_DATA[id];
+    const pd = mod.provinceData[id];
     if (!pd) return { fillOpacity: 0, opacity: 0, weight: 0 };
     return {
       fillColor:   pd.fill,
@@ -1361,11 +1839,11 @@ function AgrimodelPro() {
       weight:      selected === id ? 2.2 : 0.8,
       opacity:     selected === id ? 0.9 : 0.55,
     };
-  }, [selected]);
+  }, [selected, mod]);
 
   const onEachProvince = useCallback((feature, layer) => {
     const id = PROV_NAME_MAP[feature.properties.NAME_1] || "";
-    const pd = PROVINCE_DATA[id];
+    const pd = mod.provinceData[id];
     if (!pd) return;
     layer.on({
       click: () => setSelected(prev => prev === id ? null : id),
@@ -1379,7 +1857,7 @@ function AgrimodelPro() {
       },
     });
     layer.bindTooltip(pd.name, { className: "prov-tip", sticky: true, direction: "center" });
-  }, [selected]);
+  }, [selected, mod]);
 
   const handlePaySuccess = useCallback((buyerName, buyerEmail, code) => {
     const finalCode = code || Math.random().toString(36).slice(2,8).toUpperCase();
@@ -1395,20 +1873,20 @@ function AgrimodelPro() {
     showToast("Access unlocked — building your report…", "success");
     setReportStatus("loading");
     try {
-      const rd = buildReportData(PROVINCE_DATA[selected || "limpopo"], flockSize, labourMode, carcass);
+      const rd = buildReportData(mod.provinceData[selected || "limpopo"], flockSize, labourMode, carcass);
       const r  = generateProReport(rd, buyerName || "Valued Client");
-      setReport({ ...r, buyerEmail });
+      setReport({ ...r, buyerEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch (err) {
       console.error("Report generation failed:", err);
       setReportStatus("error");
     }
-  }, [selected, flockSize, carcass, labourMode]);
+  }, [selected, flockSize, carcass, labourMode, mod]);
 
   // Reset inputs when province changes — use smart defaults per province
   useEffect(() => {
     if (prov && selected) {
-      const def = PROVINCE_DEFAULTS[selected] ?? { system:"extensive", market:"auction", feed:"purchased" };
+      const def = mod.provinceDefaults[selected] ?? { system:"extensive", market:"auction", feed:"purchased" };
       setFlockSize(Math.max(20, (prov.be ?? 50) + 10));
       setLabour(1500);
       setLabourMode("owner");
@@ -1494,14 +1972,14 @@ function AgrimodelPro() {
   const result = useMemo(() => {
     if (!prov) return null;
     const effectiveLabour = labourMode === "owner" ? labour : (prov.hired ?? 5594);
-    return calcFull(prov, carcass, flockSize, effectiveLabour, prov.oh ?? 600, {
+    return mod.calcFn(prov, carcass, flockSize, effectiveLabour, prov.oh ?? 600, {
       bond:           bondMonthly,
       feedOverride:   feedOverride,
       healthOverride: healthOverride,
       fencing:        fencingMonthly,
       misc:           miscMonthly,
     });
-  }, [prov, carcass, flockSize, labour, labourMode, bondMonthly, feedOverride, healthOverride, fencingMonthly, miscMonthly]);
+  }, [prov, carcass, flockSize, labour, labourMode, bondMonthly, feedOverride, healthOverride, fencingMonthly, miscMonthly, mod]);
 
   const auditResult = useMemo(() => {
     if (!result || !prov) return null;
@@ -1513,9 +1991,9 @@ function AgrimodelPro() {
 
   const carryingCapacity = useMemo(() => {
     if (!landHa || !selected) return null;
-    const ewesPerHa = CARRYING_CAPACITY[productionSystem]?.[selected] ?? 3;
-    return Math.floor(landHa * ewesPerHa);
-  }, [landHa, selected, productionSystem]);
+    const unitsPerHa = mod.carryingCapacity[productionSystem]?.[selected] ?? 3;
+    return Math.floor(landHa * unitsPerHa);
+  }, [landHa, selected, productionSystem, mod]);
 
   const isOverstocked = carryingCapacity !== null && flockSize > carryingCapacity;
   const overstockPct  = isOverstocked ? Math.round(((flockSize - carryingCapacity) / carryingCapacity) * 100) : 0;
@@ -1545,12 +2023,12 @@ function AgrimodelPro() {
     try { const s = JSON.parse(localStorage.getItem("agri_session") || "{}"); storedName = s.name || storedName; storedEmail = s.email || ""; } catch {}
     setReportStatus("loading");
     try {
-      const rd = buildReportData(PROVINCE_DATA[selected], flockSize, labourMode, carcass);
+      const rd = buildReportData(mod.provinceData[selected], flockSize, labourMode, carcass);
       const r  = generateProReport(rd, storedName);
-      setReport({ ...r, buyerEmail: storedEmail });
+      setReport({ ...r, buyerEmail: storedEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch { setReportStatus("error"); }
-  }, [selected, flockSize, labourMode, carcass]);
+  }, [selected, flockSize, labourMode, carcass, mod]);
 
   return (
     <>
@@ -1576,10 +2054,11 @@ function AgrimodelPro() {
           productionSystem={productionSystem} setProductionSystem={setProductionSystem}
           marketChannel={marketChannel} setMarketChannel={setMarketChannel}
           feedSource={feedSource} setFeedSource={setFeedSource}
+          terms={T}
           onClose={() => setShowAdvisor(false)}
         />
       )}
-      {reportStatus==="loading" && <ReportLoading provName={prov?.name || "SA"} />}
+      {reportStatus==="loading" && <ReportLoading provName={prov?.name || "SA"} emoji={mod.emoji} />}
       {reportStatus==="ready" && report && <ReportViewer report={report} onClose={()=>setReportStatus(null)} />}
       {reportStatus==="error" && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
@@ -1603,9 +2082,62 @@ function AgrimodelPro() {
 
         {/* ── HEADER ── */}
         <div style={{background:PALETTE.surface,borderBottom:`1px solid ${PALETTE.faint}`,padding:"11px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
-          <div>
-            <span style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:"#f0ece0"}}>🐑 Agrimodel Pro</span>
-            <span className="hdr-sub" style={{fontSize:13,color:PALETTE.dim,letterSpacing:2,textTransform:"uppercase",marginLeft:10}}>SA Breed Recommender + Feasibility</span>
+          <div style={{position:"relative"}}>
+            {/* Livestock selector button */}
+            <button
+              onClick={() => setShowLivestockMenu(m => !m)}
+              style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",padding:0}}
+            >
+              <span style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:"#f0ece0"}}>
+                {mod.emoji} Agrimodel Pro
+              </span>
+              <span style={{fontSize:12,color:PALETTE.dim,marginTop:2}}>▾</span>
+            </button>
+            <span className="hdr-sub" style={{fontSize:13,color:PALETTE.dim,letterSpacing:2,textTransform:"uppercase",marginLeft:0,display:"block",marginTop:1}}>SA Breed Recommender + Feasibility</span>
+
+            {/* Livestock dropdown */}
+            {showLivestockMenu && (
+              <div
+                style={{position:"absolute",top:"100%",left:0,zIndex:5000,marginTop:6,background:PALETTE.card,border:`1px solid ${PALETTE.border}`,borderRadius:12,overflow:"hidden",minWidth:260,boxShadow:"0 8px 32px rgba(0,0,0,.55)"}}
+                onMouseLeave={() => setShowLivestockMenu(false)}
+              >
+                <div style={{padding:"8px 12px 6px",fontSize:11,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.5,borderBottom:`1px solid ${PALETTE.faint}`}}>Select livestock module</div>
+                {LIVESTOCK_TYPES.map(lt => {
+                  const isCurrent = lt.id === livestockType;
+                  return (
+                  <button key={lt.id}
+                    onClick={() => {
+                      setShowLivestockMenu(false);
+                      if (lt.status === "active") {
+                        if (lt.id !== livestockType) {
+                          setLivestockType(lt.id);
+                          setCarcass(LIVESTOCK_MODULES[lt.id]?.carcassDefault ?? 52);
+                          setSelected(null);
+                        }
+                      } else {
+                        showToast(`${lt.label} module coming soon`, "warn");
+                      }
+                    }}
+                    style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:isCurrent?"rgba(122,204,58,.08)":"none",border:"none",cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${PALETTE.faint}22`,transition:"background .12s"}}
+                    onMouseEnter={e => e.currentTarget.style.background = isCurrent ? "rgba(122,204,58,.12)" : PALETTE.surface}
+                    onMouseLeave={e => e.currentTarget.style.background = isCurrent ? "rgba(122,204,58,.08)" : "none"}
+                  >
+                    <span style={{fontSize:20,flexShrink:0}}>{lt.emoji}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:14,color:lt.status==="active"?PALETTE.accent:PALETTE.text,fontWeight:lt.status==="active"?700:400}}>{lt.label}</div>
+                      <div style={{fontSize:12,color:PALETTE.dim}}>{lt.sub}</div>
+                    </div>
+                    {isCurrent
+                      ? <span style={{fontSize:11,padding:"2px 7px",borderRadius:8,background:"rgba(122,204,58,.20)",color:PALETTE.accent,border:`1px solid ${PALETTE.accent}66`,fontWeight:700}}>✓ Active</span>
+                      : lt.status === "active"
+                        ? <span style={{fontSize:11,padding:"2px 7px",borderRadius:8,background:"rgba(122,204,58,.06)",color:PALETTE.accent,border:`1px solid ${PALETTE.accent}33`}}>Switch</span>
+                        : <span style={{fontSize:11,padding:"2px 7px",borderRadius:8,background:PALETTE.surface,color:PALETTE.dim,border:`1px solid ${PALETTE.faint}`}}>Soon</span>
+                    }
+                  </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             {!isPaid && (
@@ -1647,7 +2179,7 @@ function AgrimodelPro() {
           ) : selected ? (
             <span style={{fontSize:14,color:PALETTE.muted,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
               <strong style={{color:PALETTE.accent,fontFamily:"'Playfair Display',serif",marginRight:6}}>{prov?.name}</strong>
-              <span style={{color:PALETTE.dim}}>BE {prov?.be} ewes · {prov?.rainfall} rain · Primary: {prov?.primary?.[0]}</span>
+              <span style={{color:PALETTE.dim}}>BE {prov?.be} {T.units} · {prov?.rainfall} rain · Primary: {prov?.primary?.[0]}</span>
               <span style={{color:PALETTE.dim,marginLeft:8}}>· ESC to clear</span>
             </span>
           ) : (
@@ -1786,9 +2318,9 @@ function AgrimodelPro() {
                   {/* Key stats row */}
                   <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:12}}>
                     {[
-                      {l:"Lambing",   v:`${prov.lambing}%`},
-                      {l:"Slaughter", v:`${prov.liveKg}kg / ${prov.dressing}%`},
-                      {l:"Ewe price", v:ZAR(prov.ewePrice)},
+                      {l:T.rateLabel,     v:`${prov.lambing}%`},
+                      {l:"Slaughter",     v:`${prov.liveKg}kg / ${prov.dressing}%`},
+                      {l:T.priceLabel,    v:ZAR(prov.ewePrice)},
                     ].map((s,i)=>(
                       <div key={i} style={{background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"7px 8px",textAlign:"center"}}>
                         <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,color:PALETTE.accent}}>{s.v}</div>
@@ -1826,10 +2358,10 @@ function AgrimodelPro() {
                   </button>
                   {isPaid && result && (
                     <a href={`https://wa.me/?text=${encodeURIComponent(
-                      `${prov.name} sheep farm analysis (Agrimodel Pro)\n` +
+                      `${prov.name} ${mod.label.toLowerCase()} farm analysis (Agrimodel Pro)\n` +
                       `Breed: ${prov.primary[0]} · ${prov.type}\n` +
-                      `Profit/ewe: R${result.profitPerEwe.toFixed(0)} · ROI: ${(result.roi*100).toFixed(1)}%\n` +
-                      `Breakeven: ${result.breakeven} ewes · Capital: R${Math.round(result.capital).toLocaleString()}\n` +
+                      `Profit/${T.unit}: R${result.profitPerEwe.toFixed(0)} · ROI: ${(result.roi*100).toFixed(1)}%\n` +
+                      `Breakeven: ${result.breakeven} ${T.units} · Capital: R${Math.round(result.capital).toLocaleString()}\n` +
                       `Run your own model at agrimodel.co.za`
                     )}`} target="_blank" rel="noopener noreferrer"
                       style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,width:"100%",padding:"10px",background:"transparent",border:`1px solid rgba(37,211,102,.3)`,borderRadius:9,color:"rgba(37,211,102,.85)",fontSize:15,fontWeight:600,textDecoration:"none",boxSizing:"border-box"}}>
@@ -1843,14 +2375,15 @@ function AgrimodelPro() {
               {activeTab === 1 && (
                 <div className="fade-in">
                   <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>
-                    Breed performance at R{carcass}/kg carcass · default flock size
+                    Breed performance at R{carcass}/kg carcass · default {T.group} size
                   </div>
                   {[...prov.primary.map(n=>({n,primary:true})), ...prov.secondary.map(n=>({n,primary:false}))].map(({n,primary})=>{
-                    const isMeat = !["Merino","SAMM","Dohne Merino","Ile de France"].includes(n);
+                    const isWool = ["Merino","SAMM","Dohne Merino","Ile de France"].includes(n);
+                    const isMeat = !isWool;
                     const isProvBreed = n === prov.breed && result;
                     const roi       = isProvBreed ? result.roi        : (primary ? (isMeat ? 0.12 : 0.07) : 0.04);
                     const profitEwe = isProvBreed ? result.profitPerEwe : (primary ? (isMeat ? 250 : 120) : 60);
-                    const woolEwe   = isProvBreed ? result.woolRevPerEwe : (isMeat ? 0 : 220);
+                    const woolEwe   = isProvBreed ? result.woolRevPerEwe : (isWool ? 220 : 0);
                     const isReal    = !!isProvBreed;
                     return (
                       <div key={n} style={{background:PALETTE.card,border:`1px solid ${primary?PALETTE.faint:"#1a2a1a"}`,borderRadius:10,padding:"12px",marginBottom:8}}>
@@ -1860,13 +2393,13 @@ function AgrimodelPro() {
                             {!primary && <span style={{fontSize:14,color:PALETTE.muted}}>◆ VIABLE</span>}
                             <span style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:"#f0ece0"}}>{n}</span>
                           </div>
-                          <span style={{fontSize:14,color:PALETTE.muted}}>{isMeat?"Meat":"Dual Purpose"}</span>
+                          <span style={{fontSize:14,color:PALETTE.muted}}>{prov.type}</span>
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
                           {[
-                            {l:isReal?"ROI":"Est. ROI",           v:PCT(roi),           c:roi>=0?PALETTE.accent:PALETTE.danger},
-                            {l:isReal?"Profit/Ewe":"Est. Profit",  v:`${SGN(profitEwe)}${ZAR(Math.abs(profitEwe))}`, c:profitEwe>=0?PALETTE.accent:PALETTE.danger},
-                            {l:"Wool/yr",                          v:ZAR(woolEwe),       c:woolEwe>0?PALETTE.gold:PALETTE.dim},
+                            {l:isReal?"ROI":"Est. ROI",                                v:PCT(roi),           c:roi>=0?PALETTE.accent:PALETTE.danger},
+                            {l:isReal?`Profit/${T.unit}`:"Est. Profit",                v:`${SGN(profitEwe)}${ZAR(Math.abs(profitEwe))}`, c:profitEwe>=0?PALETTE.accent:PALETTE.danger},
+                            {l:livestockType==="sheep"?"Wool/yr":"Breed type",         v:livestockType==="sheep"?ZAR(woolEwe):prov.type, c:woolEwe>0?PALETTE.gold:PALETTE.dim},
                           ].map((s,i)=>(
                             <div key={i} style={{background:PALETTE.bg,borderRadius:6,padding:"7px 6px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                               <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:s.c}}>{s.v}</div>
@@ -1876,7 +2409,7 @@ function AgrimodelPro() {
                         </div>
                         <div style={{marginTop:8,fontSize:14,color:PALETTE.dim}}>
                           {isReal
-                            ? `✓ Live model — based on your ${flockSize} ewes at R${carcass}/kg`
+                            ? `✓ Live model — based on your ${flockSize} ${T.units} at R${carcass}/kg`
                             : primary ? `✓ Recommended for ${prov.name}'s conditions` : `◆ Works with good management and infrastructure`}
                         </div>
                       </div>
@@ -1915,14 +2448,14 @@ function AgrimodelPro() {
                         </div>
                         <div style={{fontSize:15,color:PALETTE.muted,marginBottom:16,lineHeight:1.8}}>
                           Unlock to model your farm economics live:<br/>
-                          <span style={{color:PALETTE.dim}}>Profit/ewe · ROI · Payback · Cashflow · Sensitivity · Scale</span>
+                          <span style={{color:PALETTE.dim}}>Profit/{T.unit} · ROI · Payback · Cashflow · Sensitivity · Scale</span>
                         </div>
                         {[
-                          ["Profit / ewe",  result ? `${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}` : "R —"],
+                          [`Profit / ${T.unit}`, result ? `${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}` : "R —"],
                           ["Annual ROI",    result ? PCT(result.roi) : "—"],
                           ["Payback",       result?.payback ? `${result.payback.toFixed(1)} yr` : "— yr"],
                           ["5-yr NPV",      result ? `${SGN(result.npv5)}${ZAR(Math.abs(result.npv5))}` : "R —"],
-                          ["Breakeven",     result ? `${result.breakeven} ewes` : "— ewes"],
+                          ["Breakeven",     result ? `${result.breakeven} ${T.units}` : `— ${T.units}`],
                         ].map(([l,v],i)=>(
                           <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 12px",borderBottom:`1px solid ${PALETTE.faint}`,filter:"blur(4px)",userSelect:"none",pointerEvents:"none"}}>
                             <span style={{fontSize:15,color:PALETTE.muted}}>{l}</span>
@@ -2018,10 +2551,10 @@ function AgrimodelPro() {
                     </button>
 
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                      <Field label="Carcass R/kg" value={carcass} onChange={setCarcass} pre="R" hint="A2 R87 AgriOrbit" min={40} max={250}/>
-                      <Field label="Flock Size" value={flockSize} onChange={setFlockSize} suf="ewes" hint={result.breakeven?`MVO=${result.breakeven}`:`MVO=?`} min={1} max={10000}/>
+                      <Field label={mod.carcassLabel} value={carcass} onChange={setCarcass} pre="R" hint="AgriOrbit benchmark" min={40} max={250}/>
+                      <Field label={`${T.group.charAt(0).toUpperCase()+T.group.slice(1)} Size`} value={flockSize} onChange={setFlockSize} suf={T.units} hint={result.breakeven?`MVO=${result.breakeven}`:`MVO=?`} min={1} max={10000}/>
                       <Field label="Farm Size" value={landHa ?? ""} onChange={v=>setLandHa(v>0?v:null)} suf="ha"
-                        hint={carryingCapacity?`cap. ${carryingCapacity} ewes`:"enter to check"} min={0} max={100000}/>
+                        hint={carryingCapacity?`cap. ${carryingCapacity} ${T.units}`:"enter to check"} min={0} max={100000}/>
                       {labourMode==="owner" && (
                         <Field label="Labour/mo" value={labour} onChange={setLabour} pre="R" hint="Owner R1,500+" min={0} max={50000}/>
                       )}
@@ -2042,15 +2575,15 @@ function AgrimodelPro() {
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                           <Field label="Bond repayment/mo" value={bondMonthly||""} onChange={v=>setBondMonthly(v||0)} pre="R" hint="Finance instalment" min={0} max={500000}/>
                           <Field label="Fencing/infra/mo"  value={fencingMonthly||""} onChange={v=>setFencingMonthly(v||0)} pre="R" hint="Maint + repairs" min={0} max={100000}/>
-                          <Field label="Feed/ewe/yr"        value={feedOverride!==null?feedOverride:prov.feed} onChange={v=>setFeedOverride(v)} pre="R"
+                          <Field label={`Feed/${T.unit}/yr`}     value={feedOverride!==null?feedOverride:prov.feed} onChange={v=>setFeedOverride(v)} pre="R"
                             hint={`Default: ${ZAR(prov.feed)}`} min={0} max={10000}/>
-                          <Field label="Meds+vet/ewe/yr"   value={healthOverride!==null?healthOverride:prov.health} onChange={v=>setHealthOverride(v)} pre="R"
+                          <Field label={`Meds+vet/${T.unit}/yr`} value={healthOverride!==null?healthOverride:prov.health} onChange={v=>setHealthOverride(v)} pre="R"
                             hint={`Default: ${ZAR(prov.health)}`} min={0} max={5000}/>
                           <Field label="Misc/mo"            value={miscMonthly||""} onChange={v=>setMiscMonthly(v||0)} pre="R" hint="Other fixed costs" min={0} max={100000}/>
                         </div>
                         {/* Cost breakdown summary */}
                         <div style={{marginTop:10,background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"8px"}}>
-                          <div style={{fontSize:13,color:PALETTE.dim,marginBottom:6,textTransform:"uppercase",letterSpacing:.7}}>Annual cost breakdown — {flockSize} ewes</div>
+                          <div style={{fontSize:13,color:PALETTE.dim,marginBottom:6,textTransform:"uppercase",letterSpacing:.7}}>Annual cost breakdown — {flockSize} {T.units}</div>
                           {Object.values(result.costBreakdown).filter(c=>c.annual>0).map((c,i)=>(
                             <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:`1px solid ${PALETTE.faint}22`,fontSize:14}}>
                               <span style={{color:PALETTE.muted}}>{c.label}</span>
@@ -2073,14 +2606,14 @@ function AgrimodelPro() {
                         ⚠ OVERSTOCKED — {overstockPct}% above carrying capacity
                       </div>
                       <div style={{fontSize:14,color:"#c07060",lineHeight:1.6}}>
-                        {landHa} ha ({productionSystem}) supports ~{carryingCapacity} ewes. You have {flockSize} ewes — excess {flockSize - carryingCapacity} ewes will degrade veld and reduce long-term viability. Reduce flock or add land.
+                        {landHa} ha ({productionSystem}) supports ~{carryingCapacity} {T.units}. You have {flockSize} {T.units} — excess {flockSize - carryingCapacity} {T.units} will degrade veld and reduce long-term viability. Reduce {T.group} or add land.
                       </div>
                     </div>
                   )}
                   {carryingCapacity !== null && !isOverstocked && (
                     <div style={{background:PALETTE.card,border:`1px solid rgba(130,212,72,.40)`,borderRadius:8,padding:"8px 12px",marginBottom:12}}>
                       <div style={{fontSize:14,color:PALETTE.text}}>
-                        ✓ Stocking rate OK — {landHa} ha carries up to {carryingCapacity} ewes ({productionSystem}) · you are at {Math.round((flockSize/carryingCapacity)*100)}% capacity
+                        ✓ Stocking rate OK — {landHa} ha carries up to {carryingCapacity} {T.units} ({productionSystem}) · you are at {Math.round((flockSize/carryingCapacity)*100)}% capacity
                       </div>
                     </div>
                   )}
@@ -2088,7 +2621,7 @@ function AgrimodelPro() {
                   {/* 3 KPI cards */}
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
                     {[
-                      {l:"Profit/Ewe", v:`${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}`, c:pc, big:true},
+                      {l:`Profit/${T.unit}`, v:`${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}`, c:pc, big:true},
                       {l:"Annual ROI", v:PCT(result.roi), c:pc, big:true},
                       {l:"Payback",    v:result.payback?(result.payback>20?">20 yr":`${result.payback.toFixed(1)} yr`):"∞", c:PALETTE.gold, big:true},
                     ].map((s,i)=>(
@@ -2125,9 +2658,9 @@ function AgrimodelPro() {
                   {/* Revenue + cost summary */}
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"10px",marginBottom:6}}>
                     {[
-                      {l:`Revenue (${flockSize} ewes)`,    v:ZAR(result.flockRev),                       c:PALETTE.accent},
+                      {l:`Revenue (${flockSize} ${T.units})`,    v:ZAR(result.flockRev),                   c:PALETTE.accent},
                       {l:"Total cost",                      v:`−${ZAR(result.totalCostPerEwe*flockSize)}`, c:PALETTE.danger},
-                      {l:"Flock profit/yr",                 v:`${SGN(result.flockProfit)}${ZAR(Math.abs(result.flockProfit))}`, c:pc},
+                      {l:`${T.group.charAt(0).toUpperCase()+T.group.slice(1)} profit/yr`, v:`${SGN(result.flockProfit)}${ZAR(Math.abs(result.flockProfit))}`, c:pc},
                     ].map((row,i)=>(
                       <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:i<2?`1px solid ${PALETTE.faint}22`:"none"}}>
                         <span style={{fontSize:14,color:PALETTE.muted}}>{row.l}</span>
@@ -2154,7 +2687,7 @@ function AgrimodelPro() {
                       <div style={{fontSize:13,color:PALETTE.gold,textTransform:"uppercase",letterSpacing:.8,marginBottom:7}}>Minimum Viable Operation</div>
                       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:7}}>
                         {[
-                          {l:"Start with",     v:`${result.breakeven} ewes`,   c:PALETTE.text},
+                          {l:"Start with",     v:`${result.breakeven} ${T.units}`, c:PALETTE.text},
                           {l:"Capital needed", v:ZAR(result.mvoCapital),        c:PALETTE.gold},
                           {l:"First revenue",  v:"Month 13",                    c:PALETTE.accent},
                         ].map((s,i)=>(
@@ -2165,17 +2698,17 @@ function AgrimodelPro() {
                         ))}
                       </div>
                       {flockSize < result.breakeven
-                        ? <div style={{fontSize:14,color:PALETTE.danger,lineHeight:1.5}}>⚠ {flockSize} ewes is below MVO — increase flock or reduce costs to break even</div>
-                        : <div style={{fontSize:14,color:PALETTE.muted,lineHeight:1.5}}>Strategy: Start at MVO ({result.breakeven} ewes), reinvest year-2 profit to reach {Math.round(result.breakeven * 1.5)} ewes by year 3</div>
+                        ? <div style={{fontSize:14,color:PALETTE.danger,lineHeight:1.5}}>⚠ {flockSize} {T.units} is below MVO — increase {T.group} or reduce costs to break even</div>
+                        : <div style={{fontSize:14,color:PALETTE.muted,lineHeight:1.5}}>Strategy: Start at MVO ({result.breakeven} {T.units}), reinvest year-2 profit to reach {Math.round(result.breakeven * 1.5)} {T.units} by year 3</div>
                       }
                     </div>
                   )}
 
                   {/* Capital structure */}
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"10px",marginBottom:10}}>
-                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8,marginBottom:8}}>Capital structure — {flockSize} ewes</div>
+                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8,marginBottom:8}}>Capital structure — {flockSize} {T.units}</div>
                     {[
-                      {l:`Ewe purchase (${flockSize} × ${ZAR(prov.ewePrice)})`, v:ZAR(result.ewePurchase), pct:result.ewePurchase/result.capital},
+                      {l:`${T.unit.charAt(0).toUpperCase()+T.unit.slice(1)} purchase (${flockSize} × ${ZAR(prov.ewePrice)})`, v:ZAR(result.ewePurchase), pct:result.ewePurchase/result.capital},
                       {l:"12-month working capital buffer",                      v:ZAR(result.workingCapital), pct:result.workingCapital/result.capital},
                     ].map((row,i)=>(
                       <div key={i} style={{marginBottom:7}}>
@@ -2214,19 +2747,19 @@ function AgrimodelPro() {
                       ))}
                     </div>
                     <div style={{fontSize:13,color:PALETTE.dim,marginTop:6,lineHeight:1.5}}>
-                      Bars = monthly profit/loss · Gold line = cumulative balance from Day 0 · Dashed = lamb sale months (13, 25) · Green dot = payback
+                      Bars = monthly profit/loss · Gold line = cumulative balance from Day 0 · Dashed = {T.saleMonthLabel} (13, 25) · Green dot = payback
                     </div>
                   </div>
 
                   {/* Scale preview */}
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"10px",marginBottom:14}}>
-                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8,marginBottom:8}}>Scale — annual profit by flock size</div>
+                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8,marginBottom:8}}>Scale — annual profit by {T.group} size</div>
                     {result.scaleRows.map((row,i)=>{
                       const w = Math.min(Math.max(row.roi*400,0),100);
                       const c = row.profit>=0 ? (row.roi>0.2?PALETTE.accent:PALETTE.gold) : PALETTE.danger;
                       return (
                         <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
-                          <span style={{fontSize:14,color:PALETTE.muted,width:48,textAlign:"right",flexShrink:0}}>{row.n} ewes</span>
+                          <span style={{fontSize:14,color:PALETTE.muted,width:48,textAlign:"right",flexShrink:0}}>{row.n} {T.units}</span>
                           <div style={{flex:1,height:8,background:PALETTE.bg,borderRadius:4,overflow:"hidden"}}>
                             <div style={{width:`${w}%`,height:"100%",background:c,borderRadius:4,transition:"width .4s"}}/>
                           </div>
@@ -2246,7 +2779,7 @@ function AgrimodelPro() {
                         const r200 = result.scaleRows.find(r=>r.n>=200)||result.scaleRows[result.scaleRows.length-1];
                         return [
                           {l:"Full 36-month cashflow table", v:"Month-by-month"},
-                          {l:`Scale ${r200.n} ewes profit`, v:`${SGN(r200.profit)}${ZAR(Math.abs(r200.profit))}`},
+                          {l:`Scale ${r200.n} ${T.units} profit`, v:`${SGN(r200.profit)}${ZAR(Math.abs(r200.profit))}`},
                           {l:"Capital structure", v:ZAR(result.capital)},
                           {l:"Sensitivity (±20% carcass)", v:"9 scenarios"},
                           {l:"5-yr NPV (10% discount)", v:`${SGN(result.npv5)}${ZAR(Math.abs(result.npv5))}`},
@@ -2291,7 +2824,7 @@ function AgrimodelPro() {
                         {ZAR(auditResult.totalAnnualSaving)}<span style={{fontSize:16,color:PALETTE.muted,fontWeight:400}}>/yr</span>
                       </div>
                       <div style={{fontSize:14,color:PALETTE.muted,marginTop:4,lineHeight:1.6}}>
-                        Based on {flockSize} ewes · {productionSystem} system · {marketChannel} market · {feedSource} feed
+                        Based on {flockSize} {T.units} · {productionSystem} system · {marketChannel} market · {feedSource} feed
                       </div>
                     </div>
                   )}
@@ -2387,7 +2920,7 @@ function AgrimodelPro() {
                         </div>
                         <div style={{fontSize:14,color:PALETTE.muted,lineHeight:1.7,marginBottom:8}}>
                           {!landHa && <span>→ Enter your <strong style={{color:PALETTE.accent}}>farm size (ha)</strong> to enable carrying capacity check<br/></span>}
-                          {feedOverride===null && <span>→ Override <strong style={{color:PALETTE.accent}}>Feed cost/ewe</strong> with your actual figure for better accuracy<br/></span>}
+                          {feedOverride===null && <span>→ Override <strong style={{color:PALETTE.accent}}>Feed cost/{T.unit}</strong> with your actual figure for better accuracy<br/></span>}
                           {healthOverride===null && <span>→ Override <strong style={{color:PALETTE.accent}}>Meds + vet cost</strong> to sharpen the veterinary savings calc<br/></span>}
                           <span>→ Try <strong style={{color:PALETTE.accent}}>Direct</strong> market or <strong style={{color:PALETTE.accent}}>Home-grown</strong> feed to see impact on findings</span>
                         </div>
@@ -2435,12 +2968,12 @@ function AgrimodelPro() {
           <div style={{flex:1,overflow:"auto",minHeight:0,padding:"12px 16px 20px",overscrollBehavior:"contain"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.5}}>
-                9 SA Sheep Provinces — tap any to explore
+                9 {mod.labelPlural} Provinces — tap any to explore
               </div>
               <div style={{fontSize:13,color:PALETTE.faint}}>↑ or click map</div>
             </div>
-            {Object.keys(PROVINCE_DATA).map(key=>{
-              const pd = PROVINCE_DATA[key];
+            {Object.keys(mod.provinceData).map(key=>{
+              const pd = mod.provinceData[key];
               const typeColor = pd.type==="Wool"?PALETTE.gold:pd.type==="Dual"?"#5a9adc":PALETTE.accent;
               return (
                 <div key={key} role="button" tabIndex={0} aria-label={`Select ${pd.name} province`}
