@@ -1323,6 +1323,7 @@ function AgrimodelPro() {
   const [report,       setReport]       = useState(null);
   const [provGeo,      setProvGeo]      = useState(null);
   const [geoError,     setGeoError]     = useState(false);
+  const [mapCollapsed, setMapCollapsed] = useState(false);
   const prov = selected ? PROVINCE_DATA[selected] : null;
 
   // Load accurate province boundaries from GADM 4.1 (authoritative SA demarcation data)
@@ -1645,25 +1646,33 @@ function AgrimodelPro() {
         </div>
 
         {/* ── MAP ── */}
-        <div style={{position:"relative",flexShrink:0}}>
-          {!provGeo && !geoError && (
+        <div style={{position:"relative",flexShrink:0,overflow:"hidden"}}>
+          {!mapCollapsed && !provGeo && !geoError && (
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,pointerEvents:"none"}}>
               <span className="map-loading" style={{fontSize:14,color:PALETTE.muted,letterSpacing:1.5,textTransform:"uppercase",background:"rgba(8,15,6,.82)",padding:"5px 14px",borderRadius:20,border:`1px solid ${PALETTE.faint}`}}>
                 ⟳ Loading province boundaries…
               </span>
             </div>
           )}
-          {geoError && (
+          {!mapCollapsed && geoError && (
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,pointerEvents:"none"}}>
               <span style={{fontSize:14,color:PALETTE.danger,letterSpacing:1,background:"rgba(8,15,6,.82)",padding:"5px 12px",borderRadius:20,border:`1px solid rgba(224,92,58,.3)`}}>
                 ⚠ Province boundaries unavailable — use list below
               </span>
             </div>
           )}
+          {/* Collapse toggle — overlaid bottom-centre of map */}
+          {!mapCollapsed && (
+            <button
+              onClick={() => setMapCollapsed(true)}
+              style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",zIndex:1000,background:"rgba(8,15,6,.82)",border:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,borderRadius:16,padding:"4px 14px",fontSize:13,cursor:"pointer",letterSpacing:.5}}>
+              ▲ Hide map
+            </button>
+          )}
           <MapContainer
             bounds={[[-35.5, 16.2], [-21.5, 33.5]]}
             boundsOptions={{padding:[0,0]}}
-            style={{width:"100%", height:selected?"28vh":"50vh", background:"#0a1520", transition:"height .35s cubic-bezier(.4,0,.2,1)"}}
+            style={{width:"100%", height:mapCollapsed?0:(selected?"28vh":"50vh"), background:"#0a1520", transition:"height .35s cubic-bezier(.4,0,.2,1)"}}
             attributionControl={false}
             zoomControl={true}
             scrollWheelZoom={false}
@@ -1684,6 +1693,15 @@ function AgrimodelPro() {
             )}
           </MapContainer>
         </div>
+
+        {/* ── MAP COLLAPSED STRIP ── */}
+        {mapCollapsed && (
+          <button
+            onClick={() => setMapCollapsed(false)}
+            style={{width:"100%",flexShrink:0,background:PALETTE.surface,border:"none",borderBottom:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,padding:"7px 16px",fontSize:13,cursor:"pointer",textAlign:"center",letterSpacing:.5}}>
+            ▼ Show map {selected ? `· ${prov?.name} selected` : "· tap to select province"}
+          </button>
+        )}
 
         {/* ── REGION PANEL ── */}
         {selected && prov && (
