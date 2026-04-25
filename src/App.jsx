@@ -996,6 +996,123 @@ function PayModal({ region, onClose, onSuccess }) {
   );
 }
 
+// ── FREE SUMMARY PDF ──────────────────────────────────────────────────────────
+function printSummaryPDF({ prov, result, T, mod, flockSize, carcass, productionSystem, auditResult }) {
+  if (!prov || !result) return;
+  const fmt  = n => `R ${Math.abs(n).toLocaleString("en-ZA", {minimumFractionDigits:0,maximumFractionDigits:0})}`;
+  const pct  = n => `${(n * 100).toFixed(1)}%`;
+  const sgn  = n => n >= 0 ? "+" : "−";
+  const pc   = result.profitPerEwe >= 0 ? "#1a7a20" : "#c0392b";
+  const today = new Date().toLocaleDateString("en-ZA", {year:"numeric",month:"long",day:"numeric"});
+  const topSaving = auditResult?.findings?.find(f => (f.annualSaving ?? 0) > 0);
+  const unitLabel = T.unit === "hive" ? "kg honey" : "kg carcass";
+
+  const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<title>Agrimodel Pro — Free Summary · ${prov.name}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Mono',monospace;background:#fff;color:#1a1a1a;padding:0;}
+  .page{padding:28px 32px;max-width:700px;margin:0 auto;}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;border-bottom:2px solid #1a1a1a;padding-bottom:12px;}
+  .brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a1a1a;}
+  .brand-sub{font-size:11px;color:#666;margin-top:3px;letter-spacing:2px;text-transform:uppercase;}
+  .hdr-right{text-align:right;font-size:12px;color:#555;line-height:1.6;}
+  .sec{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;margin-top:16px;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+  .kpi{border:1.5px solid #ddd;border-radius:7px;padding:11px 6px;text-align:center;}
+  .kpi-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;}
+  .kpi-lbl{font-size:9px;color:#777;text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+  .info{font-size:12px;color:#444;padding:9px 11px;background:#f6f6f6;border-radius:6px;margin-bottom:14px;line-height:1.7;}
+  .sav{border:1.5px solid #d4901a;border-radius:8px;padding:12px 14px;margin-bottom:14px;background:#fffbf0;}
+  .sav-badge{font-size:10px;color:#a06010;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:5px;}
+  .sav-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#1a1a1a;margin-bottom:3px;}
+  .sav-amt{font-size:14px;color:#1a6a20;font-weight:600;margin-bottom:7px;}
+  .sav-act{font-size:12px;color:#444;line-height:1.65;}
+  .cta{background:#0a0c0a;color:#f0ece0;border-radius:10px;padding:18px 20px;text-align:center;margin-top:6px;}
+  .cta-eyebrow{font-size:10px;color:#d4b55a;text-transform:uppercase;letter-spacing:3px;margin-bottom:7px;}
+  .cta-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;margin-bottom:5px;line-height:1.3;}
+  .cta-price{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:#d4b55a;margin-bottom:8px;}
+  .cta-once{font-size:13px;color:#b8b4a8;font-weight:400;}
+  .cta-feats{font-size:11px;color:#b8b4a8;line-height:2;margin-bottom:11px;}
+  .cta-url{font-size:15px;color:#7acc3a;font-weight:600;letter-spacing:1px;}
+  .footer{margin-top:18px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:10px;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style></head><body>
+<div class="page">
+  <div class="hdr">
+    <div>
+      <div class="brand">Agrimodel Pro</div>
+      <div class="brand-sub">Free Farm Summary</div>
+    </div>
+    <div class="hdr-right">
+      ${mod.emoji} ${T.group.charAt(0).toUpperCase()+T.group.slice(1)} Feasibility<br/>
+      ${prov.name} · ${today}
+    </div>
+  </div>
+
+  <div class="sec">Your operation at a glance</div>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-val" style="color:${pc}">${sgn(result.profitPerEwe)}${fmt(Math.abs(result.profitPerEwe))}</div>
+      <div class="kpi-lbl">Profit / ${T.unit}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:${pc}">${pct(result.roi)}</div>
+      <div class="kpi-lbl">Annual ROI</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:#a07820">${result.payback ? (result.payback > 20 ? ">20 yr" : result.payback.toFixed(1)+" yr") : "∞"}</div>
+      <div class="kpi-lbl">Payback</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:#a07820">${fmt(result.capital)}</div>
+      <div class="kpi-lbl">Capital req.</div>
+    </div>
+  </div>
+
+  <div class="info">
+    <strong>${flockSize} ${T.units}</strong> &nbsp;·&nbsp; ${prov.name} &nbsp;·&nbsp; ${productionSystem} system
+    &nbsp;·&nbsp; Primary: <strong>${prov.breed}</strong>
+    &nbsp;·&nbsp; R${carcass} / ${unitLabel}
+    ${result.breakeven ? `&nbsp;·&nbsp; Breakeven: <strong>${result.breakeven} ${T.units}</strong>` : ""}
+  </div>
+
+  ${topSaving ? `
+  <div class="sav">
+    <div class="sav-badge">⚡ Top savings opportunity identified</div>
+    <div class="sav-title">${topSaving.component}</div>
+    <div class="sav-amt">+${fmt(topSaving.annualSaving)} / yr recoverable</div>
+    <div class="sav-act">${topSaving.action}</div>
+  </div>` : ""}
+
+  <div class="cta">
+    <div class="cta-eyebrow">Agrimodel Pro · Full Report</div>
+    <div class="cta-title">9-Section Bankable AI<br/>Feasibility Report</div>
+    <div class="cta-price">R&nbsp;147.95 <span class="cta-once">once-off · ready in 30s</span></div>
+    <div class="cta-feats">
+      ✓ Complete 36-month cashflow projection<br/>
+      ✓ Capital structure + bank-grade sensitivity analysis<br/>
+      ✓ Risk assessment · market outlook · breed ranking<br/>
+      ✓ Printable — Land Bank &amp; investor ready
+    </div>
+    <div class="cta-url">agrimodel.co.za</div>
+  </div>
+
+  <div class="footer">
+    Generated by Agrimodel Pro · agrimodel.co.za · Free summary — indicative only. Full model detail in the paid report.
+  </div>
+</div>
+</body></html>`;
+
+  const w = window.open("", "_blank", "width=794,height=1123");
+  if (!w) { alert("Allow pop-ups to export the summary PDF."); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => { try { w.focus(); w.print(); } catch {} }, 700);
+}
+
 // ── FIELD INPUT ───────────────────────────────────────────────────────────────
 const Field = memo(function Field({ label, value, onChange, pre, suf, hint, min=0, max=999999 }) {
   const [raw, setRaw]     = useState(String(value));
@@ -1660,7 +1777,9 @@ function AdvisorWizard({
 
   const STEPS = [
     {
-      id:"flock", icon:"🐑", title:"Flock size",
+      id:"flock",
+      icon: T.unit==="hive" ? "🐝" : T.unit==="cow" ? "🐄" : "🐑",
+      title: T.group.charAt(0).toUpperCase()+T.group.slice(1)+" size",
       question:`How many ${T.units} are you planning to run on your ${prov?.name || ""} farm?`,
       why: result?.breakeven
         ? `Your breakeven is ${result.breakeven} ${T.units}. Every ${T.unit} above that earns pure margin — every ${T.unit} below subsidises fixed costs from your own pocket.`
@@ -2095,6 +2214,12 @@ function AgrimodelPro() {
     }
   }, [selected, flockSize, carcass, labourMode, mod]);
 
+  // Reset carcass price and flock size when livestock type changes
+  useEffect(() => {
+    setCarcass(mod.carcassDefault);
+    setFlockSize(mod.id === "cattle" ? 20 : 50);
+  }, [livestockType]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Reset inputs when province changes — use smart defaults per province
   useEffect(() => {
     if (prov && selected) {
@@ -2196,7 +2321,7 @@ function AgrimodelPro() {
   const auditResult = useMemo(() => {
     if (!result || !prov) return null;
     return runInefficiencyAudit(
-      { productionSystem, marketChannel, feedSource, flockSize },
+      { productionSystem, marketChannel, feedSource, flockSize, unit: T.unit },
       { healthCost: result.healthCost, feedCost: result.feedCost, flockRev: result.flockRev }
     );
   }, [result, prov, productionSystem, marketChannel, feedSource, flockSize]);
@@ -2591,31 +2716,43 @@ function AgrimodelPro() {
               {activeTab === 1 && (
                 <div className="fade-in">
                   <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>
-                    {T.unit === "hive" ? `Honey types at R${carcass}/kg · default ${T.group} size` : `Breed performance at R${carcass}/kg carcass · default ${T.group} size`}
+                    {T.unit === "hive"
+                      ? `Honey types & by-products · ${prov.name} · R${carcass}/kg honey`
+                      : `Breed performance at R${carcass}/kg carcass · default ${T.group} size`}
                   </div>
                   {[...prov.primary.map(n=>({n,primary:true})), ...prov.secondary.map(n=>({n,primary:false}))].map(({n,primary})=>{
-                    const isWool = ["Merino","SAMM","Dohne Merino","Ile de France"].includes(n);
-                    const isMeat = !isWool;
+                    const isWool      = livestockType === "sheep" && ["Merino","SAMM","Dohne Merino","Ile de France"].includes(n);
                     const isProvBreed = n === prov.breed && result;
-                    const roi       = isProvBreed ? result.roi        : (primary ? (isMeat ? 0.12 : 0.07) : 0.04);
-                    const profitEwe = isProvBreed ? result.profitPerEwe : (primary ? (isMeat ? 250 : 120) : 60);
-                    const woolEwe   = isProvBreed ? result.woolRevPerEwe : (isWool ? 220 : 0);
-                    const isReal    = !!isProvBreed;
+                    // Scale estimated performance numbers per livestock type
+                    const estRoiPri  = T.unit==="hive" ? 0.18 : T.unit==="cow" ? 0.09 : (isWool ? 0.07 : 0.12);
+                    const estRoiSec  = T.unit==="hive" ? 0.10 : T.unit==="cow" ? 0.05 : 0.04;
+                    const estProfPri = T.unit==="hive" ? 420  : T.unit==="cow" ? 2800 : (isWool ? 120 : 250);
+                    const estProfSec = T.unit==="hive" ? 200  : T.unit==="cow" ? 1000 : 60;
+                    const roi        = isProvBreed ? result.roi        : (primary ? estRoiPri : estRoiSec);
+                    const profitEwe  = isProvBreed ? result.profitPerEwe : (primary ? estProfPri : estProfSec);
+                    const woolEwe    = isProvBreed ? result.woolRevPerEwe : (isWool ? 220 : 0);
+                    const isReal     = !!isProvBreed;
+                    // 3rd stat: wool income (sheep), breed category (cattle), honey style (bees)
+                    const stat3 = T.unit === "hive"
+                      ? { l:"Honey style",  v:primary ? "Premium" : "Specialty", c:PALETTE.gold }
+                      : T.unit === "cow"
+                      ? { l:"Category",     v:prov.type,                          c:PALETTE.gold }
+                      : { l:"Wool/yr",      v:ZAR(woolEwe), c:woolEwe>0?PALETTE.gold:PALETTE.dim };
                     return (
                       <div key={n} style={{background:PALETTE.card,border:`1px solid ${primary?PALETTE.faint:"#1a2a1a"}`,borderRadius:10,padding:"12px",marginBottom:8}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                           <div style={{display:"flex",alignItems:"center",gap:8}}>
-                            {primary && <span style={{fontSize:14,color:PALETTE.accent}}>★ PRIMARY</span>}
-                            {!primary && <span style={{fontSize:14,color:PALETTE.muted}}>◆ VIABLE</span>}
+                            {primary && <span style={{fontSize:14,color:PALETTE.accent}}>{T.unit==="hive" ? "★ MAIN CROP" : "★ PRIMARY"}</span>}
+                            {!primary && <span style={{fontSize:14,color:PALETTE.muted}}>{T.unit==="hive" ? "◆ BY-PRODUCT" : "◆ VIABLE"}</span>}
                             <span style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:"#f0ece0"}}>{n}</span>
                           </div>
                           <span style={{fontSize:14,color:PALETTE.muted}}>{prov.type}</span>
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
                           {[
-                            {l:isReal?"ROI":"Est. ROI",                                v:PCT(roi),           c:roi>=0?PALETTE.accent:PALETTE.danger},
-                            {l:isReal?`Profit/${T.unit}`:"Est. Profit",                v:`${SGN(profitEwe)}${ZAR(Math.abs(profitEwe))}`, c:profitEwe>=0?PALETTE.accent:PALETTE.danger},
-                            {l:livestockType==="sheep"?"Wool/yr":"Breed type",         v:livestockType==="sheep"?ZAR(woolEwe):prov.type, c:woolEwe>0?PALETTE.gold:PALETTE.dim},
+                            {l:isReal?"ROI":"Est. ROI",                 v:PCT(roi),                                        c:roi>=0?PALETTE.accent:PALETTE.danger},
+                            {l:isReal?`Profit/${T.unit}`:"Est. Profit", v:`${SGN(profitEwe)}${ZAR(Math.abs(profitEwe))}`,  c:profitEwe>=0?PALETTE.accent:PALETTE.danger},
+                            stat3,
                           ].map((s,i)=>(
                             <div key={i} style={{background:PALETTE.bg,borderRadius:6,padding:"7px 6px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                               <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:s.c}}>{s.v}</div>
@@ -2626,24 +2763,30 @@ function AgrimodelPro() {
                         <div style={{marginTop:8,fontSize:14,color:PALETTE.dim}}>
                           {isReal
                             ? `✓ Live model — based on your ${flockSize} ${T.units} at R${carcass}/kg`
-                            : primary ? `✓ Recommended for ${prov.name}'s conditions` : `◆ Works with good management and infrastructure`}
+                            : primary
+                              ? (T.unit==="hive" ? `✓ Recommended honey crop for ${prov.name}'s conditions` : `✓ Recommended for ${prov.name}'s conditions`)
+                              : (T.unit==="hive" ? `◆ Additional revenue stream for this region` : `◆ Works with good management and infrastructure`)}
                         </div>
                       </div>
                     );
                   })}
                   {prov.avoid.length > 0 && (
                     <div style={{background:PALETTE.dangerBg,border:"1px solid rgba(224,92,58,.2)",borderRadius:10,padding:"12px",marginBottom:8}}>
-                      <div style={{fontSize:14,color:PALETTE.danger,marginBottom:6}}>⚠ NOT RECOMMENDED</div>
+                      <div style={{fontSize:14,color:PALETTE.danger,marginBottom:6}}>
+                        {T.unit==="hive" ? "⚠ PLACEMENT TO AVOID" : "⚠ NOT RECOMMENDED"}
+                      </div>
                       {prov.avoid.map(n=>(
-                        <div key={n} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid rgba(224,92,58,.1)`}}>
-                          <span style={{fontSize:16,color:"#c05a4a"}}>{n}</span>
-                          <span style={{fontSize:14,color:"#804040"}}>Poorly adapted</span>
+                        <div key={n} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"5px 0",borderBottom:`1px solid rgba(224,92,58,.1)`,gap:8}}>
+                          <span style={{fontSize:T.unit==="hive"?13:16,color:"#c05a4a",lineHeight:1.5}}>{T.unit==="hive" ? `✗ ${n}` : n}</span>
+                          {T.unit!=="hive" && <span style={{fontSize:14,color:"#804040",flexShrink:0}}>Poorly adapted</span>}
                         </div>
                       ))}
                     </div>
                   )}
                   <div style={{fontSize:14,color:PALETTE.dim,textAlign:"center",marginTop:8,lineHeight:1.6}}>
-                    Full breed comparison table is in the PDF report →
+                    {T.unit==="hive"
+                      ? "Full honey variety analysis and market pricing in the PDF report →"
+                      : "Full breed comparison table is in the PDF report →"}
                   </div>
                 </div>
               )}
@@ -2823,6 +2966,12 @@ function AgrimodelPro() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Free summary PDF export */}
+                  <button onClick={() => printSummaryPDF({prov, result, T, mod, flockSize, carcass, productionSystem, auditResult})}
+                    style={{width:"100%",padding:"10px",background:"transparent",border:`1px solid ${PALETTE.borderHover}`,borderRadius:9,color:PALETTE.accent,fontSize:14,fontWeight:600,cursor:"pointer",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:7,letterSpacing:.3}}>
+                    📄 Export Free 1-Page Summary PDF
+                  </button>
 
                   {/* Profitability status banner */}
                   {(() => {
@@ -3091,6 +3240,12 @@ function AgrimodelPro() {
                         </div>
                       </div>
 
+                      {/* Free summary export */}
+                      <button onClick={() => printSummaryPDF({prov, result, T, mod, flockSize, carcass, productionSystem, auditResult})}
+                        style={{width:"100%",padding:"10px",background:"transparent",border:`1px solid ${PALETTE.borderHover}`,borderRadius:8,color:PALETTE.accent,fontSize:14,fontWeight:600,cursor:"pointer",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>
+                        📄 Export Free 1-Page Summary PDF
+                      </button>
+
                       <div style={{display:"flex",gap:8,marginBottom:10}}>
                         <button onClick={()=>window.print()}
                           style={{flex:1,padding:"10px",background:"transparent",border:`1px solid ${PALETTE.faint}`,borderRadius:8,color:PALETTE.muted,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
@@ -3106,7 +3261,7 @@ function AgrimodelPro() {
 
                       <button className="glow-btn" onClick={()=>setShowPay(true)}
                         style={{width:"100%",padding:"12px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.3)`}}>
-                        Get AI Feasibility Report →
+                        Get Full AI Feasibility Report — R 147.95 →
                       </button>
                     </div>
 
