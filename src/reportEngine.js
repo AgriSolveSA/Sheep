@@ -157,12 +157,40 @@ export function buildReportData(r, flock, lm, carcass) {
   };
 }
 
+// ── TERM SUBSTITUTION ─────────────────────────────────────────────────────────
+// Replaces sheep-specific terms with the correct livestock terminology.
+function substituteTerms(text, terms) {
+  if (!terms || terms.unit === "ewe") return text; // sheep = no change needed
+  const U  = terms.unit;    // e.g. "cow" / "hive"
+  const Us = terms.units;   // e.g. "cows" / "hives"
+  const Yg = terms.young;   // e.g. "calf" / "nuc"
+  const Ys = terms.youngs;  // e.g. "calves" / "nucs"
+  const G  = terms.group;   // e.g. "herd" / "apiary"
+  const RL = terms.rateLabel; // e.g. "Calving" / "Colony expansion"
+  return text
+    .replace(/\bewes\b/g,   Us).replace(/\bEwes\b/g,   Us.charAt(0).toUpperCase()+Us.slice(1))
+    .replace(/\bewe\b/g,    U ).replace(/\bEwe\b/g,    U.charAt(0).toUpperCase()+U.slice(1))
+    .replace(/\blambs\b/g,  Ys).replace(/\bLambs\b/g,  Ys.charAt(0).toUpperCase()+Ys.slice(1))
+    .replace(/\blamb\b/g,   Yg).replace(/\bLamb\b/g,   Yg.charAt(0).toUpperCase()+Yg.slice(1))
+    .replace(/\bflocks\b/g, G+"s").replace(/\bFlock\b/g, G.charAt(0).toUpperCase()+G.slice(1))
+    .replace(/\bflock\b/g,  G )
+    .replace(/\bLambing\b/g, RL).replace(/\blambing\b/g, RL.toLowerCase())
+    .replace(/\bsheep farming\b/gi, terms.unit === "hive" ? "beekeeping" : "cattle farming")
+    .replace(/\bsheep\b/gi, terms.unit === "hive" ? "bees" : "cattle");
+}
+
 // ── IN-HOUSE PRO REPORT ENGINE ────────────────────────────────────────────────
 // Full 9-section feasibility report generated deterministically from model data.
 // No API call, no per-report cost, instant generation.
-export function generateProReport(reportData, buyerName) {
+export function generateProReport(reportData, buyerName, terms) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
           scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc } = reportData;
+
+  const T = terms ?? { unit:"ewe", units:"ewes", group:"flock", young:"lamb", youngs:"lambs", rateLabel:"Lambing" };
+  const U  = T.unit;
+  const Us = T.units;
+  const G  = T.group;
+  const Ys = T.youngs;
 
   const lmNote = lm === "owner"
     ? "owner-operated (notional R1,500/mo — BCEA 2024 hired benchmark R5,594/mo for reference)"
@@ -173,12 +201,15 @@ export function generateProReport(reportData, buyerName) {
   const scaleVi = scaleRows.find(rw => rw.ok);
 
   const viabilityVerdict = pp > 0
-    ? `VIABLE — this ${flock}-ewe ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/ewe/year net (${PCT(pp / r.ewePrice)} ROI on stock capital).`
-    : `MARGINAL — at ${flock} ewes, this operation falls below the ${be ?? "?"}-ewe breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered by the current flock. Increasing to at least ${be ?? flock + 20} ewes is the single most critical action before committing capital.`;
+    ? `VIABLE — this ${flock}-${U} ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/${U}/year net (${PCT(pp / r.ewePrice)} ROI on stock capital).`
+    : `MARGINAL — at ${flock} ${Us}, this operation falls below the ${be ?? "?"}-${U} breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered by the current ${G}. Increasing to at least ${be ?? flock + 20} ${Us} is the single most critical action before committing capital.`;
 
   const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
 
-  const ccGuide = PROV_CC[r.name] || "4–8 ha/ewe depending on rainfall zone and grazing management — obtain a professional carrying-capacity assessment before stocking";
+  const stockDensity = r.sheepDensity || r.cattleDensity || r.beeDensity || "Medium";
+  const stockDensityLabel = r.cattleDensity ? "Commercial cattle density" : r.beeDensity ? "Apiary density" : "Commercial stock density";
+
+  const ccGuide = PROV_CC[r.name] || `4–8 ha/${U} depending on rainfall zone and grazing management — obtain a professional carrying-capacity assessment before stocking`;
 
   const breedSource = (BREED_SOURCES[r.breed] || BREED_SOURCES["_default"])
     .replace(/\$\{r => ZAR\(r\.wool\)\}/g, ZAR(r.wool));
@@ -189,16 +220,16 @@ export function generateProReport(reportData, buyerName) {
 
   const scaleStr = scaleRows
     .filter((_, i) => i % 2 === 0)
-    .map(rw => `${rw.n} ewes: profit/ewe ${ZAR(rw.pp)} · flock profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.15 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
+    .map(rw => `${rw.n} ${Us}: profit/${U} ${ZAR(rw.pp)} · ${G} profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.15 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
     .join("\n");
 
   const sensTable = sensRows
     .filter(s => [-20, -10, 0, 10, 20].includes(s.pct))
-    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/ewe ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} ewes`)
+    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/${U} ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} ${Us}`)
     .join("\n");
 
-  const primaryIncomeEwes = vm > 0 ? Math.round((fa + 180000) / vm) : "N/A";
-  const primeParityEwes   = vm > r.ewePrice * 0.115 ? Math.round(fa / (vm - r.ewePrice * 0.115)) : "N/A";
+  const primaryIncomeUnits = vm > 0 ? Math.round((fa + 180000) / vm) : "N/A";
+  const primeParityUnits   = vm > r.ewePrice * 0.115 ? Math.round(fa / (vm - r.ewePrice * 0.115)) : "N/A";
 
   const TITLES = [
     "Executive Summary",
@@ -232,7 +263,7 @@ Recommended immediate action: ${be && flock < be ? `Increase flock size to at le
     // ── 2. REGIONAL ANALYSIS ────────────────────────────────────────────────
     `${r.name} — ${r.climate}.
 
-Climate and production environment: Rainfall ${r.climate.match(/\d+[–\-]\d+mm/)?.[0] ?? "variable"} · Season: ${r.season ?? "summer"} rainfall · Frost: ${r.frost} · Parasite pressure: ${r.parasites} · Drought frequency: ${r.drought} · Commercial sheep density: ${r.sheepDensity}.
+Climate and production environment: Rainfall ${r.climate.match(/\d+[–\-]\d+mm/)?.[0] ?? "variable"} · Season: ${r.season ?? "summer"} rainfall · Frost: ${r.frost} · Parasite pressure: ${r.parasites} · Drought frequency: ${r.drought} · ${stockDensityLabel}: ${stockDensity}.
 
 Carrying capacity: ${ccGuide}. This figure is a district average — actual capacity on your farm depends on veld type, water point distribution, and seasonal rainfall variability. A professional veld assessment (consult ARC-Range & Forage Institute at arc.agric.za or a local agricultural advisor) before stocking avoids the most common error in ${r.name} sheep farming: overstocking in a good rainfall year and being trapped when the next drought arrives.
 
@@ -315,9 +346,9 @@ ${scaleVi ? `First viable scale: ${scaleVi.n} ewes — profit ${ZAR(scaleVi.fp)}
 
 Your current position: ${flock} ewes · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} ewes above breakeven (${PCT((flock - (be ?? 0)) / flock)} safety buffer)` : `${(be ?? flock) - flock} ewes below breakeven — fixed costs cannot be covered until flock reaches ${be ?? "?"}`}.
 
-At what scale does this become a primary income? ${primaryIncomeEwes === "N/A" ? "Not achievable at current variable margin — review input costs." : `${primaryIncomeEwes} ewes generate approximately R180,000/year net — a minimum rural household income.`} At ${vm > 0 ? Math.round((fa + 360000) / vm) : "N/A"} ewes, the operation produces R360,000/year.
+At what scale does this become a primary income? ${primaryIncomeUnits === "N/A" ? "Not achievable at current variable margin — review input costs." : `${primaryIncomeUnits} ${Us} generate approximately R180,000/year net — a minimum rural household income.`} At ${vm > 0 ? Math.round((fa + 360000) / vm) : "N/A"} ${Us}, the operation produces R360,000/year.
 
-At what scale does it beat money in the bank (prime 11.5%)? ${primeParityEwes === "N/A" ? "ROI cannot reach prime at current variable margin — the cost structure requires attention." : `${primeParityEwes} ewes — below this, the same capital invested at prime earns more than the farming operation.`}
+At what scale does it beat money in the bank (prime 11.5%)? ${primeParityUnits === "N/A" ? "ROI cannot reach prime at current variable margin — the cost structure requires attention." : `${primeParityUnits} ${Us} — below this, the same capital invested at prime earns more than the farming operation.`}
 
 The most important reinvestment decision in Year 3: retain the best 20% of ewe lambs instead of selling them. This grows your flock by approximately ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.2)} ewes/year at zero purchase cost — compounding the profit margin with each successive cycle without additional debt.
 
@@ -416,9 +447,10 @@ FIVE ACTIONS THIS WEEK (priority order):
 
   ];
 
+  const finalBodies = bodies.map(b => substituteTerms(b, T));
   return {
-    sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
-    raw: bodies.join("\n\n"),
+    sections: TITLES.map((title, i) => ({ title, body: finalBodies[i] ?? "" })),
+    raw: finalBodies.join("\n\n"),
     reportData, buyerName,
     generatedAt: new Date().toISOString(),
     isSandbox: false,

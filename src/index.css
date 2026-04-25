@@ -18,8 +18,8 @@
   --accent:     #7acc3a;   /* lime green  — positive numbers, active states */
   --gold:       #d4b55a;   /* amber gold  — capital, payback                */
   --text:       #f0ece0;   /* warm white  — headings, primary values        */
-  --muted:      #aca89c;   /* warm gray   — labels, secondary text          */
-  --dim:        #6e6a60;   /* medium gray — captions, hints, footnotes      */
+  --muted:      #b8b4a8;   /* warm gray   — labels, secondary text          */
+  --dim:        #9a9590;   /* medium gray — captions, hints, footnotes      */
   --danger:     #e06848;   /* orange-red  — losses, warnings                */
 }
 

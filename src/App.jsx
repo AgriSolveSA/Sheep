@@ -354,6 +354,166 @@ const CATTLE_PROVINCE_DEFAULTS = {
   northern_cape: { system:"extensive",     market:"auction",   feed:"purchased" },
 };
 
+// ─── APIARY / BEES MODULE ──────────────────────────────────────────────────────
+// lambing:118, survival:100, dressing:100 → lambsPerEwe ≈ 1.0
+// liveKg = honey yield per hive/yr (kg), carcass = honey price R/kg
+// wool = secondary income (beeswax + pollen) per hive/yr in R
+const BEE_PROVINCE_DATA = {
+  limpopo: {
+    name:"Limpopo", short:"Limpopo",
+    fill:"#d4a500", stroke:"#9a7800", hoverFill:"#e8b800",
+    climate:"Bushveld · 400–600mm · Hot summers · Diverse flora",
+    rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low",
+    parasites:"Medium (Varroa)", drought:"Moderate", hiveDensity:"Medium",
+    primary:["Bushveld honey","Mopane honey"],
+    secondary:["Beeswax","Pollen"],
+    avoid:["Sites near intensive pesticide use","High-density urban placement"],
+    why:"Limpopo's diverse bushveld flora — mopane, acacia, mixed veld — produces excellent aromatic honey. Spring (Aug–Oct) and autumn (Mar–May) are peak forage periods. Mobile apiaries moving between veld sites is the commercial standard. Citrus orchards near Tzaneen offer premium pollination income of R600–900/hive/visit.",
+    tip:"Vaalwater and Mokopane areas: excellent mixed bushveld forage. Negotiate citrus pollination contracts in Tzaneen for Oct–Nov — this income can match 3 months of honey production.",
+    breed:"Bushveld honey", type:"Honey", market:"Joburg honey packers · Pretoria bulk buyers · local markets",
+    rep:20, oh:500, labour:1500, hired:5594, woolMonth:4,
+    lambing:118, survival:100, liveKg:25, dressing:100, wool:80, feed:120, health:150, ewePrice:2800, be:32,
+  },
+  north_west: {
+    name:"North West", short:"N. West",
+    fill:"#c89000", stroke:"#8a6000", hoverFill:"#dca400",
+    climate:"Semi-arid Bushveld · 300–500mm · Hot and dry",
+    rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low",
+    parasites:"Low–medium", drought:"High", hiveDensity:"Low",
+    primary:["Acacia honey","Bushveld honey"],
+    secondary:["Beeswax"],
+    avoid:["Sites near intensive crop spraying","Extended drought areas without water"],
+    why:"North West has good acacia and mixed bushveld forage but drought risk is significant — hive losses in dry years can reach 40–60% without supplemental feeding. Marico and Zeerust have better water access. Sunflower farms near Lichtenburg offer excellent Aug–Sep forage.",
+    tip:"Position hives near reliable water — bees won't forage effectively more than 3km from water. Negotiate sunflower access near Lichtenburg for the August–September flush.",
+    breed:"Acacia honey", type:"Honey", market:"Vryburg bulk buyers · Gauteng packers",
+    rep:25, oh:500, labour:1500, hired:5594, woolMonth:3,
+    lambing:118, survival:100, liveKg:20, dressing:100, wool:60, feed:150, health:150, ewePrice:2600, be:40,
+  },
+  gauteng: {
+    name:"Gauteng", short:"Gauteng",
+    fill:"#e8b400", stroke:"#a07800", hoverFill:"#f0c600",
+    climate:"Highveld · 700mm · Year-round urban forage · Moderate",
+    rainfall:"700mm", season:"Summer", frost:"Moderate", humidity:"Medium",
+    parasites:"Medium", drought:"Low", hiveDensity:"Medium–high",
+    primary:["Mixed urban honey","Highveld honey"],
+    secondary:["Beeswax","Pollination services"],
+    avoid:["Industrial areas","Dense residential without council permission","Heavy pesticide zones"],
+    why:"Gauteng's year-round garden and agricultural fringe flora provides reliable forage. Urban honey is increasingly premium-priced. The biggest opportunity is pollination services to highveld fruit and vegetable farmers — R700–1,000/hive/visit.",
+    tip:"Farm the agricultural fringe — Walkerville, Muldersdrift, Roslyn. Direct retail at farmers markets (R120–160/kg) pays back significantly faster than bulk supply to packers.",
+    breed:"Mixed highveld honey", type:"Honey + Pollination", market:"Joburg farmers markets · direct retail · highveld farms",
+    rep:20, oh:600, labour:1500, hired:5594, woolMonth:3,
+    lambing:118, survival:100, liveKg:22, dressing:100, wool:100, feed:150, health:160, ewePrice:3200, be:38,
+  },
+  mpumalanga: {
+    name:"Mpumalanga", short:"Mpuma-\nlanga",
+    fill:"#d46800", stroke:"#8a4200", hoverFill:"#e87c00",
+    climate:"Highveld + Lowveld · 600–800mm · Excellent forage diversity",
+    rainfall:"600–800mm", season:"Summer", frost:"Moderate highland", humidity:"High lowveld",
+    parasites:"Medium", drought:"Low", hiveDensity:"High",
+    primary:["Citrus honey","Lowveld bush honey"],
+    secondary:["Beeswax","Pollination services"],
+    avoid:["Citrus blocks during heavy spray periods","Macadamia orchards mid-season"],
+    why:"Mpumalanga is one of SA's best beekeeping provinces. The lowveld citrus belt (Nelspruit to Tzaneen) is SA's premier pollination market — one placement contract pays R700–1,000/hive. Eucalyptus plantations produce reliable base honey. The highveld adds diverse summer flora.",
+    tip:"Hazyview to Nelspruit: citrus pollination goldmine. Negotiate multi-season contracts with citrus farmers before October. One week on citrus earns more than 3 months on natural veld.",
+    breed:"Citrus honey", type:"Honey + Pollination", market:"Nelspruit honey buyers · Joburg packers · direct retail",
+    rep:20, oh:550, labour:1500, hired:5594, woolMonth:4,
+    lambing:118, survival:100, liveKg:30, dressing:100, wool:120, feed:130, health:160, ewePrice:2800, be:28,
+  },
+  free_state: {
+    name:"Free State", short:"Free State",
+    fill:"#c88000", stroke:"#885200", hoverFill:"#dc9400",
+    climate:"Grassland · 400–600mm · Cold winters · Hard frost",
+    rainfall:"400–600mm", season:"Summer", frost:"Heavy", humidity:"Low–medium",
+    parasites:"Low", drought:"Moderate", hiveDensity:"Low",
+    primary:["Canola honey","Sunflower honey"],
+    secondary:["Beeswax","Mixed grassland honey"],
+    avoid:["Winter placement without feeding (colonies starve)","Weed-sprayed monocultures"],
+    why:"Cold winters force long breaks — colonies need supplemental feeding June–August. The upside: canola fields (Aug–Sep) and sunflower (Jan–Feb) produce excellent single-source honey at industrial scale. Large sunflower producers actively seek hive placements at R400–600/hive.",
+    tip:"Source canola contracts before August — fields are allocated early. One good canola flush can produce 30+ kg per hive in 4 weeks. Overwinter hives in insulated boxes with sugar syrup feeding.",
+    breed:"Canola honey", type:"Honey", market:"Bloemfontein buyers · bulk export via Joburg · co-ops",
+    rep:25, oh:500, labour:1500, hired:5594, woolMonth:9,
+    lambing:118, survival:100, liveKg:22, dressing:100, wool:60, feed:200, health:150, ewePrice:2400, be:38,
+  },
+  kwazulu_natal: {
+    name:"KwaZulu-Natal", short:"KZN",
+    fill:"#da9c00", stroke:"#946800", hoverFill:"#eeb000",
+    climate:"Subtropical · High rainfall · Near year-round forage",
+    rainfall:"600–1200mm", season:"Summer", frost:"Highlands only", humidity:"High",
+    parasites:"Medium", drought:"Low", hiveDensity:"Medium",
+    primary:["Subtropical honey","Litchi honey"],
+    secondary:["Beeswax","Pollination services"],
+    avoid:["Timber plantations (limited forage)","Sugarcane monoculture zones","High-humidity sites prone to chalkbrood"],
+    why:"KZN's subtropical climate enables near year-round forage with minimal winter gap. Coastal bush and midlands produce aromatic multi-floral honey at a local premium. Litchi and avocado pollination services are well-developed — R800–1,100/hive/visit for established orchards.",
+    tip:"Durban North Shore to Eshowe: excellent coastal bush apiary sites. Litchi pollination (Oct–Nov) is the premium income event. Check with local beekeeping associations for site access on communal land.",
+    breed:"Subtropical honey", type:"Honey + Pollination", market:"Durban honey market · Joburg buyers · coastal farm stalls",
+    rep:20, oh:500, labour:1500, hired:5594, woolMonth:5,
+    lambing:118, survival:100, liveKg:28, dressing:100, wool:100, feed:100, health:170, ewePrice:2800, be:30,
+  },
+  eastern_cape: {
+    name:"Eastern Cape", short:"E. Cape",
+    fill:"#c07800", stroke:"#7e4e00", hoverFill:"#d48c00",
+    climate:"Karoo + Coastal · 200–700mm · Variable rainfall",
+    rainfall:"200–700mm", season:"Mixed", frost:"Karoo interior", humidity:"Variable",
+    parasites:"Low–medium", drought:"Karoo high", hiveDensity:"Low–medium",
+    primary:["Karoo honey","Fynbos transition honey"],
+    secondary:["Beeswax","Coastal mixed honey"],
+    avoid:["Deep Karoo during drought years","Sites more than 2km from reliable water"],
+    why:"Eastern Cape's diversity produces distinct honey types by zone. Karoo interior honey is intensely flavoured with very low moisture — premium buyers pay R80–100/kg for verified Karoo origin. Coastal midlands produce lighter floral honey. Drought management is the primary challenge.",
+    tip:"Graaff-Reinet and Murraysburg area: Karoo honey commands a geographic premium. Build relationships with local farmers — migratory beekeepers follow Karoo flowering after rain events.",
+    breed:"Karoo honey", type:"Honey", market:"Cape Town premium buyers · PE market · Karoo direct retail",
+    rep:20, oh:500, labour:1500, hired:5594, woolMonth:3,
+    lambing:118, survival:100, liveKg:22, dressing:100, wool:70, feed:150, health:150, ewePrice:2600, be:38,
+  },
+  western_cape: {
+    name:"Western Cape", short:"W. Cape",
+    fill:"#d4a018", stroke:"#926c00", hoverFill:"#e8b42a",
+    climate:"Mediterranean · Winter rainfall · Fynbos · SA's premier honey province",
+    rainfall:"200–800mm", season:"Winter (Cape)", frost:"Light–moderate", humidity:"Moderate",
+    parasites:"Low–medium", drought:"Summer", hiveDensity:"High",
+    primary:["Fynbos honey","Protea honey"],
+    secondary:["Beeswax","Citrus honey","Pollination services"],
+    avoid:["Fynbos fire-cleared sites in summer","Orchard blocks during fungicide programs"],
+    why:"The Western Cape produces SA's most prestigious honey. Fynbos honey — particularly Renosterbos and Protea varieties — commands R120–200/kg in premium channels. Winter rainfall means fynbos flowers when other provinces are dormant. Deciduous fruit pollination (Sep–Nov) around Grabouw, Ceres, and Elgin pays R900–1,200/hive.",
+    tip:"Overberg and Swartland: SA's premier honey region. Cape Fynbos Honey Association certification unlocks international premiums. Deciduous fruit pollination contracts fill in the cash-flow gap between fynbos harvests.",
+    breed:"Fynbos honey", type:"Honey + Pollination", market:"Cape Town premium retail · export via Cape Honey · international buyers",
+    rep:20, oh:600, labour:1500, hired:5594, woolMonth:10,
+    lambing:118, survival:100, liveKg:35, dressing:100, wool:140, feed:150, health:180, ewePrice:3500, be:26,
+  },
+  northern_cape: {
+    name:"Northern Cape", short:"N. Cape",
+    fill:"#b87000", stroke:"#7a4600", hoverFill:"#cc8400",
+    climate:"Karoo · Hyper-arid · 50–250mm · Extreme heat + cold",
+    rainfall:"50–250mm", season:"Erratic", frost:"Heavy nights", humidity:"Very low",
+    parasites:"Very low", drought:"Very high", hiveDensity:"Very low",
+    primary:["Keimoes citrus honey","Namaqualand flower honey"],
+    secondary:["Beeswax"],
+    avoid:["Permanent apiaries without irrigation-backed forage","Sites far from the Orange River"],
+    why:"The Northern Cape is SA's most challenging beekeeping environment. Two viable windows exist: the Orange River irrigation belt (Keimoes, Upington, Kakamas) for citrus honey in Aug–Sep, and the Namaqualand flower season (Aug–Oct) after good rains. Migratory beekeeping during these windows is profitable but requires careful planning.",
+    tip:"Move hives to Keimoes citrus belt in mid-July; harvest in late September. Namaqualand flower season follows rain — contact local farmers for land access. Don't maintain permanent apiaries outside irrigation zones.",
+    breed:"Citrus honey", type:"Honey", market:"Upington local buyers · Cape Town buyers · Gauteng bulk packers",
+    rep:30, oh:450, labour:1500, hired:5594, woolMonth:9,
+    lambing:118, survival:100, liveKg:15, dressing:100, wool:50, feed:200, health:130, ewePrice:2200, be:55,
+  },
+};
+
+const BEE_CARRYING_CAPACITY = {
+  extensive:     { limpopo:0.5, north_west:0.3, gauteng:0.8, mpumalanga:1.0, free_state:0.4, kwazulu_natal:0.8, eastern_cape:0.4, western_cape:1.0, northern_cape:0.15 },
+  semiIntensive: { limpopo:1.5, north_west:1.0, gauteng:2.5, mpumalanga:3.0, free_state:1.2, kwazulu_natal:2.5, eastern_cape:1.2, western_cape:3.0, northern_cape:0.5  },
+  intensive:     { limpopo:4.0, north_west:3.0, gauteng:6.0, mpumalanga:8.0, free_state:3.5, kwazulu_natal:6.0, eastern_cape:3.5, western_cape:8.0, northern_cape:1.5  },
+};
+
+const BEE_PROVINCE_DEFAULTS = {
+  limpopo:       { system:"extensive",     market:"auction",  feed:"purchased" },
+  north_west:    { system:"extensive",     market:"auction",  feed:"purchased" },
+  gauteng:       { system:"semiIntensive", market:"direct",   feed:"mixed"     },
+  mpumalanga:    { system:"semiIntensive", market:"direct",   feed:"mixed"     },
+  free_state:    { system:"semiIntensive", market:"auction",  feed:"purchased" },
+  kwazulu_natal: { system:"extensive",     market:"direct",   feed:"purchased" },
+  eastern_cape:  { system:"extensive",     market:"direct",   feed:"purchased" },
+  western_cape:  { system:"semiIntensive", market:"direct",   feed:"mixed"     },
+  northern_cape: { system:"extensive",     market:"auction",  feed:"purchased" },
+};
+
 // ─── LIVESTOCK MODULE REGISTRY ─────────────────────────────────────────────────
 // Each module is a self-contained slice. Add new species here.
 const LIVESTOCK_MODULES = {
@@ -380,6 +540,18 @@ const LIVESTOCK_MODULES = {
       calcFull(reg, carcass, size, labour, overhead, extra, [5, 10, 20, 50, 100, 200, 500]),
     carcassDefault: 52,
     carcassLabel: "Carcass R/kg",
+  },
+  bees: {
+    id:"bees", emoji:"🐝", label:"Apiary / Bees", labelPlural:"SA Beekeeping",
+    terms:{ unit:"hive", units:"hives", group:"apiary", young:"colony", youngs:"colonies",
+            rateLabel:"Honey yield", priceLabel:"Hive cost", saleMonthLabel:"Harvest months" },
+    provinceData: BEE_PROVINCE_DATA,
+    carryingCapacity: BEE_CARRYING_CAPACITY,
+    provinceDefaults: BEE_PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [10, 25, 50, 100, 200, 500]),
+    carcassDefault: 60,
+    carcassLabel: "Honey R/kg",
   },
 };
 
@@ -531,7 +703,7 @@ function buildPFUrl(name, email, region) {
 const PALETTE = {
   bg:"#0a0c0a",       surface:"#131713",   card:"#1a201a",   border:"#2c3c2c",
   borderHover:"#4a6a34", accent:"#7acc3a", gold:"#d4b55a",   goldDim:"#9a7830",
-  text:"#f0ece0",     muted:"#aca89c",     dim:"#6e6a60",    faint:"#263626",
+  text:"#f0ece0",     muted:"#b8b4a8",     dim:"#9a9590",    faint:"#263626",
   danger:"#e06848",   dangerBg:"rgba(224,104,72,.10)",
   ocean:"#0a1520",    land:"rgba(18,36,14,.6)",
 };
@@ -588,8 +760,9 @@ const CSS = `
 const TABS = ["Overview", "Breeds", "Model", "Savings"];
 
 const LIVESTOCK_TYPES = [
-  { id:"sheep",   emoji:"🐑", label:"Sheep",        sub:"Wool, meat & dual-purpose breeds",  status:"active" },
+  { id:"sheep",   emoji:"🐑", label:"Sheep",         sub:"Wool, meat & dual-purpose breeds",  status:"active" },
   { id:"cattle",  emoji:"🐄", label:"Beef Cattle",   sub:"Commercial & stud beef operations", status:"active" },
+  { id:"bees",    emoji:"🐝", label:"Apiary / Bees", sub:"Honey production & pollination",    status:"active" },
   { id:"goats",   emoji:"🐐", label:"Goats",         sub:"Boer goat & dairy operations",      status:"soon"   },
   { id:"pigs",    emoji:"🐖", label:"Pigs",          sub:"Commercial piggery models",          status:"soon"   },
   { id:"poultry", emoji:"🐓", label:"Poultry",       sub:"Broiler & layer operations",         status:"soon"   },
@@ -695,7 +868,7 @@ function PayModal({ region, onClose, onSuccess }) {
       <div style={{fontSize:15,color:PALETTE.muted,marginBottom:16,lineHeight:1.7}}>
         {PF.sandbox
           ? <><span>Sandbox mode — no real charge.</span><br/><span style={{color:PALETTE.dim}}>Set sandbox:false + add PayFast credentials to go live.</span></>
-          : `Welcome, ${name}. Full platform access is now active.`}
+          : `Welcome, ${name}. Your bankable feasibility report is ready to generate.`}
       </div>
       <div style={{background:PALETTE.surface,border:`1px solid ${PALETTE.borderHover}`,borderRadius:10,padding:"14px",marginBottom:16}}>
         <div style={{fontSize:13,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Your Access Code — save this</div>
@@ -704,7 +877,7 @@ function PayModal({ region, onClose, onSuccess }) {
       </div>
       <button className="glow-btn" onClick={() => { onSuccess && onSuccess(name, email, genCode); onClose(); }}
         style={{width:"100%",padding:"13px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,cursor:"pointer"}}>
-        Explore Full Platform →
+        Generate My Report →
       </button>
     </div>
   );
@@ -760,7 +933,7 @@ function PayModal({ region, onClose, onSuccess }) {
         <div style={{fontSize:14,color:PALETTE.gold,letterSpacing:3,textTransform:"uppercase",marginBottom:6}}>Agrimodel Pro</div>
         <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:900,color:"#f0ece0"}}>Choose how to pay</div>
         <div style={{fontFamily:"'Playfair Display',serif",fontSize:26,fontWeight:900,color:PALETTE.gold,marginTop:8}}>
-          R 147.95 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · full platform access</span>
+          R 147.95 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · bankable AI report</span>
         </div>
       </div>
       {PAY_METHODS.map(m=>(
@@ -777,7 +950,7 @@ function PayModal({ region, onClose, onSuccess }) {
         </button>
       ))}
       <button onClick={onClose} style={{width:"100%",marginTop:4,padding:"9px",background:"none",color:PALETTE.muted,border:"none",fontSize:15,cursor:"pointer"}}>Keep exploring for free</button>
-      <div style={{fontSize:13,color:PALETTE.faint,textAlign:"center",marginTop:10,lineHeight:1.6}}>
+      <div style={{fontSize:13,color:PALETTE.dim,textAlign:"center",marginTop:10,lineHeight:1.6}}>
         🔒 Powered by PayFast · Card · EFT · SnapScan · Zapper · PayShap
       </div>
     </>
@@ -792,7 +965,7 @@ function PayModal({ region, onClose, onSuccess }) {
             Agrimodel Pro · {prov.name || "SA"} Feasibility Report
           </div>
           <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:900,color:"#f0ece0",lineHeight:1.3}}>
-            Unlock your complete<br/>feasibility analysis
+            Get your bankable<br/>AI feasibility report
           </div>
           <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,fontWeight:900,color:PALETTE.gold,marginTop:12}}>
             R 147.95 <span style={{fontSize:16,fontFamily:"monospace",color:PALETTE.muted,fontWeight:400}}>once-off · full platform access</span>
@@ -800,10 +973,10 @@ function PayModal({ region, onClose, onSuccess }) {
         </div>
         <div style={{padding:"20px 24px"}}>
           {[
-            "✓ Full financial model — live profit, ROI, payback",
-            "✓ Inefficiency engine — find R5k–20k/yr in savings",
-            "✓ 9-section AI feasibility report (ready in 30s)",
-            "✓ All 9 SA provinces + every commercial breed",
+            "✓ 9-section bankable AI feasibility report (ready in 30s)",
+            "✓ Cashflow · capital structure · sensitivity analysis",
+            "✓ Risk assessment · market outlook · breed ranking",
+            "✓ All 9 SA provinces · every commercial breed",
           ].map((txt,i)=>(
             <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
               <span style={{fontSize:15,color:PALETTE.text,lineHeight:1.5}}>{txt}</span>
@@ -873,12 +1046,12 @@ function MiniBarChart({ data, height=44 }) {
       <div style={{display:"flex",alignItems:"center",gap:2,marginTop:1}}>
         {data.map((d,i)=>(
           <div key={i} style={{flex:1,textAlign:"center"}}>
-            <span style={{fontSize:11,color:PALETTE.dim}}>{MONTHS[i][0]}</span>
+            <span style={{fontSize:11,color:PALETTE.muted}}>{MONTHS[i][0]}</span>
           </div>
         ))}
       </div>
       {!hasPositive && (
-        <div style={{fontSize:12,color:PALETTE.danger,textAlign:"center",marginTop:2,opacity:.7}}>
+        <div style={{fontSize:13,color:PALETTE.danger,textAlign:"center",marginTop:3}}>
           All months negative — working capital period
         </div>
       )}
@@ -1080,11 +1253,7 @@ function printReport(report) {
 
     @page {
       size: A4 portrait;
-      margin: 22mm 18mm 26mm 18mm;
-    }
-    @page {
-      @bottom-left  { content: "AGRIMODEL PRO  ·  PROFESSIONAL FEASIBILITY REPORT  ·  CONFIDENTIAL"; font-size: 6.5pt; color: #bbb; font-family: 'Courier New', monospace; }
-      @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 6.5pt; color: #bbb; font-family: 'Courier New', monospace; }
+      margin: 20mm 14mm 26mm 14mm;
     }
 
     body {
@@ -1104,10 +1273,10 @@ function printReport(report) {
     .hdr-sub     { font-size: 8.5pt; color: #555; margin-top: 4pt; font-family: 'Courier New', monospace; }
 
     /* KPI strip */
-    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6pt; margin-top: 11pt; }
-    .kpi-card { border: 0.75pt solid #ddd; border-top-width: 2.5pt; border-radius: 2pt; padding: 7pt 4pt; text-align: center; page-break-inside: avoid; }
-    .kpi-val  { font-size: 12pt; font-weight: 700; line-height: 1.2; font-family: Georgia, serif; }
-    .kpi-lbl  { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.4pt; color: #666; margin-top: 2pt; font-family: 'Courier New', monospace; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5pt; margin-top: 10pt; }
+    .kpi-card { border: 0.75pt solid #ddd; border-top-width: 2.5pt; border-radius: 2pt; padding: 6pt 3pt; text-align: center; page-break-inside: avoid; }
+    .kpi-val  { font-size: 10pt; font-weight: 700; line-height: 1.2; font-family: Georgia, serif; }
+    .kpi-lbl  { font-size: 6pt; text-transform: uppercase; letter-spacing: 0.3pt; color: #666; margin-top: 2pt; font-family: 'Courier New', monospace; }
 
     /* Sections */
     .section { page-break-before: always; padding-top: 2pt; }
@@ -1120,11 +1289,12 @@ function printReport(report) {
     .section-body {
       font-family: 'Courier New', 'Lucida Console', monospace;
       font-size: 9pt; line-height: 1.8; white-space: pre-wrap;
-      word-break: break-word; color: #222;
+      word-break: break-word; overflow-wrap: break-word; color: #222;
+      max-width: 100%; overflow: hidden;
     }
 
     /* Tables */
-    .tbl-wrap  { margin-top: 11pt; }
+    .tbl-wrap  { margin-top: 11pt; page-break-inside: avoid; }
     .tbl-title { font-size: 8.5pt; font-weight: 700; color: #7a5c00; margin-bottom: 5pt; font-family: Georgia, serif; }
     .tbl-note  { font-size: 7pt; color: #777; margin-top: 3pt; font-family: 'Courier New', monospace; }
 
@@ -1187,8 +1357,8 @@ function printReport(report) {
         <div class="hdr-title">${r.name} — ${r.breed}</div>
         <div class="hdr-sub">Prepared for: <strong>${buyerName}</strong> &nbsp;·&nbsp; ${date}${isSandbox ? ' &nbsp;·&nbsp; <span style="color:#c0392b;font-weight:700;">SANDBOX DEMO</span>' : ""}</div>
       </div>
-      <div style="text-align:right;font-family:'Courier New',monospace;font-size:8pt;color:#999;flex-shrink:0;">
-        <div style="font-size:18pt;line-height:1;margin-bottom:2pt;">🌿</div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:7.5pt;color:#999;flex-shrink:1;min-width:0;white-space:nowrap;">
+        <div style="font-size:14pt;line-height:1;margin-bottom:2pt;">🌿</div>
         <div>agrisolvesa.netlify.app</div>
       </div>
     </div>
@@ -1261,7 +1431,7 @@ function ReportViewer({ report, onClose }) {
           ].map((s,i) => (
             <div key={i} style={{background:"rgba(0,0,0,.35)",borderRadius:"7px 7px 0 0",padding:"8px 6px",textAlign:"center",borderTop:`2px solid ${s.c}44`}}>
               <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:s.c}}>{s.v}</div>
-              <div style={{fontSize:12,color:PALETTE.muted,marginTop:2,textTransform:"uppercase",letterSpacing:.4}}>{s.l}</div>
+              <div style={{fontSize:13,color:PALETTE.muted,marginTop:2,textTransform:"uppercase",letterSpacing:.4}}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -1351,8 +1521,8 @@ function ReportViewer({ report, onClose }) {
                     <tr key={i} style={{background:isYours?"rgba(200,168,75,.07)":isBE?"rgba(130,212,72,.05)":i%2===0?PALETTE.card:PALETTE.bg,borderBottom:`1px solid ${PALETTE.faint}22`}}>
                       <td style={{padding:"6px 8px",textAlign:"right"}}>
                         <span style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:row.ok?"#f0ece0":PALETTE.muted}}>{row.n}</span>
-                        {isBE    && <span style={{fontSize:12,color:PALETTE.accent,marginLeft:4}}>BE</span>}
-                        {isYours && <span style={{fontSize:12,color:PALETTE.gold,marginLeft:4}}>◄ yours</span>}
+                        {isBE    && <span style={{fontSize:13,color:PALETTE.accent,marginLeft:4}}>BE</span>}
+                        {isYours && <span style={{fontSize:13,color:PALETTE.gold,marginLeft:4}}>◄ yours</span>}
                       </td>
                       <td style={{padding:"6px 8px",color:PALETTE.accent,textAlign:"right",fontFamily:"'Playfair Display',serif",fontWeight:700}}>{ZAR(row.rev)}</td>
                       <td style={{padding:"6px 8px",color:row.pp>=0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontFamily:"'Playfair Display',serif"}}>{SGN(row.pp)}{ZAR(Math.abs(row.pp))}</td>
@@ -1385,7 +1555,7 @@ function ReportViewer({ report, onClose }) {
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:15}}>
               <thead>
                 <tr style={{background:PALETTE.bg}}>
-                  {["Scenario","Carcass R/kg","Profit/Ewe","Flock Profit","ROI","Breakeven"].map(h => (
+                  {["Scenario",(LIVESTOCK_MODULES[report.livestockType]?.carcassLabel)||"Carcass R/kg",`Profit/${RT.unit}`,"Flock Profit","ROI","Breakeven"].map(h => (
                     <th key={h} style={{padding:"5px 8px",color:PALETTE.muted,textAlign:"right",fontSize:13,textTransform:"uppercase",borderBottom:`1px solid ${PALETTE.faint}`,fontWeight:500}}>{h}</th>
                   ))}
                 </tr>
@@ -1509,7 +1679,9 @@ function AdvisorWizard({
     {
       id:"land", icon:"🗺", title:"Farm size",
       question:"How many hectares do you farm?",
-      why:"Without land area I can't check if your flock is overstocking the veld — the #1 cause of long-term farm degradation in SA. I'll calculate carrying capacity and flag any overload.",
+      why: T.unit === "hive"
+        ? "Without land area I can't check if your apiary is overstocked — too many hives on limited forage cuts per-hive yields sharply. I'll calculate the hive density and flag any overload."
+        : "Without land area I can't check if your flock is overstocking the veld — the #1 cause of long-term farm degradation in SA. I'll calculate carrying capacity and flag any overload.",
       insight: landHa && carryingCapacity !== null
         ? (flockSize > carryingCapacity
           ? `⚠  ${landHa} ha at ${productionSystem} carries ${carryingCapacity} ${T.units} max — you're ${flockSize - carryingCapacity} ${T.units} over capacity`
@@ -1523,20 +1695,28 @@ function AdvisorWizard({
     },
     {
       id:"system", icon:"🏡", title:"Production system",
-      question:"How do you run your operation — extensive veld, supplemented, or intensive?",
-      why:"This recalibrates carrying capacity, feed cost benchmarks, and every inefficiency finding. Getting it right changes the entire model calibration for your province.",
-      insight: {
+      question: T.unit === "hive"
+        ? "How are your hives managed — migratory, fixed apiaries, or commercial scale?"
+        : "How do you run your operation — extensive veld, supplemented, or intensive?",
+      why: T.unit === "hive"
+        ? "This sets the hive density benchmark. Commercial Western Cape apiaries run 8+ hives/ha; migratory beekeepers follow bloom cycles and can manage far more at lower fixed cost."
+        : "This recalibrates carrying capacity, feed cost benchmarks, and every inefficiency finding. Getting it right changes the entire model calibration for your province.",
+      insight: (T.unit === "hive" ? {
+        extensive:     "Migratory: low fixed cost, follow the bloom. Standard for most SA commercial beekeepers — Limpopo bushveld to Cape fynbos.",
+        semiIntensive: "Fixed apiaries + supplemental feeding: balanced approach. Most common for full-time beekeepers with reliable year-round forage.",
+        intensive:     "Commercial scale: high-density managed apiaries, pollination contracts. Highest income potential — requires active colony management.",
+      } : {
         extensive:     "Extensive: natural veld only — lowest input cost, lowest stocking density. Standard for most SA farms.",
         semiIntensive: "Semi-intensive: supplemented grazing — balanced input/output, the most common commercial system in SA.",
         intensive:     "Intensive: feedlot or irrigated pasture — highest input cost but maximum stocking. Suits peri-urban or high-value markets.",
-      }[productionSystem] || "",
+      })[productionSystem] || "",
       insightColor: PALETTE.gold,
       renderInput: () => (
         <div style={{display:"flex",flexDirection:"column",gap:7}}>
           {[
-            {id:"extensive",     l:"Extensive",      sub:"Natural veld only"},
-            {id:"semiIntensive", l:"Semi-intensive",  sub:"Supplemented grazing"},
-            {id:"intensive",     l:"Intensive",       sub:"Feedlot / irrigated pasture"},
+            {id:"extensive",     l:"Extensive",      sub: T.unit==="hive" ? "Migratory / seasonal placement" : "Natural veld only"},
+            {id:"semiIntensive", l:"Semi-intensive",  sub: T.unit==="hive" ? "Fixed apiaries + managed forage" : "Supplemented grazing"},
+            {id:"intensive",     l:"Intensive",       sub: T.unit==="hive" ? "Commercial honey farm" : "Feedlot / irrigated pasture"},
           ].map(m => (
             <button key={m.id} onClick={() => setProductionSystem(m.id)}
               style={{padding:"11px 14px",background:productionSystem===m.id?PALETTE.borderHover:PALETTE.bg,border:`1.5px solid ${productionSystem===m.id?PALETTE.accent:PALETTE.faint}`,borderRadius:9,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
@@ -1549,21 +1729,33 @@ function AdvisorWizard({
     },
     {
       id:"market", icon:"🏪", title:"Market channel",
-      question:"Where do you currently sell your animals?",
-      why:"Direct sales earn 15–25% more than auction. That's often the single fastest margin improvement available — no capital needed, no extra labour required.",
-      insight: {
+      question: T.unit === "hive"
+        ? "How do you currently sell your honey and hive products?"
+        : "Where do you currently sell your animals?",
+      why: T.unit === "hive"
+        ? "Retail honey at R90–150/kg vs R40–60/kg wholesale. Direct sales and farm stalls are the single fastest margin multiplier in beekeeping — no extra input cost required."
+        : "Direct sales earn 15–25% more than auction. That's often the single fastest margin improvement available — no capital needed, no extra labour required.",
+      insight: (T.unit === "hive" ? {
+        auction:  `Wholesale/bulk: easiest but lowest margin. Premium honey buyers pay R70–100/kg. A beekeepers co-op negotiates significantly better rates than selling independently.`,
+        abattoir: `Health stores and retailers: solid middle ground. Farm stalls and online channels add 30–50% margin above bulk wholesale prices.`,
+        direct:   `Direct + pollination: the best margin model. Retail honey at R90–150/kg plus pollination at R700–1,200/hive/visit. ${result ? `At current yields ~${ZAR(Math.round(result.totalRevPerEwe * 0.30))}/hive above wholesale.` : ""}`,
+      } : {
         auction:  `Auction is convenient but the lowest-margin option. Direct relationships typically add R${result ? Math.round(result.totalRevPerEwe * 0.15) : 200}–${result ? Math.round(result.totalRevPerEwe * 0.25) : 350}/${T.unit} over auction prices.`,
         abattoir: "Abattoir: solid commercial baseline. Consider joining a buying group or co-op — they negotiate as a block and consistently earn better rates.",
         direct:   `Direct: excellent. Building a buyer network takes effort but locks in the best long-term margins. ${result ? `That's ~${ZAR(Math.round(result.totalRevPerEwe * 0.20))}/${T.unit} above auction.` : ""}`,
-      }[marketChannel] || "",
+      })[marketChannel] || "",
       insightColor: marketChannel === "direct" ? PALETTE.accent : marketChannel === "abattoir" ? PALETTE.gold : PALETTE.muted,
       renderInput: () => (
         <div style={{display:"flex",flexDirection:"column",gap:7}}>
-          {[
+          {(T.unit === "hive" ? [
+            {id:"auction",  l:"Wholesale",             sub:"Co-op / bulk buyer — lowest margin"},
+            {id:"abattoir", l:"Retail",                sub:"Health stores / farm stalls"},
+            {id:"direct",   l:"Direct + Pollination",   sub:"+40–60% over wholesale"},
+          ] : [
             {id:"auction",  l:"Auction",      sub:"Standard — lowest margin"},
             {id:"abattoir", l:"Abattoir",      sub:"Commercial standard"},
             {id:"direct",   l:"Direct sale",   sub:"+15–25% over auction prices"},
-          ].map(m => (
+          ]).map(m => (
             <button key={m.id} onClick={() => setMarketChannel(m.id)}
               style={{padding:"11px 14px",background:marketChannel===m.id?PALETTE.borderHover:PALETTE.bg,border:`1.5px solid ${marketChannel===m.id?PALETTE.accent:PALETTE.faint}`,borderRadius:9,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
               <div style={{fontSize:15,color:marketChannel===m.id?PALETTE.accent:PALETTE.text,fontWeight:marketChannel===m.id?700:400}}>{m.l}</div>
@@ -1574,22 +1766,34 @@ function AdvisorWizard({
       ),
     },
     {
-      id:"feedSource", icon:"🌾", title:"Feed source",
-      question:"Where does most of your feed come from?",
-      why: `Home-grown feed cuts costs 30–45%. For ${flockSize} ${T.units} that's potentially ${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.35))}/yr saved — often the largest single saving on any SA farm.`,
-      insight: {
+      id:"feedSource", icon:"🌾", title: T.unit === "hive" ? "Feeding strategy" : "Feed source",
+      question: T.unit === "hive"
+        ? "How do you manage off-season colony feeding?"
+        : "Where does most of your feed come from?",
+      why: T.unit === "hive"
+        ? `Sugar syrup costs R8–13/kg. For ${flockSize} hives in dearth periods that's R${Math.round(flockSize * (prov?.feed || 150) * 0.5).toLocaleString()}/yr minimum — positioning near reliable forage eliminates this entirely.`
+        : `Home-grown feed cuts costs 30–45%. For ${flockSize} ${T.units} that's potentially ${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.35))}/yr saved — often the largest single saving on any SA farm.`,
+      insight: (T.unit === "hive" ? {
+        purchased: `Purchased syrup at ~${ZAR(prov?.feed || 150)}/hive/yr is the most expensive option. Site selection near diverse forage halves or eliminates this cost.`,
+        mixed:     `Mixed: sensible balance. Every hive you can run without supplemental feeding saves ~${ZAR(prov?.feed || 150)}/yr in syrup cost.`,
+        homeGrown: `Natural forage only: the lowest-input model. Ensure apiaries are near year-round forage or plan migratory moves to follow the bloom.`,
+      } : {
         purchased: `Purchased feed at ~${ZAR(prov?.feed || 500)}/${T.unit}/yr is the highest-cost option. Even shifting 30% to home-grown saves ~${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.30))}/yr.`,
         mixed:     `Mixed: a sensible balance. Every additional 10% shift home-grown saves ~${ZAR(Math.round(flockSize * (prov?.feed || 500) * 0.10))}/yr.`,
         homeGrown: `Home-grown: the #1 cost-reduction lever in SA ${T.group} farming. Monitor nutritional quality — deficiencies cost more in vet bills than the feed saving is worth.`,
-      }[feedSource] || "",
+      })[feedSource] || "",
       insightColor: feedSource === "homeGrown" ? PALETTE.accent : feedSource === "mixed" ? PALETTE.gold : PALETTE.muted,
       renderInput: () => (
         <div style={{display:"flex",flexDirection:"column",gap:7}}>
-          {[
+          {(T.unit === "hive" ? [
+            {id:"purchased", l:"Purchased",     sub:"Sugar syrup / pollen supplement"},
+            {id:"mixed",     l:"Mixed",          sub:"Forage + supplemental feeding"},
+            {id:"homeGrown", l:"Natural forage", sub:"No supplemental feeding — lowest cost"},
+          ] : [
             {id:"purchased", l:"Purchased",   sub:"Retail / feed agent — full input cost"},
             {id:"mixed",     l:"Mixed",        sub:"Some home-grown forage"},
             {id:"homeGrown", l:"Home-grown",   sub:"Own forage / crop residue — best margin"},
-          ].map(m => (
+          ]).map(m => (
             <button key={m.id} onClick={() => setFeedSource(m.id)}
               style={{padding:"11px 14px",background:feedSource===m.id?PALETTE.borderHover:PALETTE.bg,border:`1.5px solid ${feedSource===m.id?PALETTE.accent:PALETTE.faint}`,borderRadius:9,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
               <div style={{fontSize:15,color:feedSource===m.id?PALETTE.accent:PALETTE.text,fontWeight:feedSource===m.id?700:400}}>{m.l}</div>
@@ -1600,40 +1804,48 @@ function AdvisorWizard({
       ),
     },
     {
-      id:"feedCost", icon:"💰", title:"Actual feed cost",
-      question:`What do you actually pay for feed — per ${T.unit}, per year?`,
-      why: `Province default is ${ZAR(prov?.feed || 500)}/${T.unit}/yr. Real costs vary 20–40% depending on drought supplementation, pasture quality, and buying method. Your actual figure makes every savings calculation specific to your farm.`,
+      id:"feedCost", icon:"💰", title: T.unit === "hive" ? "Actual feeding cost" : "Actual feed cost",
+      question: T.unit === "hive"
+        ? `What do you actually spend on sugar syrup and supplements — per hive, per year?`
+        : `What do you actually pay for feed — per ${T.unit}, per year?`,
+      why: T.unit === "hive"
+        ? `Province default is ${ZAR(prov?.feed || 150)}/hive/yr for supplemental feeding. Your actual spend calibrates every cost-saving calculation to your operation.`
+        : `Province default is ${ZAR(prov?.feed || 500)}/${T.unit}/yr. Real costs vary 20–40% depending on drought supplementation, pasture quality, and buying method. Your actual figure makes every savings calculation specific to your farm.`,
       insight: feedOverride !== null
         ? (feedOverride < (prov?.feed || 500)
           ? `✓  ${ZAR(feedOverride)}/${T.unit} — ${ZAR((prov?.feed || 500) - feedOverride)} below benchmark. Saving ${ZAR(Math.round(((prov?.feed || 500) - feedOverride) * flockSize))}/yr vs province average.`
           : feedOverride > (prov?.feed || 500)
-          ? `⚠  ${ZAR(feedOverride)}/${T.unit} — ${ZAR(feedOverride - (prov?.feed || 500))} above benchmark. Investigate bulk-buying or growing your own to close this gap.`
-          : "Feed cost matches the province benchmark exactly.")
+          ? `⚠  ${ZAR(feedOverride)}/${T.unit} — ${ZAR(feedOverride - (prov?.feed || 500))} above benchmark. ${T.unit === "hive" ? "Consider strategic hive placement near forage-rich sites to reduce supplemental feeding." : "Investigate bulk-buying or growing your own to close this gap."}`
+          : T.unit === "hive" ? "Feeding cost matches the province benchmark." : "Feed cost matches the province benchmark exactly.")
         : `Province default: ${ZAR(prov?.feed || 500)}/${T.unit}/yr. Enter your actual spend to calibrate the model.`,
       insightColor: feedOverride !== null
         ? (feedOverride < (prov?.feed || 500) ? PALETTE.accent : feedOverride > (prov?.feed || 500) ? PALETTE.danger : PALETTE.muted)
         : PALETTE.muted,
       renderInput: () => (
-        <Field label={`Feed cost / ${T.unit} / year`} value={feedOverride !== null ? feedOverride : (prov?.feed || 500)}
+        <Field label={T.unit === "hive" ? `Supplement cost / hive / year` : `Feed cost / ${T.unit} / year`} value={feedOverride !== null ? feedOverride : (prov?.feed || 500)}
           onChange={v => setFeedOverride(v)} pre="R" hint={`Benchmark: ${ZAR(prov?.feed || 500)}`} min={0} max={10000}/>
       ),
     },
     {
-      id:"healthCost", icon:"💊", title:"Vet & medicine costs",
-      question:`What do you spend on vet fees and medicines per ${T.unit} per year?`,
-      why: `${prov?.name || "SA"} benchmark is ${ZAR(prov?.health || 180)}/${T.unit}/yr. Costs range from ${ZAR(100)} (Northern Cape) to ${ZAR(300)}+ (KZN). Your actual spend reveals whether your protocol is cost-efficient or whether there's a real savings opportunity.`,
+      id:"healthCost", icon: T.unit === "hive" ? "🐝" : "💊", title: T.unit === "hive" ? "Hive health costs" : "Vet & medicine costs",
+      question: T.unit === "hive"
+        ? `What do you spend on Varroa treatments, medications, and hive maintenance per hive per year?`
+        : `What do you spend on vet fees and medicines per ${T.unit} per year?`,
+      why: T.unit === "hive"
+        ? `${prov?.name || "SA"} benchmark is ${ZAR(prov?.health || 150)}/hive/yr for Varroa treatment and hive health. Your actual spend shows whether your protocol is cost-efficient or whether there's a saving available.`
+        : `${prov?.name || "SA"} benchmark is ${ZAR(prov?.health || 180)}/${T.unit}/yr. Costs range from ${ZAR(100)} (Northern Cape) to ${ZAR(300)}+ (KZN). Your actual spend reveals whether your protocol is cost-efficient or whether there's a real savings opportunity.`,
       insight: healthOverride !== null
         ? (healthOverride < (prov?.health || 180)
           ? `✓  ${ZAR(healthOverride)}/${T.unit} — well managed. ${ZAR(Math.round(((prov?.health || 180) - healthOverride) * flockSize))}/yr below the total benchmark.`
           : healthOverride > (prov?.health || 180)
-          ? `⚠  ${ZAR(healthOverride)}/${T.unit} — ${ZAR(healthOverride - (prov?.health || 180))} above benchmark. Review vaccination scheduling, bulk drug purchasing, and whether a production-vet visit reduces reactive treatments.`
-          : "Vet costs match the province benchmark.")
+          ? `⚠  ${ZAR(healthOverride)}/${T.unit} — ${ZAR(healthOverride - (prov?.health || 180))} above benchmark. ${T.unit === "hive" ? "Review Varroa treatment frequency, consider oxalic acid vaporisation, and check queen replacement rates." : "Review vaccination scheduling, bulk drug purchasing, and whether a production-vet visit reduces reactive treatments."}`
+          : T.unit === "hive" ? "Hive health costs match the province benchmark." : "Vet costs match the province benchmark.")
         : `Province default: ${ZAR(prov?.health || 180)}/${T.unit}/yr. Enter your actual spend.`,
       insightColor: healthOverride !== null
         ? (healthOverride < (prov?.health || 180) ? PALETTE.accent : healthOverride > (prov?.health || 180) ? PALETTE.danger : PALETTE.muted)
         : PALETTE.muted,
       renderInput: () => (
-        <Field label={`Meds + vet / ${T.unit} / year`} value={healthOverride !== null ? healthOverride : (prov?.health || 180)}
+        <Field label={T.unit === "hive" ? `Hive health / hive / year` : `Meds + vet / ${T.unit} / year`} value={healthOverride !== null ? healthOverride : (prov?.health || 180)}
           onChange={v => setHealthOverride(v)} pre="R" hint={`Benchmark: ${ZAR(prov?.health || 180)}`} min={0} max={5000}/>
       ),
     },
@@ -1674,7 +1886,7 @@ function AdvisorWizard({
             ].map((s,i)=>(
               <div key={i} style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"9px 8px",textAlign:"center"}}>
                 <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,color:s.c}}>{s.v}</div>
-                <div style={{fontSize:12,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.4,marginTop:2}}>{s.l}</div>
+                <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.4,marginTop:2}}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -1702,7 +1914,7 @@ function AdvisorWizard({
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:24}}>{step.icon}</span>
             <div>
-              <div style={{fontSize:12,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8}}>Step {stepIdx+1} of {STEPS.length} · Farm Advisor</div>
+              <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8}}>Step {stepIdx+1} of {STEPS.length} · Farm Advisor</div>
               <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,color:"#f0ece0"}}>{step.title}</div>
             </div>
           </div>
@@ -1729,7 +1941,7 @@ function AdvisorWizard({
         <div style={{padding:"0 18px 28px"}}>
           {/* Advisor speech bubble */}
           <div style={{background:"rgba(122,204,58,.06)",border:`1px solid rgba(122,204,58,.2)`,borderLeft:`3px solid ${PALETTE.accent}`,borderRadius:10,padding:"12px 14px",marginBottom:12}}>
-            <div style={{fontSize:12,color:PALETTE.accent,textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>🌿 Agrimodel Advisor</div>
+            <div style={{fontSize:13,color:PALETTE.accent,textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>🌿 Agrimodel Advisor</div>
             <div style={{fontSize:15,color:"#c8d8b0",lineHeight:1.8,fontStyle:"italic"}}>{step.question}</div>
           </div>
 
@@ -1874,7 +2086,7 @@ function AgrimodelPro() {
     setReportStatus("loading");
     try {
       const rd = buildReportData(mod.provinceData[selected || "limpopo"], flockSize, labourMode, carcass);
-      const r  = generateProReport(rd, buyerName || "Valued Client");
+      const r  = generateProReport(rd, buyerName || "Valued Client", T);
       setReport({ ...r, buyerEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch (err) {
@@ -2024,7 +2236,7 @@ function AgrimodelPro() {
     setReportStatus("loading");
     try {
       const rd = buildReportData(mod.provinceData[selected], flockSize, labourMode, carcass);
-      const r  = generateProReport(rd, storedName);
+      const r  = generateProReport(rd, storedName, T);
       setReport({ ...r, buyerEmail: storedEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch { setReportStatus("error"); }
@@ -2043,7 +2255,7 @@ function AgrimodelPro() {
         showToast("Access restored — welcome back!");
       }}/>}
       {showPay && <PayModal region={selected} onClose={()=>setShowPay(false)} onSuccess={handlePaySuccess}/>}
-      {showAdvisor && isPaid && (
+      {showAdvisor && (
         <AdvisorWizard
           prov={prov} result={result} carryingCapacity={carryingCapacity} dataCompleteness={dataCompleteness}
           flockSize={flockSize} setFlockSize={setFlockSize}
@@ -2081,19 +2293,19 @@ function AgrimodelPro() {
       <div style={{background:PALETTE.bg,height:"100dvh",display:"flex",flexDirection:"column",fontFamily:"'DM Mono',monospace",overflow:"hidden"}}>
 
         {/* ── HEADER ── */}
-        <div style={{background:PALETTE.surface,borderBottom:`1px solid ${PALETTE.faint}`,padding:"11px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
-          <div style={{position:"relative"}}>
+        <div style={{background:PALETTE.surface,borderBottom:`1px solid ${PALETTE.faint}`,padding:"11px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0,gap:8}}>
+          <div style={{position:"relative",flex:1,minWidth:0}}>
             {/* Livestock selector button */}
             <button
               onClick={() => setShowLivestockMenu(m => !m)}
-              style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",padding:0}}
+              style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",padding:0,maxWidth:"100%",overflow:"hidden"}}
             >
-              <span style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:"#f0ece0"}}>
+              <span style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:"#f0ece0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
                 {mod.emoji} Agrimodel Pro
               </span>
-              <span style={{fontSize:12,color:PALETTE.dim,marginTop:2}}>▾</span>
+              <span style={{fontSize:13,color:PALETTE.dim,marginTop:2,flexShrink:0}}>▾</span>
             </button>
-            <span className="hdr-sub" style={{fontSize:13,color:PALETTE.dim,letterSpacing:2,textTransform:"uppercase",marginLeft:0,display:"block",marginTop:1}}>SA Breed Recommender + Feasibility</span>
+            <span className="hdr-sub" style={{fontSize:13,color:PALETTE.dim,letterSpacing:1.5,textTransform:"uppercase",display:"block",marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{mod.labelPlural} · Breed &amp; Feasibility</span>
 
             {/* Livestock dropdown */}
             {showLivestockMenu && (
@@ -2101,7 +2313,7 @@ function AgrimodelPro() {
                 style={{position:"absolute",top:"100%",left:0,zIndex:5000,marginTop:6,background:PALETTE.card,border:`1px solid ${PALETTE.border}`,borderRadius:12,overflow:"hidden",minWidth:260,boxShadow:"0 8px 32px rgba(0,0,0,.55)"}}
                 onMouseLeave={() => setShowLivestockMenu(false)}
               >
-                <div style={{padding:"8px 12px 6px",fontSize:11,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.5,borderBottom:`1px solid ${PALETTE.faint}`}}>Select livestock module</div>
+                <div style={{padding:"8px 12px 6px",fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.5,borderBottom:`1px solid ${PALETTE.faint}`}}>Select livestock module</div>
                 {LIVESTOCK_TYPES.map(lt => {
                   const isCurrent = lt.id === livestockType;
                   return (
@@ -2125,13 +2337,13 @@ function AgrimodelPro() {
                     <span style={{fontSize:20,flexShrink:0}}>{lt.emoji}</span>
                     <div style={{flex:1}}>
                       <div style={{fontSize:14,color:lt.status==="active"?PALETTE.accent:PALETTE.text,fontWeight:lt.status==="active"?700:400}}>{lt.label}</div>
-                      <div style={{fontSize:12,color:PALETTE.dim}}>{lt.sub}</div>
+                      <div style={{fontSize:13,color:PALETTE.dim}}>{lt.sub}</div>
                     </div>
                     {isCurrent
-                      ? <span style={{fontSize:11,padding:"2px 7px",borderRadius:8,background:"rgba(122,204,58,.20)",color:PALETTE.accent,border:`1px solid ${PALETTE.accent}66`,fontWeight:700}}>✓ Active</span>
+                      ? <span style={{fontSize:13,padding:"2px 7px",borderRadius:8,background:"rgba(122,204,58,.20)",color:PALETTE.accent,border:`1px solid ${PALETTE.accent}66`,fontWeight:700}}>✓ Active</span>
                       : lt.status === "active"
-                        ? <span style={{fontSize:11,padding:"2px 7px",borderRadius:8,background:"rgba(122,204,58,.06)",color:PALETTE.accent,border:`1px solid ${PALETTE.accent}33`}}>Switch</span>
-                        : <span style={{fontSize:11,padding:"2px 7px",borderRadius:8,background:PALETTE.surface,color:PALETTE.dim,border:`1px solid ${PALETTE.faint}`}}>Soon</span>
+                        ? <span style={{fontSize:13,padding:"2px 7px",borderRadius:8,background:"rgba(122,204,58,.06)",color:PALETTE.accent,border:`1px solid ${PALETTE.accent}33`}}>Switch</span>
+                        : <span style={{fontSize:13,padding:"2px 7px",borderRadius:8,background:PALETTE.surface,color:PALETTE.dim,border:`1px solid ${PALETTE.faint}`}}>Soon</span>
                     }
                   </button>
                   );
@@ -2172,8 +2384,8 @@ function AgrimodelPro() {
         <div style={{height:26,background:PALETTE.surface,borderBottom:`1px solid ${PALETTE.faint}`,display:"flex",alignItems:"center",padding:"0 16px",flexShrink:0,overflow:"hidden"}}>
           {hovered ? (
             <span style={{fontSize:15,color:PALETTE.accent,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-              <strong style={{fontFamily:"'Playfair Display',serif"}}>{PROVINCE_DATA[hovered]?.name}</strong>
-              <span style={{color:PALETTE.muted,marginLeft:8}}>{PROVINCE_DATA[hovered]?.climate}</span>
+              <strong style={{fontFamily:"'Playfair Display',serif"}}>{mod.provinceData[hovered]?.name}</strong>
+              <span style={{color:PALETTE.muted,marginLeft:8}}>{mod.provinceData[hovered]?.climate}</span>
               <span style={{color:PALETTE.dim,marginLeft:8}}>· Click to select</span>
             </span>
           ) : selected ? (
@@ -2317,27 +2529,31 @@ function AgrimodelPro() {
 
                   {/* Key stats row */}
                   <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:12}}>
-                    {[
-                      {l:T.rateLabel,     v:`${prov.lambing}%`},
-                      {l:"Slaughter",     v:`${prov.liveKg}kg / ${prov.dressing}%`},
-                      {l:T.priceLabel,    v:ZAR(prov.ewePrice)},
-                    ].map((s,i)=>(
+                    {(T.unit === "hive" ? [
+                      {l:"Honey yield",      v:`${prov.liveKg} kg/hive/yr`},
+                      {l:"Beeswax income",   v:`${ZAR(prov.wool)}/hive/yr`},
+                      {l:T.priceLabel,       v:ZAR(prov.ewePrice)},
+                    ] : [
+                      {l:T.rateLabel,        v:`${prov.lambing}%`},
+                      {l:"Slaughter",        v:`${prov.liveKg}kg / ${prov.dressing}%`},
+                      {l:T.priceLabel,       v:ZAR(prov.ewePrice)},
+                    ]).map((s,i)=>(
                       <div key={i} style={{background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"7px 8px",textAlign:"center"}}>
                         <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,color:PALETTE.accent}}>{s.v}</div>
-                        <div style={{fontSize:12,color:PALETTE.dim,marginTop:2,textTransform:"uppercase",letterSpacing:.5}}>{s.l}</div>
+                        <div style={{fontSize:13,color:PALETTE.dim,marginTop:2,textTransform:"uppercase",letterSpacing:.5}}>{s.l}</div>
                       </div>
                     ))}
                   </div>
 
                   {/* Market access */}
                   <div style={{background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"8px 12px",marginBottom:12}}>
-                    <div style={{fontSize:12,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Markets</div>
+                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Markets</div>
                     <div style={{fontSize:14,color:PALETTE.muted,lineHeight:1.7}}>{prov.market}</div>
                   </div>
 
                   {/* Quick breed pills */}
                   <div style={{marginBottom:14}}>
-                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.2,marginBottom:8}}>★ Recommended breeds</div>
+                    <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.2,marginBottom:8}}>★ {T.unit === "hive" ? "Honey types" : "Recommended breeds"}</div>
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
                       {prov.primary.map(b=>(
                         <span key={b} style={{padding:"5px 11px",background:"#1a3a0e",border:`1px solid ${PALETTE.borderHover}`,borderRadius:20,color:PALETTE.accent,fontSize:15}}>★ {b}</span>
@@ -2375,7 +2591,7 @@ function AgrimodelPro() {
               {activeTab === 1 && (
                 <div className="fade-in">
                   <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1.2,marginBottom:10}}>
-                    Breed performance at R{carcass}/kg carcass · default {T.group} size
+                    {T.unit === "hive" ? `Honey types at R${carcass}/kg · default ${T.group} size` : `Breed performance at R${carcass}/kg carcass · default ${T.group} size`}
                   </div>
                   {[...prov.primary.map(n=>({n,primary:true})), ...prov.secondary.map(n=>({n,primary:false}))].map(({n,primary})=>{
                     const isWool = ["Merino","SAMM","Dohne Merino","Ile de France"].includes(n);
@@ -2403,7 +2619,7 @@ function AgrimodelPro() {
                           ].map((s,i)=>(
                             <div key={i} style={{background:PALETTE.bg,borderRadius:6,padding:"7px 6px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                               <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,color:s.c}}>{s.v}</div>
-                              <div style={{fontSize:12,color:PALETTE.dim,marginTop:2,textTransform:"uppercase"}}>{s.l}</div>
+                              <div style={{fontSize:13,color:PALETTE.dim,marginTop:2,textTransform:"uppercase"}}>{s.l}</div>
                             </div>
                           ))}
                         </div>
@@ -2438,38 +2654,6 @@ function AgrimodelPro() {
                   <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>
                     {prov.primary[0]} · adjust inputs to model your scenario
                   </div>
-                  {/* Model tab gate */}
-                  {!isPaid && (
-                    <div className="fade-in" style={{padding:"20px 0"}}>
-                      <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.borderHover}`,borderRadius:12,padding:"20px 16px",marginBottom:12,textAlign:"center"}}>
-                        <div style={{fontSize:32,marginBottom:10}}>🔒</div>
-                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:21,fontWeight:700,color:"#f0ece0",marginBottom:8}}>
-                          Financial Model — Locked
-                        </div>
-                        <div style={{fontSize:15,color:PALETTE.muted,marginBottom:16,lineHeight:1.8}}>
-                          Unlock to model your farm economics live:<br/>
-                          <span style={{color:PALETTE.dim}}>Profit/{T.unit} · ROI · Payback · Cashflow · Sensitivity · Scale</span>
-                        </div>
-                        {[
-                          [`Profit / ${T.unit}`, result ? `${SGN(result.profitPerEwe)}${ZAR(result.profitPerEwe)}` : "R —"],
-                          ["Annual ROI",    result ? PCT(result.roi) : "—"],
-                          ["Payback",       result?.payback ? `${result.payback.toFixed(1)} yr` : "— yr"],
-                          ["5-yr NPV",      result ? `${SGN(result.npv5)}${ZAR(Math.abs(result.npv5))}` : "R —"],
-                          ["Breakeven",     result ? `${result.breakeven} ${T.units}` : `— ${T.units}`],
-                        ].map(([l,v],i)=>(
-                          <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 12px",borderBottom:`1px solid ${PALETTE.faint}`,filter:"blur(4px)",userSelect:"none",pointerEvents:"none"}}>
-                            <span style={{fontSize:15,color:PALETTE.muted}}>{l}</span>
-                            <span style={{fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,color:PALETTE.accent}}>{v}</span>
-                          </div>
-                        ))}
-                        <button className="glow-btn" onClick={()=>setShowPay(true)}
-                          style={{width:"100%",marginTop:16,padding:"13px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.3)`}}>
-                          Unlock Full Model — R 147.95 →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  {isPaid && (<>
                   {/* Inputs */}
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:10,padding:"12px",marginBottom:12}}>
                     <div style={{marginBottom:9}}>
@@ -2482,7 +2666,7 @@ function AgrimodelPro() {
                           <button key={m.id} onClick={()=>setLabourMode(m.id)}
                             style={{flex:1,padding:"6px 8px",background:labourMode===m.id?PALETTE.dim:"transparent",border:`1px solid ${labourMode===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:14,color:labourMode===m.id?PALETTE.accent:PALETTE.muted,fontWeight:labourMode===m.id?600:400}}>{m.l}</div>
-                            <div style={{fontSize:12,color:PALETTE.dim}}>{m.sub}</div>
+                            <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
                           </button>
                         ))}
                       </div>
@@ -2492,14 +2676,14 @@ function AgrimodelPro() {
                       <div style={{fontSize:14,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:.7,marginBottom:5}}>Production System</div>
                       <div style={{display:"flex",gap:4}}>
                         {[
-                          {id:"extensive",     l:"Extensive",      sub:"Natural veld"},
-                          {id:"semiIntensive", l:"Semi-intensive",  sub:"Supplemented"},
-                          {id:"intensive",     l:"Intensive",       sub:"Feedlot / irrigated"},
+                          {id:"extensive",     l:"Extensive",      sub: T.unit==="hive" ? "Migratory / seasonal" : "Natural veld"},
+                          {id:"semiIntensive", l:"Semi-intensive",  sub: T.unit==="hive" ? "Fixed apiaries" : "Supplemented"},
+                          {id:"intensive",     l:"Intensive",       sub: T.unit==="hive" ? "Commercial farm" : "Feedlot / irrigated"},
                         ].map(m=>(
                           <button key={m.id} onClick={()=>setProductionSystem(m.id)}
                             style={{flex:1,padding:"5px 6px",background:productionSystem===m.id?PALETTE.dim:"transparent",border:`1px solid ${productionSystem===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:13,color:productionSystem===m.id?PALETTE.accent:PALETTE.muted,fontWeight:productionSystem===m.id?600:400}}>{m.l}</div>
-                            <div style={{fontSize:12,color:PALETTE.dim}}>{m.sub}</div>
+                            <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
                           </button>
                         ))}
                       </div>
@@ -2507,17 +2691,21 @@ function AgrimodelPro() {
 
                     {/* Market channel selector */}
                     <div style={{marginBottom:9}}>
-                      <div style={{fontSize:14,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:.7,marginBottom:5}}>Market Channel</div>
+                      <div style={{fontSize:14,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:.7,marginBottom:5}}>{T.unit === "hive" ? "Sales Channel" : "Market Channel"}</div>
                       <div style={{display:"flex",gap:4}}>
-                        {[
+                        {(T.unit === "hive" ? [
+                          {id:"auction",  l:"Wholesale",            sub:"Co-op / bulk buyer"},
+                          {id:"abattoir", l:"Retail",               sub:"Health stores / stalls"},
+                          {id:"direct",   l:"Direct + Pollination",  sub:"+40–60% margin"},
+                        ] : [
                           {id:"auction",  l:"Auction",    sub:"Lowest margin"},
                           {id:"abattoir", l:"Abattoir",   sub:"Standard"},
                           {id:"direct",   l:"Direct sale", sub:"+15–25% margin"},
-                        ].map(m=>(
+                        ]).map(m=>(
                           <button key={m.id} onClick={()=>setMarketChannel(m.id)}
                             style={{flex:1,padding:"5px 6px",background:marketChannel===m.id?PALETTE.dim:"transparent",border:`1px solid ${marketChannel===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:13,color:marketChannel===m.id?PALETTE.accent:PALETTE.muted,fontWeight:marketChannel===m.id?600:400}}>{m.l}</div>
-                            <div style={{fontSize:12,color:PALETTE.dim}}>{m.sub}</div>
+                            <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
                           </button>
                         ))}
                       </div>
@@ -2525,17 +2713,21 @@ function AgrimodelPro() {
 
                     {/* Feed source selector */}
                     <div style={{marginBottom:9}}>
-                      <div style={{fontSize:14,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:.7,marginBottom:5}}>Feed Source</div>
+                      <div style={{fontSize:14,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:.7,marginBottom:5}}>{T.unit === "hive" ? "Feeding Strategy" : "Feed Source"}</div>
                       <div style={{display:"flex",gap:4}}>
-                        {[
+                        {(T.unit === "hive" ? [
+                          {id:"purchased",  l:"Purchased",     sub:"Sugar syrup / supplement"},
+                          {id:"mixed",      l:"Mixed",          sub:"Forage + supplemental"},
+                          {id:"homeGrown",  l:"Natural forage", sub:"Forage-only"},
+                        ] : [
                           {id:"purchased",  l:"Purchased",   sub:"Retail / agent"},
                           {id:"mixed",      l:"Mixed",        sub:"Some home-grown"},
                           {id:"homeGrown",  l:"Home-grown",   sub:"Own forage / residue"},
-                        ].map(m=>(
+                        ]).map(m=>(
                           <button key={m.id} onClick={()=>setFeedSource(m.id)}
                             style={{flex:1,padding:"5px 6px",background:feedSource===m.id?PALETTE.dim:"transparent",border:`1px solid ${feedSource===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:13,color:feedSource===m.id?PALETTE.accent:PALETTE.muted,fontWeight:feedSource===m.id?600:400}}>{m.l}</div>
-                            <div style={{fontSize:12,color:PALETTE.dim}}>{m.sub}</div>
+                            <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
                           </button>
                         ))}
                       </div>
@@ -2676,7 +2868,7 @@ function AgrimodelPro() {
                     ].map((s,i)=>(
                       <div key={i} style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"7px 8px",textAlign:"center"}}>
                         <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,color:s.c}}>{s.v}</div>
-                        <div style={{fontSize:12,color:PALETTE.dim,marginTop:2,textTransform:"uppercase",letterSpacing:.4}}>{s.l}</div>
+                        <div style={{fontSize:13,color:PALETTE.dim,marginTop:2,textTransform:"uppercase",letterSpacing:.4}}>{s.l}</div>
                       </div>
                     ))}
                   </div>
@@ -2693,7 +2885,7 @@ function AgrimodelPro() {
                         ].map((s,i)=>(
                           <div key={i} style={{background:PALETTE.bg,borderRadius:5,padding:"5px 4px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                             <div style={{fontSize:16,fontWeight:700,color:s.c,fontFamily:"'Playfair Display',serif"}}>{s.v}</div>
-                            <div style={{fontSize:12,color:PALETTE.dim,marginTop:1,textTransform:"uppercase"}}>{s.l}</div>
+                            <div style={{fontSize:13,color:PALETTE.dim,marginTop:1,textTransform:"uppercase"}}>{s.l}</div>
                           </div>
                         ))}
                       </div>
@@ -2731,7 +2923,7 @@ function AgrimodelPro() {
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"10px",marginBottom:12}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
                       <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8}}>36-month cashflow</div>
-                      <div style={{fontSize:12,color:PALETTE.gold}}>— cumulative balance</div>
+                      <div style={{fontSize:13,color:PALETTE.gold}}>— cumulative balance</div>
                     </div>
                     <MiniCashflow36 cf36={result.cf36} ewePurchase={result.ewePurchase}/>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginTop:8}}>
@@ -2742,7 +2934,7 @@ function AgrimodelPro() {
                       ].map((s,i)=>(
                         <div key={i} style={{background:PALETTE.bg,borderRadius:5,padding:"5px 4px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                           <div style={{fontSize:15,fontWeight:700,color:s.c,fontFamily:"'Playfair Display',serif"}}>{s.v}</div>
-                          <div style={{fontSize:12,color:PALETTE.dim,marginTop:1,textTransform:"uppercase"}}>{s.l}</div>
+                          <div style={{fontSize:13,color:PALETTE.dim,marginTop:1,textTransform:"uppercase"}}>{s.l}</div>
                         </div>
                       ))}
                     </div>
@@ -2771,42 +2963,21 @@ function AgrimodelPro() {
                     })}
                   </div>
 
-                  {/* Locked / Paid-unlocked sections */}
-                  <div style={{position:"relative"}}>
-                    {/* Content rows */}
-                    <div style={{filter:isPaid?"none":"blur(5px)",userSelect:isPaid?"auto":"none",pointerEvents:isPaid?"auto":"none",opacity:isPaid?1:.45}}>
-                      {(()=>{
-                        const r200 = result.scaleRows.find(r=>r.n>=200)||result.scaleRows[result.scaleRows.length-1];
-                        return [
-                          {l:"Full 36-month cashflow table", v:"Month-by-month"},
-                          {l:`Scale ${r200.n} ${T.units} profit`, v:`${SGN(r200.profit)}${ZAR(Math.abs(r200.profit))}`},
-                          {l:"Capital structure", v:ZAR(result.capital)},
-                          {l:"Sensitivity (±20% carcass)", v:"9 scenarios"},
-                          {l:"5-yr NPV (10% discount)", v:`${SGN(result.npv5)}${ZAR(Math.abs(result.npv5))}`},
-                          {l:"Regional breed comparison", v:"9 breeds ranked"},
-                        ];
-                      })().map((t,i)=>(
-                        <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",borderBottom:`1px solid ${PALETTE.faint}`,fontSize:15}}>
-                          <span style={{color:PALETTE.text}}>{t.l}</span>
-                          <span style={{color:PALETTE.accent}}>{t.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Overlay — hidden when paid */}
-                    {!isPaid && (
-                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"rgba(8,15,6,.78)",borderRadius:8}}>
-                        <div style={{fontSize:15,color:PALETTE.muted,marginBottom:10,textAlign:"center",lineHeight:1.7}}>
-                          🔒 <strong style={{color:PALETTE.accent}}>6 more sections</strong> in the full report<br/>
-                          <span style={{fontSize:14,color:PALETTE.dim}}>Cashflow · Scale · Capital · Sensitivity · 5yr NPV · Breed comparison</span>
-                        </div>
-                        <button className="glow-btn" onClick={()=>setShowPay(true)}
-                          style={{padding:"10px 22px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:20,fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.38)`}}>
-                          Unlock Full Access — R 147.95 →
-                        </button>
+                  {/* Bankable Report CTA */}
+                  {!isPaid && (
+                    <div style={{background:"linear-gradient(135deg,#111811,#1a2414)",border:`1px solid ${PALETTE.borderHover}`,borderRadius:12,padding:"20px",marginTop:6,textAlign:"center"}}>
+                      <div style={{fontSize:13,color:PALETTE.gold,textTransform:"uppercase",letterSpacing:2,marginBottom:6}}>Land Bank Quality</div>
+                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:"#f0ece0",marginBottom:8}}>Bankable AI Feasibility Report</div>
+                      <div style={{fontSize:14,color:PALETTE.muted,marginBottom:14,lineHeight:1.7}}>
+                        9 sections — what a consultant charges R3,000–R5,000 to write.<br/>
+                        <span style={{color:PALETTE.dim}}>Cashflow · Capital · Risk · Sensitivity · Scale · Breed Analysis</span>
                       </div>
-                    )}
-                  </div>
-                  </>)}
+                      <button className="glow-btn" onClick={()=>setShowPay(true)}
+                        style={{width:"100%",padding:"13px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.3)`}}>
+                        📄 Get Bankable Report — R 147.95 →
+                      </button>
+                    </div>
+                  )}
 
                 </div>
               )}
@@ -2829,35 +3000,19 @@ function AgrimodelPro() {
                     </div>
                   )}
 
-                  {!isPaid && (
-                    <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.borderHover}`,borderRadius:12,padding:"20px 16px",textAlign:"center"}}>
-                      <div style={{fontSize:28,marginBottom:8}}>🔒</div>
-                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:"#f0ece0",marginBottom:8}}>
-                        {auditResult.findings.length} Inefficiencies Found
-                      </div>
-                      <div style={{fontSize:15,color:PALETTE.muted,marginBottom:16,lineHeight:1.7}}>
-                        Unlock to see exactly where you're leaking money and how to fix it — specific actions, suppliers, and costs.
-                      </div>
-                      <button className="glow-btn" onClick={()=>setShowPay(true)}
-                        style={{width:"100%",padding:"12px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:10,fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.3)`}}>
-                        Unlock Savings Engine — R 147.95 →
-                      </button>
-                    </div>
-                  )}
-                  {isPaid && (
-                    <div>
+                  <div>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                         <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1}}>
                           {auditResult.findings.length} inefficiencies identified · sorted by impact
                         </div>
                         <div style={{display:"flex",alignItems:"center",gap:6}}>
-                          <div style={{fontSize:12,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.5}}>Model confidence</div>
+                          <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.5}}>Model confidence</div>
                           <div style={{width:60,height:5,background:PALETTE.faint,borderRadius:2,overflow:"hidden"}}>
                             <div style={{height:"100%",width:`${dataCompleteness}%`,background:dataCompleteness>=70?PALETTE.accent:dataCompleteness>=50?PALETTE.gold:PALETTE.danger,borderRadius:2,transition:"width .4s"}}/>
                           </div>
                           <div style={{fontSize:14,fontWeight:700,color:dataCompleteness>=70?PALETTE.accent:dataCompleteness>=50?PALETTE.gold:PALETTE.danger}}>{dataCompleteness}%</div>
                           <button onClick={() => setShowAdvisor(true)}
-                            style={{padding:"2px 9px",background:"transparent",border:`1px solid ${PALETTE.accent}`,borderRadius:10,color:PALETTE.accent,fontSize:12,cursor:"pointer",fontWeight:600,letterSpacing:.3,flexShrink:0}}>
+                            style={{padding:"2px 9px",background:"transparent",border:`1px solid ${PALETTE.accent}`,borderRadius:10,color:PALETTE.accent,fontSize:13,cursor:"pointer",fontWeight:600,letterSpacing:.3,flexShrink:0}}>
                             Improve →
                           </button>
                         </div>
@@ -2888,11 +3043,11 @@ function AgrimodelPro() {
                             </div>
                             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:10}}>
                               <div style={{background:PALETTE.bg,border:`1px solid rgba(224,92,58,.2)`,borderRadius:6,padding:"6px 8px"}}>
-                                <div style={{fontSize:12,color:PALETTE.danger,textTransform:"uppercase",letterSpacing:.6,marginBottom:2}}>Current cost</div>
+                                <div style={{fontSize:13,color:PALETTE.danger,textTransform:"uppercase",letterSpacing:.6,marginBottom:2}}>Current cost</div>
                                 <div style={{fontSize:14,color:"#c07060",lineHeight:1.4}}>{f.currentLabel}</div>
                               </div>
                               <div style={{background:PALETTE.bg,border:`1px solid rgba(130,212,72,.2)`,borderRadius:6,padding:"6px 8px"}}>
-                                <div style={{fontSize:12,color:PALETTE.accent,textTransform:"uppercase",letterSpacing:.6,marginBottom:2}}>Optimised</div>
+                                <div style={{fontSize:13,color:PALETTE.accent,textTransform:"uppercase",letterSpacing:.6,marginBottom:2}}>Optimised</div>
                                 <div style={{fontSize:14,color:"#80b060",lineHeight:1.4}}>{f.optimizedLabel}</div>
                               </div>
                             </div>
@@ -2954,7 +3109,6 @@ function AgrimodelPro() {
                         Get AI Feasibility Report →
                       </button>
                     </div>
-                  )}
 
                 </div>
               )}
@@ -2986,13 +3140,13 @@ function AgrimodelPro() {
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <span style={{fontSize:16,color:"#f0ece0",fontWeight:600}}>{pd.name}</span>
-                      <span style={{fontSize:12,padding:"1px 5px",borderRadius:8,background:`${typeColor}18`,color:typeColor,border:`1px solid ${typeColor}33`}}>{pd.type}</span>
+                      <span style={{fontSize:13,padding:"1px 5px",borderRadius:8,background:`${typeColor}18`,color:typeColor,border:`1px solid ${typeColor}33`}}>{pd.type}</span>
                     </div>
                     <div style={{fontSize:14,color:PALETTE.dim,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{pd.primary.join(" · ")}</div>
                   </div>
                   <div style={{textAlign:"right",flexShrink:0}}>
                     <div style={{fontSize:14,color:PALETTE.muted,fontFamily:"'Playfair Display',serif",fontWeight:600}}>BE {pd.be}</div>
-                    <div style={{fontSize:12,color:PALETTE.dim,marginTop:1}}>{pd.rainfall}</div>
+                    <div style={{fontSize:13,color:PALETTE.dim,marginTop:1}}>{pd.rainfall}</div>
                   </div>
                 </div>
               );
@@ -3005,7 +3159,7 @@ function AgrimodelPro() {
           <div style={{position:"fixed",bottom:0,left:0,right:0,padding:"10px 16px 14px",background:`linear-gradient(to top,${PALETTE.bg} 70%,transparent)`,zIndex:100}}>
             <button className="glow-btn" onClick={()=>setShowPay(true)}
               style={{width:"100%",padding:"13px",background:PALETTE.gold,color:PALETTE.bg,border:"none",borderRadius:11,fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 24px rgba(200,168,75,.4)`}}>
-              🔓 Unlock Full Access — R 147.95 →
+              📄 Get Bankable Report — R 147.95 →
             </button>
           </div>
         )}
