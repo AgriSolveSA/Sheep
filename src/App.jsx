@@ -41,7 +41,7 @@ const PROVINCE_DATA = {
     tip:"Vaalwater area: 21ha bushveld carries ~20–30 ewes. Need irrigated pasture or external grazing to scale beyond 50.",
     breed:"Meatmaster",  type:"Meat", market:"Polokwane abattoirs · Bela-Bela auction · RCL Polokwane",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:150, survival:85, liveKg:38, dressing:48, wool:0, feed:500, health:180, ewePrice:2800, weanerPrice:550, be:41,
+    lambing:150, survival:85, liveKg:38, dressing:48, wool:0, feed:500, health:180, ewePrice:2800, weanerPrice:1200, be:41,
   },
   north_west: {
     name:"North West", short:"N. West",
@@ -56,7 +56,7 @@ const PROVINCE_DATA = {
     tip:"Commercial Dorper operations in North West typically run 200–800 ewes. Smaller flocks become viable with irrigated lucerne supplementation.",
     breed:"Dorper", type:"Meat", market:"Vryburg abattoir · Lichtenburg auction · local feedlots",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, weanerPrice:600, be:51,
+    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, weanerPrice:1300, be:51,
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
@@ -71,7 +71,7 @@ const PROVINCE_DATA = {
     tip:"Gauteng's biggest advantage is logistics — you're 1–2 hours from the largest lamb markets in SA. Factor this into your price assumptions.",
     breed:"Dorper", type:"Meat", market:"Karan Beef Balfour · Irene abattoir · Joburg fresh market",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:130, survival:82, liveKg:38, dressing:48, wool:80, feed:550, health:190, ewePrice:2800, weanerPrice:700, be:71,
+    lambing:130, survival:82, liveKg:38, dressing:48, wool:80, feed:550, health:190, ewePrice:2800, weanerPrice:1400, be:71,
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
@@ -86,7 +86,7 @@ const PROVINCE_DATA = {
     tip:"Highveld Mpumalanga is ideal for SAMM dual-purpose. Wool adds R200–400/ewe supplementary income on top of meat.",
     breed:"SAMM", type:"Dual", market:"Ermelo wool auctions · Dawn Meats · local abattoirs",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:8,
-    lambing:130, survival:82, liveKg:38, dressing:48, wool:120, feed:550, health:190, ewePrice:2700, weanerPrice:650, be:61,
+    lambing:130, survival:82, liveKg:38, dressing:48, wool:120, feed:550, health:190, ewePrice:2700, weanerPrice:1350, be:61,
   },
   free_state: {
     name:"Free State", short:"Free State",
@@ -101,7 +101,7 @@ const PROVINCE_DATA = {
     tip:"Free State Merino farms typically run 300–1,500 ewes to be viable. Wool income (R400–700/ewe) is what makes the economics work at scale.",
     breed:"Merino", type:"Wool", market:"Cape Wool Board · Bloemfontein auction · local cooperatives",
     rep:15, oh:650, labour:1500, hired:5594, woolMonth:8,
-    lambing:110, survival:80, liveKg:32, dressing:47, wool:550, feed:650, health:220, ewePrice:2400, weanerPrice:550, be:87,
+    lambing:110, survival:80, liveKg:32, dressing:47, wool:550, feed:650, health:220, ewePrice:2400, weanerPrice:1200, be:87,
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
@@ -116,7 +116,7 @@ const PROVINCE_DATA = {
     tip:"KZN farmers save significantly on veterinary costs with resistant breeds. Dorper dosing intervals can be 3–4x longer than wool breeds in this climate.",
     breed:"Dorper", type:"Meat", market:"Tongaat abattoir · Newcastle auction · coastal fresh markets",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, weanerPrice:700, be:51,
+    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, weanerPrice:1400, be:51,
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
@@ -131,7 +131,7 @@ const PROVINCE_DATA = {
     tip:"Eastern Cape auction prices are often 8–12% lower than Gauteng — transport costs real money. Calculate your abattoir distance carefully.",
     breed:"Merino", type:"Wool", market:"Cape Wool Board · Graaff-Reinet auction · Eastern Cape cooperatives",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:8,
-    lambing:120, survival:82, liveKg:34, dressing:47, wool:260, feed:600, health:200, ewePrice:2600, weanerPrice:580, be:109,
+    lambing:120, survival:82, liveKg:34, dressing:47, wool:260, feed:600, health:200, ewePrice:2600, weanerPrice:1200, be:109,
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
@@ -146,7 +146,7 @@ const PROVINCE_DATA = {
     tip:"Western Cape's biggest risk is summer feed gap. Successful operations plan winter grazing cycles precisely. Dormer ewes bred on cereal stubble after winter crop is the classic system.",
     breed:"Dormer", type:"Meat", market:"Abattoir Bragança · Boland Agri auction · Cape fresh markets",
     rep:15, oh:650, labour:1500, hired:5594, woolMonth:6,
-    lambing:130, survival:82, liveKg:38, dressing:48, wool:220, feed:600, health:190, ewePrice:2600, weanerPrice:620, be:54,
+    lambing:130, survival:82, liveKg:38, dressing:48, wool:220, feed:600, health:190, ewePrice:2600, weanerPrice:1350, be:54,
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
@@ -161,7 +161,7 @@ const PROVINCE_DATA = {
     tip:"Northern Cape farms measure land in hectares per sheep, not sheep per hectare. Capital cost is very low (no infrastructure needed) but scale requirement is very high (300+ ewes to cover fixed costs).",
     breed:"Dorper", type:"Meat", market:"Upington · De Aar · Prieska local abattoirs · long-haul to Gauteng",
     rep:15, oh:550, labour:1500, hired:5594, woolMonth:0,
-    lambing:110, survival:88, liveKg:30, dressing:45, wool:0, feed:350, health:120, ewePrice:2200, weanerPrice:480, be:148,
+    lambing:110, survival:88, liveKg:30, dressing:45, wool:0, feed:350, health:120, ewePrice:2200, weanerPrice:1000, be:148,
   },
 };
 
@@ -696,22 +696,22 @@ function calcFull(reg, carcass, flockSize, labour, overhead = reg.oh ?? 600, ext
 // Completely separate from calcFull — never modifies the breeding model.
 // Models buying weaners/calves, growing to slaughter weight, selling.
 // Returns identical field names to calcFull so all existing UI works unchanged.
-function calcGrowOut(reg, carcass, batchSize, labour, overhead = reg.oh ?? 600, extraCosts = {}, weanerPriceOverride = null) {
+function calcGrowOut(reg, carcass, batchSize, labour, overhead = reg.oh ?? 600, extraCosts = {}, weanerPriceOverride = null, sellWeightKg = null, livePriceKg = null) {
   const { bond = 0, feedOverride = null, healthOverride = null, fencing = 0, misc = 0 } = extraCosts;
 
   const isCattle      = reg.liveKg >= 200;
   const cyclesPerYear = isCattle ? 1.3 : 2.2;   // lambs ~165 days, calves ~280 days
   const growDays      = isCattle ? 280 : 165;
-  const weanerPrice   = weanerPriceOverride ?? (reg.weanerPrice ?? (isCattle ? 5500 : 600));
+  const weanerPrice   = weanerPriceOverride ?? (reg.weanerPrice ?? (isCattle ? 5500 : 1400));
 
-  // Feed cost ~35% higher in grow-out (constant intensive growth diet)
-  const feedCost   = feedOverride   !== null ? feedOverride   : Math.round(reg.feed * 1.35);
-  // Health cost ~25% lower (no reproductive / pregnancy costs)
-  const healthCost = healthOverride !== null ? healthOverride : Math.round(reg.health * 0.75);
+  // Per-cycle feed/health defaults (sheep: R750 feed + R80 meds per cycle; cattle: R3500 + R200)
+  const feedCost   = feedOverride   !== null ? feedOverride   : Math.round((isCattle ? 3500 : 750)  * cyclesPerYear);
+  const healthCost = healthOverride !== null ? healthOverride : Math.round((isCattle ? 200  : 80)   * cyclesPerYear);
   const extraFixed = bond + fencing + misc;
 
   const carcassKg          = reg.liveKg * (reg.dressing / 100);
-  const revenuePerAnimal   = carcassKg * carcass;
+  // Live weight pricing when sell weight + live price provided; fall back to carcass pricing
+  const revenuePerAnimal   = (sellWeightKg && livePriceKg) ? sellWeightKg * livePriceKg : carcassKg * carcass;
   const annualRevPerSlot   = revenuePerAnimal * cyclesPerYear;
   const weanerCostPerYear  = weanerPrice * cyclesPerYear;
   const labourShare        = (labour * 12) / batchSize;
@@ -2445,6 +2445,8 @@ function AgrimodelPro() {
   const [showTour,           setShowTour]           = useState(() => { try { return !localStorage.getItem("agri_toured"); } catch { return false; } });
   const [operationMode,      setOperationMode]      = useState("breeding"); // "breeding" | "growout"
   const [weanerPriceOverride,setWeanerPriceOverride]= useState(null);
+  const [goSellWeight,       setGoSellWeight]       = useState(48);   // kg live sell weight (grow-out)
+  const [goLivePrice,        setGoLivePrice]        = useState(60);   // R/kg live price (grow-out)
   const [selectedBreed,      setSelectedBreed]      = useState(null); // null = use province default
   const mod  = LIVESTOCK_MODULES[livestockType] ?? LIVESTOCK_MODULES.sheep;
   const T    = mod.terms;
@@ -2519,7 +2521,9 @@ function AgrimodelPro() {
         feedOverride, healthOverride, labourOverride: labour,
         productionSystem, marketChannel, feedSource,
         operationMode,
-        weanerPrice: weanerPriceOverride ?? effectiveProv?.weanerPrice,
+        weanerPrice:  weanerPriceOverride ?? effectiveProv?.weanerPrice,
+        sellWeightKg: operationMode === "growout" ? goSellWeight : undefined,
+        livePriceKg:  operationMode === "growout" ? goLivePrice  : undefined,
       });
       const r  = generateProReport(rd, buyerName || "Valued Client", T);
       setReport({ ...r, buyerEmail, terms: T, livestockType });
@@ -2528,12 +2532,14 @@ function AgrimodelPro() {
       console.error("Report generation failed:", err);
       setReportStatus("error");
     }
-  }, [selected, flockSize, carcass, labourMode, labour, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod]);
+  }, [selected, flockSize, carcass, labourMode, labour, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride, goSellWeight, goLivePrice]);
 
   // Reset carcass price and flock size when livestock type changes
   useEffect(() => {
     setCarcass(mod.carcassDefault);
     setFlockSize(mod.id === "cattle" ? 20 : 50);
+    setGoSellWeight(mod.id === "cattle" ? 450 : 48);
+    setGoLivePrice(mod.id === "cattle" ? 38 : 60);
   }, [livestockType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset inputs when province changes — use smart defaults per province
@@ -2637,10 +2643,10 @@ function AgrimodelPro() {
       misc:           miscMonthly,
     };
     if (operationMode === "growout" && mod.terms.unit !== "hive") {
-      return calcGrowOut(effectiveProv, carcass, flockSize, effectiveLabour, effectiveProv.oh ?? 600, extraCosts, weanerPriceOverride);
+      return calcGrowOut(effectiveProv, carcass, flockSize, effectiveLabour, effectiveProv.oh ?? 600, extraCosts, weanerPriceOverride, goSellWeight, goLivePrice);
     }
     return mod.calcFn(effectiveProv, carcass, flockSize, effectiveLabour, effectiveProv.oh ?? 600, extraCosts);
-  }, [effectiveProv, carcass, flockSize, labour, labourMode, bondMonthly, feedOverride, healthOverride, fencingMonthly, miscMonthly, mod, operationMode, weanerPriceOverride]);
+  }, [effectiveProv, carcass, flockSize, labour, labourMode, bondMonthly, feedOverride, healthOverride, fencingMonthly, miscMonthly, mod, operationMode, weanerPriceOverride, goSellWeight, goLivePrice]);
 
   const auditResult = useMemo(() => {
     if (!result || !effectiveProv) return null;
@@ -2689,13 +2695,15 @@ function AgrimodelPro() {
         feedOverride, healthOverride, labourOverride: labour,
         productionSystem, marketChannel, feedSource,
         operationMode,
-        weanerPrice: weanerPriceOverride ?? effectiveProv?.weanerPrice,
+        weanerPrice:  weanerPriceOverride ?? effectiveProv?.weanerPrice,
+        sellWeightKg: operationMode === "growout" ? goSellWeight : undefined,
+        livePriceKg:  operationMode === "growout" ? goLivePrice  : undefined,
       });
       const r  = generateProReport(rd, storedName, T);
       setReport({ ...r, buyerEmail: storedEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch { setReportStatus("error"); }
-  }, [selected, flockSize, labourMode, labour, carcass, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride]);
+  }, [selected, flockSize, labourMode, labour, carcass, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride, goSellWeight, goLivePrice]);
 
   return (
     <>
@@ -3199,11 +3207,31 @@ function AgrimodelPro() {
                               <div style={{fontSize:13,color:PALETTE.dim,marginBottom:3}}>Weaner buy price/head</div>
                               <div style={{display:"flex",alignItems:"center",gap:4}}>
                                 <span style={{fontSize:14,color:PALETTE.dim}}>R</span>
-                                <input type="number" value={weanerPriceOverride ?? (prov?.weanerPrice ?? (T.unit==="cow"?5500:600))}
+                                <input type="number" value={weanerPriceOverride ?? (prov?.weanerPrice ?? (T.unit==="cow"?5500:1400))}
                                   onChange={e=>setWeanerPriceOverride(e.target.value>0?Number(e.target.value):null)}
                                   style={{width:"100%",padding:"7px 9px",background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,color:PALETTE.text,fontSize:15,fontFamily:"'DM Mono',monospace"}}/>
                               </div>
-                              <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>Default: {ZAR(prov?.weanerPrice ?? (T.unit==="cow"?5500:600))} (province avg)</div>
+                              <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>Default: {ZAR(prov?.weanerPrice ?? (T.unit==="cow"?5500:1400))} (province avg)</div>
+                            </div>
+                            <div>
+                              <div style={{fontSize:13,color:PALETTE.dim,marginBottom:3}}>Sell weight (kg live)</div>
+                              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                                <input type="number" value={goSellWeight}
+                                  onChange={e=>setGoSellWeight(Number(e.target.value)||48)}
+                                  style={{width:"100%",padding:"7px 9px",background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,color:PALETTE.text,fontSize:15,fontFamily:"'DM Mono',monospace"}}/>
+                                <span style={{fontSize:14,color:PALETTE.dim}}>kg</span>
+                              </div>
+                              <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>Target: {T.unit==="cow"?"450":"48"} kg live</div>
+                            </div>
+                            <div>
+                              <div style={{fontSize:13,color:PALETTE.dim,marginBottom:3}}>Live price (R/kg)</div>
+                              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                                <span style={{fontSize:14,color:PALETTE.dim}}>R</span>
+                                <input type="number" value={goLivePrice}
+                                  onChange={e=>setGoLivePrice(Number(e.target.value)||60)}
+                                  style={{width:"100%",padding:"7px 9px",background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,color:PALETTE.text,fontSize:15,fontFamily:"'DM Mono',monospace"}}/>
+                              </div>
+                              <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>Default: R{T.unit==="cow"?"38":"60"}/kg live auction</div>
                             </div>
                             <div style={{background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"7px 9px"}}>
                               <div style={{fontSize:12,color:PALETTE.dim,marginBottom:3}}>Capital required</div>

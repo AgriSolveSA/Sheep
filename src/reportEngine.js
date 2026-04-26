@@ -106,6 +106,8 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     feedSource       = "mixed",
     operationMode    = "breeding",
     weanerPrice      = null,
+    sellWeightKg     = null,
+    livePriceKg      = null,
   } = inputs;
 
   // Apply client inputs with floors and fallbacks
@@ -174,11 +176,11 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     const isCattle      = r.liveKg >= 200;
     const cyclesPerYear = isCattle ? 1.3 : 2.2;
     const growDays      = isCattle ? 280 : 165;
-    const goWPrice      = weanerPrice ?? (r.weanerPrice ?? (isCattle ? 5500 : 600));
-    const goFeed        = feedCost * 1.35;
-    const goHealth      = healthCost * 0.75;
+    const goWPrice      = weanerPrice ?? (r.weanerPrice ?? (isCattle ? 5500 : 1400));
+    const goFeed        = feedOverride   !== null ? feedCost : Math.round((isCattle ? 3500 : 750)  * cyclesPerYear);
+    const goHealth      = healthOverride !== null ? healthCost : Math.round((isCattle ? 200  : 80)   * cyclesPerYear);
     const carcassKgGO   = r.liveKg * (r.dressing / 100);
-    const revPerAnimal  = carcassKgGO * carcass;
+    const revPerAnimal  = (sellWeightKg && livePriceKg) ? sellWeightKg * livePriceKg : carcassKgGO * carcass;
     const annualRevPS   = revPerAnimal * cyclesPerYear;  // revenue per batch slot per year
     const wearerCostPY  = goWPrice * cyclesPerYear;
     const fixedAnnualGO = (lab + r.oh) * 12;
@@ -214,12 +216,16 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     cf36GO.forEach(row => { cumGO += row.profit; row.cum = Math.round(cumGO); });
     const firstPositiveGO = cf36GO.find(row => row.rev > 0) ?? null;
     const sensRowsGO = [-20,-15,-10,-5,0,5,10,15,20].map(pct => {
-      const adjC = carcass * (1 + pct / 100);
-      const adjR = carcassKgGO * adjC * cyclesPerYear;
-      const adjP = adjR - wearerCostPY - goFeed - goHealth - labShareGO;
-      const adjVm = (carcassKgGO * adjC - goWPrice - goFeed / cyclesPerYear - goHealth / cyclesPerYear) * cyclesPerYear;
-      const adjBe = adjVm > 0 ? Math.ceil(fixedAnnualGO / adjVm) : null;
-      return { pct, adj: adjC, pp: adjP, fp: adjP * flock, roi: adjP / goWPrice, be: adjBe };
+      const basePrice = livePriceKg ?? carcass;
+      const adjP2     = basePrice * (1 + pct / 100);
+      const adjRev    = (sellWeightKg && livePriceKg)
+        ? sellWeightKg * adjP2 * cyclesPerYear
+        : carcassKgGO * adjP2 * cyclesPerYear;
+      const adjProfit = adjRev - wearerCostPY - goFeed - goHealth - labShareGO;
+      const adjRevPA  = adjRev / cyclesPerYear;
+      const adjVm     = (adjRevPA - goWPrice - goFeed / cyclesPerYear - goHealth / cyclesPerYear) * cyclesPerYear;
+      const adjBe     = adjVm > 0 ? Math.ceil(fixedAnnualGO / adjVm) : null;
+      return { pct, adj: adjP2, pp: adjProfit, fp: adjProfit * flock, roi: adjProfit / goWPrice, be: adjBe };
     });
     return {
       r, flock, lm, carcass, lab, fa: fixedAnnualGO,
