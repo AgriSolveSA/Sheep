@@ -41,7 +41,7 @@ const PROVINCE_DATA = {
     tip:"Vaalwater area: 21ha bushveld carries ~20–30 ewes. Need irrigated pasture or external grazing to scale beyond 50.",
     breed:"Meatmaster",  type:"Meat", market:"Polokwane abattoirs · Bela-Bela auction · RCL Polokwane",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:150, survival:85, liveKg:38, dressing:48, wool:0, feed:500, health:180, ewePrice:2800, be:41,
+    lambing:150, survival:85, liveKg:38, dressing:48, wool:0, feed:500, health:180, ewePrice:2800, weanerPrice:550, be:41,
   },
   north_west: {
     name:"North West", short:"N. West",
@@ -56,7 +56,7 @@ const PROVINCE_DATA = {
     tip:"Commercial Dorper operations in North West typically run 200–800 ewes. Smaller flocks become viable with irrigated lucerne supplementation.",
     breed:"Dorper", type:"Meat", market:"Vryburg abattoir · Lichtenburg auction · local feedlots",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, be:51,
+    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, weanerPrice:600, be:51,
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
@@ -71,7 +71,7 @@ const PROVINCE_DATA = {
     tip:"Gauteng's biggest advantage is logistics — you're 1–2 hours from the largest lamb markets in SA. Factor this into your price assumptions.",
     breed:"Dorper", type:"Meat", market:"Karan Beef Balfour · Irene abattoir · Joburg fresh market",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:130, survival:82, liveKg:38, dressing:48, wool:80, feed:550, health:190, ewePrice:2800, be:71,
+    lambing:130, survival:82, liveKg:38, dressing:48, wool:80, feed:550, health:190, ewePrice:2800, weanerPrice:700, be:71,
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
@@ -86,7 +86,7 @@ const PROVINCE_DATA = {
     tip:"Highveld Mpumalanga is ideal for SAMM dual-purpose. Wool adds R200–400/ewe supplementary income on top of meat.",
     breed:"SAMM", type:"Dual", market:"Ermelo wool auctions · Dawn Meats · local abattoirs",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:8,
-    lambing:130, survival:82, liveKg:38, dressing:48, wool:120, feed:550, health:190, ewePrice:2700, be:61,
+    lambing:130, survival:82, liveKg:38, dressing:48, wool:120, feed:550, health:190, ewePrice:2700, weanerPrice:650, be:61,
   },
   free_state: {
     name:"Free State", short:"Free State",
@@ -101,7 +101,7 @@ const PROVINCE_DATA = {
     tip:"Free State Merino farms typically run 300–1,500 ewes to be viable. Wool income (R400–700/ewe) is what makes the economics work at scale.",
     breed:"Merino", type:"Wool", market:"Cape Wool Board · Bloemfontein auction · local cooperatives",
     rep:15, oh:650, labour:1500, hired:5594, woolMonth:8,
-    lambing:110, survival:80, liveKg:32, dressing:47, wool:550, feed:650, health:220, ewePrice:2400, be:87,
+    lambing:110, survival:80, liveKg:32, dressing:47, wool:550, feed:650, health:220, ewePrice:2400, weanerPrice:550, be:87,
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
@@ -116,7 +116,7 @@ const PROVINCE_DATA = {
     tip:"KZN farmers save significantly on veterinary costs with resistant breeds. Dorper dosing intervals can be 3–4x longer than wool breeds in this climate.",
     breed:"Dorper", type:"Meat", market:"Tongaat abattoir · Newcastle auction · coastal fresh markets",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:0,
-    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, be:51,
+    lambing:150, survival:83, liveKg:36, dressing:50, wool:0, feed:500, health:180, ewePrice:3200, weanerPrice:700, be:51,
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
@@ -131,7 +131,7 @@ const PROVINCE_DATA = {
     tip:"Eastern Cape auction prices are often 8–12% lower than Gauteng — transport costs real money. Calculate your abattoir distance carefully.",
     breed:"Merino", type:"Wool", market:"Cape Wool Board · Graaff-Reinet auction · Eastern Cape cooperatives",
     rep:15, oh:600, labour:1500, hired:5594, woolMonth:8,
-    lambing:120, survival:82, liveKg:34, dressing:47, wool:260, feed:600, health:200, ewePrice:2600, be:109,
+    lambing:120, survival:82, liveKg:34, dressing:47, wool:260, feed:600, health:200, ewePrice:2600, weanerPrice:580, be:109,
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
@@ -146,7 +146,7 @@ const PROVINCE_DATA = {
     tip:"Western Cape's biggest risk is summer feed gap. Successful operations plan winter grazing cycles precisely. Dormer ewes bred on cereal stubble after winter crop is the classic system.",
     breed:"Dormer", type:"Meat", market:"Abattoir Bragança · Boland Agri auction · Cape fresh markets",
     rep:15, oh:650, labour:1500, hired:5594, woolMonth:6,
-    lambing:130, survival:82, liveKg:38, dressing:48, wool:220, feed:600, health:190, ewePrice:2600, be:54,
+    lambing:130, survival:82, liveKg:38, dressing:48, wool:220, feed:600, health:190, ewePrice:2600, weanerPrice:620, be:54,
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
@@ -161,7 +161,7 @@ const PROVINCE_DATA = {
     tip:"Northern Cape farms measure land in hectares per sheep, not sheep per hectare. Capital cost is very low (no infrastructure needed) but scale requirement is very high (300+ ewes to cover fixed costs).",
     breed:"Dorper", type:"Meat", market:"Upington · De Aar · Prieska local abattoirs · long-haul to Gauteng",
     rep:15, oh:550, labour:1500, hired:5594, woolMonth:0,
-    lambing:110, survival:88, liveKg:30, dressing:45, wool:0, feed:350, health:120, ewePrice:2200, be:148,
+    lambing:110, survival:88, liveKg:30, dressing:45, wool:0, feed:350, health:120, ewePrice:2200, weanerPrice:480, be:148,
   },
 };
 
@@ -204,7 +204,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Bonsmara", type:"Beef", market:"Polokwane sale yard · Mokopane abattoir · Beefcor",
     rep:15, oh:1200, labour:2800, hired:8500,
     lambing:78, survival:82, liveKg:480, dressing:54, wool:0, woolMonth:0,
-    feed:1800, health:480, ewePrice:18000, be:18,
+    feed:1800, health:480, ewePrice:18000, weanerPrice:5800, be:18,
   },
   north_west: {
     name:"North West", short:"N. West",
@@ -220,7 +220,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Bonsmara", type:"Beef", market:"Vryburg sale yard · Lichtenburg · Vleissentraal feedlots",
     rep:15, oh:1200, labour:2800, hired:8500,
     lambing:75, survival:80, liveKg:460, dressing:53, wool:0, woolMonth:0,
-    feed:1800, health:440, ewePrice:16000, be:22,
+    feed:1800, health:440, ewePrice:16000, weanerPrice:6200, be:22,
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
@@ -236,7 +236,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Angus", type:"Beef", market:"Karan Beef · Joburg fresh market · premium butcheries",
     rep:15, oh:1400, labour:3000, hired:9000,
     lambing:80, survival:84, liveKg:490, dressing:54, wool:0, woolMonth:0,
-    feed:2200, health:520, ewePrice:20000, be:24,
+    feed:2200, health:520, ewePrice:20000, weanerPrice:7500, be:24,
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
@@ -252,7 +252,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Simmentaler", type:"Beef", market:"Ermelo sale yard · Carolina · Dawn Meats Standerton",
     rep:15, oh:1200, labour:2800, hired:8500,
     lambing:79, survival:83, liveKg:490, dressing:54, wool:0, woolMonth:0,
-    feed:1900, health:480, ewePrice:18000, be:19,
+    feed:1900, health:480, ewePrice:18000, weanerPrice:6000, be:19,
   },
   free_state: {
     name:"Free State", short:"Free State",
@@ -268,7 +268,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Bonsmara", type:"Beef", market:"Harrismith · Bethlehem sale yards · Beefcor · RCL Foods",
     rep:15, oh:1300, labour:2800, hired:8500,
     lambing:77, survival:81, liveKg:470, dressing:53, wool:0, woolMonth:0,
-    feed:2000, health:480, ewePrice:17000, be:21,
+    feed:2000, health:480, ewePrice:17000, weanerPrice:5800, be:21,
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
@@ -284,7 +284,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Nguni", type:"Beef", market:"Kokstad sale yard · Newcastle · Tongaat abattoir",
     rep:15, oh:1100, labour:2800, hired:8500,
     lambing:74, survival:78, liveKg:400, dressing:52, wool:0, woolMonth:0,
-    feed:1600, health:560, ewePrice:14000, be:26,
+    feed:1600, health:560, ewePrice:14000, weanerPrice:5200, be:26,
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
@@ -300,7 +300,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Nguni", type:"Beef", market:"Queenstown sale yard · East London abattoir · Rennie's",
     rep:15, oh:1100, labour:2800, hired:8500,
     lambing:72, survival:78, liveKg:420, dressing:52, wool:0, woolMonth:0,
-    feed:1700, health:440, ewePrice:15000, be:23,
+    feed:1700, health:440, ewePrice:15000, weanerPrice:4800, be:23,
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
@@ -316,7 +316,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Angus", type:"Beef", market:"Boland Agri · Paarl sale yard · Cape Town abattoirs · premium butcheries",
     rep:15, oh:1400, labour:3000, hired:9000,
     lambing:80, survival:84, liveKg:480, dressing:54, wool:0, woolMonth:0,
-    feed:2100, health:460, ewePrice:21000, be:20,
+    feed:2100, health:460, ewePrice:21000, weanerPrice:6800, be:20,
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
@@ -332,7 +332,7 @@ const CATTLE_PROVINCE_DATA = {
     breed:"Drakensberger", type:"Beef", market:"Upington · De Aar sale yards · long-haul to Gauteng feedlots",
     rep:15, oh:1000, labour:2800, hired:8500,
     lambing:68, survival:74, liveKg:420, dressing:51, wool:0, woolMonth:0,
-    feed:1400, health:360, ewePrice:13000, be:32,
+    feed:1400, health:360, ewePrice:13000, weanerPrice:4500, be:32,
   },
 };
 
@@ -372,7 +372,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Vaalwater and Mokopane areas: excellent mixed bushveld forage. Negotiate citrus pollination contracts in Tzaneen for Oct–Nov — this income can match 3 months of honey production.",
     breed:"Bushveld honey", type:"Honey", market:"Joburg honey packers · Pretoria bulk buyers · local markets",
     rep:20, oh:500, labour:1500, hired:5594, woolMonth:4,
-    lambing:118, survival:100, liveKg:25, dressing:100, wool:80, feed:120, health:150, ewePrice:2800, be:32,
+    lambing:118, survival:100, liveKg:25, dressing:100, wool:80, feed:120, health:150, ewePrice:2800, subspecies:"scutellata", be:32,
   },
   north_west: {
     name:"North West", short:"N. West",
@@ -387,7 +387,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Position hives near reliable water — bees won't forage effectively more than 3km from water. Negotiate sunflower access near Lichtenburg for the August–September flush.",
     breed:"Acacia honey", type:"Honey", market:"Vryburg bulk buyers · Gauteng packers",
     rep:25, oh:500, labour:1500, hired:5594, woolMonth:3,
-    lambing:118, survival:100, liveKg:20, dressing:100, wool:60, feed:150, health:150, ewePrice:2600, be:40,
+    lambing:118, survival:100, liveKg:20, dressing:100, wool:60, feed:150, health:150, ewePrice:2600, subspecies:"scutellata", be:40,
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
@@ -402,7 +402,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Farm the agricultural fringe — Walkerville, Muldersdrift, Roslyn. Direct retail at farmers markets (R120–160/kg) pays back significantly faster than bulk supply to packers.",
     breed:"Mixed highveld honey", type:"Honey + Pollination", market:"Joburg farmers markets · direct retail · highveld farms",
     rep:20, oh:600, labour:1500, hired:5594, woolMonth:3,
-    lambing:118, survival:100, liveKg:22, dressing:100, wool:100, feed:150, health:160, ewePrice:3200, be:38,
+    lambing:118, survival:100, liveKg:22, dressing:100, wool:100, feed:150, health:160, ewePrice:3200, subspecies:"scutellata", be:38,
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
@@ -417,7 +417,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Hazyview to Nelspruit: citrus pollination goldmine. Negotiate multi-season contracts with citrus farmers before October. One week on citrus earns more than 3 months on natural veld.",
     breed:"Citrus honey", type:"Honey + Pollination", market:"Nelspruit honey buyers · Joburg packers · direct retail",
     rep:20, oh:550, labour:1500, hired:5594, woolMonth:4,
-    lambing:118, survival:100, liveKg:30, dressing:100, wool:120, feed:130, health:160, ewePrice:2800, be:28,
+    lambing:118, survival:100, liveKg:30, dressing:100, wool:120, feed:130, health:160, ewePrice:2800, subspecies:"scutellata", be:28,
   },
   free_state: {
     name:"Free State", short:"Free State",
@@ -432,7 +432,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Source canola contracts before August — fields are allocated early. One good canola flush can produce 30+ kg per hive in 4 weeks. Overwinter hives in insulated boxes with sugar syrup feeding.",
     breed:"Canola honey", type:"Honey", market:"Bloemfontein buyers · bulk export via Joburg · co-ops",
     rep:25, oh:500, labour:1500, hired:5594, woolMonth:9,
-    lambing:118, survival:100, liveKg:22, dressing:100, wool:60, feed:200, health:150, ewePrice:2400, be:38,
+    lambing:118, survival:100, liveKg:22, dressing:100, wool:60, feed:200, health:150, ewePrice:2400, subspecies:"scutellata", be:38,
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
@@ -447,7 +447,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Durban North Shore to Eshowe: excellent coastal bush apiary sites. Litchi pollination (Oct–Nov) is the premium income event. Check with local beekeeping associations for site access on communal land.",
     breed:"Subtropical honey", type:"Honey + Pollination", market:"Durban honey market · Joburg buyers · coastal farm stalls",
     rep:20, oh:500, labour:1500, hired:5594, woolMonth:5,
-    lambing:118, survival:100, liveKg:28, dressing:100, wool:100, feed:100, health:170, ewePrice:2800, be:30,
+    lambing:118, survival:100, liveKg:28, dressing:100, wool:100, feed:100, health:170, ewePrice:2800, subspecies:"scutellata", be:30,
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
@@ -462,7 +462,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Graaff-Reinet and Murraysburg area: Karoo honey commands a geographic premium. Build relationships with local farmers — migratory beekeepers follow Karoo flowering after rain events.",
     breed:"Karoo honey", type:"Honey", market:"Cape Town premium buyers · PE market · Karoo direct retail",
     rep:20, oh:500, labour:1500, hired:5594, woolMonth:3,
-    lambing:118, survival:100, liveKg:22, dressing:100, wool:70, feed:150, health:150, ewePrice:2600, be:38,
+    lambing:118, survival:100, liveKg:22, dressing:100, wool:70, feed:150, health:150, ewePrice:2600, subspecies:"hybrid_zone", be:38,
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
@@ -477,7 +477,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Overberg and Swartland: SA's premier honey region. Cape Fynbos Honey Association certification unlocks international premiums. Deciduous fruit pollination contracts fill in the cash-flow gap between fynbos harvests.",
     breed:"Fynbos honey", type:"Honey + Pollination", market:"Cape Town premium retail · export via Cape Honey · international buyers",
     rep:20, oh:600, labour:1500, hired:5594, woolMonth:10,
-    lambing:118, survival:100, liveKg:35, dressing:100, wool:140, feed:150, health:180, ewePrice:3500, be:26,
+    lambing:118, survival:100, liveKg:35, dressing:100, wool:140, feed:150, health:180, ewePrice:3500, subspecies:"capensis", be:26,
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
@@ -492,7 +492,7 @@ const BEE_PROVINCE_DATA = {
     tip:"Move hives to Keimoes citrus belt in mid-July; harvest in late September. Namaqualand flower season follows rain — contact local farmers for land access. Don't maintain permanent apiaries outside irrigation zones.",
     breed:"Citrus honey", type:"Honey", market:"Upington local buyers · Cape Town buyers · Gauteng bulk packers",
     rep:30, oh:450, labour:1500, hired:5594, woolMonth:9,
-    lambing:118, survival:100, liveKg:15, dressing:100, wool:50, feed:200, health:130, ewePrice:2200, be:55,
+    lambing:118, survival:100, liveKg:15, dressing:100, wool:50, feed:200, health:130, ewePrice:2200, subspecies:"scutellata", be:55,
   },
 };
 
@@ -671,6 +671,107 @@ function calcFull(reg, carcass, flockSize, labour, overhead = reg.oh ?? 600, ext
   };
 }
 
+// ── GROW-OUT MODEL (weaner/calf buy-and-finish) ───────────────────────────────
+// Completely separate from calcFull — never modifies the breeding model.
+// Models buying weaners/calves, growing to slaughter weight, selling.
+// Returns identical field names to calcFull so all existing UI works unchanged.
+function calcGrowOut(reg, carcass, batchSize, labour, overhead = reg.oh ?? 600, extraCosts = {}, weanerPriceOverride = null) {
+  const { bond = 0, feedOverride = null, healthOverride = null, fencing = 0, misc = 0 } = extraCosts;
+
+  const isCattle      = reg.liveKg >= 200;
+  const cyclesPerYear = isCattle ? 1.3 : 2.2;   // lambs ~165 days, calves ~280 days
+  const growDays      = isCattle ? 280 : 165;
+  const weanerPrice   = weanerPriceOverride ?? (reg.weanerPrice ?? (isCattle ? 5500 : 600));
+
+  // Feed cost ~35% higher in grow-out (constant intensive growth diet)
+  const feedCost   = feedOverride   !== null ? feedOverride   : Math.round(reg.feed * 1.35);
+  // Health cost ~25% lower (no reproductive / pregnancy costs)
+  const healthCost = healthOverride !== null ? healthOverride : Math.round(reg.health * 0.75);
+  const extraFixed = bond + fencing + misc;
+
+  const carcassKg          = reg.liveKg * (reg.dressing / 100);
+  const revenuePerAnimal   = carcassKg * carcass;
+  const annualRevPerSlot   = revenuePerAnimal * cyclesPerYear;
+  const weanerCostPerYear  = weanerPrice * cyclesPerYear;
+  const labourShare        = (labour * 12) / batchSize;
+  const overheadShare      = ((overhead + extraFixed) * 12) / batchSize;
+  const totalCostPerSlot   = weanerCostPerYear + feedCost + healthCost + labourShare + overheadShare;
+  const profitPerSlot      = annualRevPerSlot - totalCostPerSlot;
+  const roi                = profitPerSlot / weanerPrice;
+
+  const varMarginPerAnimal = revenuePerAnimal - weanerPrice - feedCost / cyclesPerYear - healthCost / cyclesPerYear;
+  const varMarginPerYear   = varMarginPerAnimal * cyclesPerYear;
+  const fixedAnnual        = (labour + overhead + extraFixed) * 12;
+  const breakeven          = varMarginPerYear > 0 ? Math.ceil(fixedAnnual / varMarginPerYear) : null;
+
+  const weanerBatch    = batchSize * weanerPrice;
+  const monthlyOpex    = (feedCost / 12 + healthCost / 12) * batchSize + labour + overhead + extraFixed;
+  const growMonths     = Math.round(growDays / 30);
+  const workingCapital = Math.round(monthlyOpex * growMonths);
+  const capital        = weanerBatch + workingCapital;
+  let   mvoCapital     = null;
+  if (breakeven) {
+    const mvoOpex = (feedCost / 12 + healthCost / 12) * breakeven + labour + overhead + extraFixed;
+    mvoCapital = breakeven * weanerPrice + Math.round(mvoOpex * growMonths);
+  }
+
+  const costBreakdown = {
+    feed:     { label: "Feed (grow phase)",    annual: feedCost * batchSize,       perEwe: feedCost },
+    health:   { label: "Meds / vet",           annual: healthCost * batchSize,     perEwe: healthCost },
+    labour:   { label: "Labour",               annual: labour * 12,                perEwe: labourShare },
+    overhead: { label: "Overhead",             annual: overhead * 12,              perEwe: (overhead * 12) / batchSize },
+    replace:  { label: "Weaner/calf purchase", annual: weanerCostPerYear * batchSize, perEwe: weanerCostPerYear },
+    bond:     { label: "Bond repayment",       annual: bond * 12,                  perEwe: (bond * 12) / batchSize },
+    fencing:  { label: "Fencing / infra",      annual: fencing * 12,               perEwe: (fencing * 12) / batchSize },
+    misc:     { label: "Miscellaneous",        annual: misc * 12,                  perEwe: (misc * 12) / batchSize },
+  };
+
+  const scalePoints = isCattle ? [5, 10, 20, 50, 100, 200] : [20, 50, 100, 200, 500, 1000];
+  const scaleRows   = scalePoints.map(n => {
+    const ls   = (labour * 12) / n;
+    const os   = ((overhead + extraFixed) * 12) / n;
+    const cost = weanerCostPerYear + feedCost + healthCost + ls + os;
+    const p    = annualRevPerSlot - cost;
+    return { n, rev: annualRevPerSlot * n, profit: p * n, roi: p / weanerPrice };
+  });
+
+  // 36-month cashflow: harvest at end of each grow cycle
+  const cycleMonths = Math.round(12 / cyclesPerYear);
+  const batchRev    = revenuePerAnimal * batchSize;
+  const cf36 = Array.from({ length: 36 }, (_, i) => {
+    const m      = i + 1;
+    const isHarv = m % cycleMonths === 0;
+    const rev    = isHarv ? batchRev : 0;
+    return { m, rev, lambRev: rev, woolRev: 0, cost: monthlyOpex, profit: rev - monthlyOpex };
+  });
+  let cum = -weanerBatch;
+  cf36.forEach(row => { cum += row.profit; row.cum = Math.round(cum); });
+
+  const firstProfitMonth = cf36.find(r => r.profit > 0)?.m ?? null;
+  const paybackMonth     = cf36.find(r => r.cum >= 0)?.m  ?? null;
+  const yr1              = cf36.slice(0, 12);
+  const npv5             = [-weanerBatch, ...Array(5).fill(profitPerSlot * batchSize)]
+    .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+
+  return {
+    lambsPerEwe: cyclesPerYear, carcassKg, lambRevPerEwe: annualRevPerSlot, woolRevPerEwe: 0,
+    totalRevPerEwe: annualRevPerSlot,
+    labourShare, overheadShare, replaceCost: weanerCostPerYear,
+    totalCostPerEwe: totalCostPerSlot,
+    profitPerEwe: profitPerSlot, roi,
+    payback: profitPerSlot > 0 ? weanerPrice / profitPerSlot : null,
+    breakeven,
+    ewePurchase: weanerBatch, workingCapital, capital, mvoCapital,
+    flockRev:    annualRevPerSlot * batchSize,
+    flockProfit: profitPerSlot   * batchSize,
+    varMargin: varMarginPerYear, fixedAnnual,
+    costBreakdown, feedCost, healthCost, extraFixed,
+    scaleRows, yr1, cf36, npv5,
+    firstProfitMonth, paybackMonth,
+    isGrowOut: true, cyclesPerYear, weanerPrice, growDays,
+  };
+}
+
 const PF = {
   merchantId:  import.meta.env?.VITE_PF_MERCHANT_ID  || "REPLACE_MERCHANT_ID",
   merchantKey: import.meta.env?.VITE_PF_MERCHANT_KEY || "REPLACE_MERCHANT_KEY",
@@ -838,6 +939,127 @@ function RestoreModal({ onClose, onRestore }) {
           Restore →
         </button>
         <button onClick={onClose} style={{width:"100%",marginTop:8,padding:"8px",background:"none",color:PALETTE.muted,border:"none",fontSize:15,cursor:"pointer"}}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+// ── ONBOARDING TOUR ───────────────────────────────────────────────────────────
+const TOUR_TIPS = {
+  sheep: "Enter your real flock size and actual carcass R/kg price (check current AgriOrbit auction results). The model only saves you money if the numbers are honest.",
+  cattle: "Enter your realistic herd size and the carcass price you actually achieve. Start conservative — it is better to be surprised on the upside.",
+  bees: "The honey R/kg price makes the biggest difference here. Wholesale (R45–65/kg) vs direct retail (R90–200/kg) can double your profit. Enter what you actually sell for.",
+};
+
+function OnboardingTour({ onDone, livestockType, setLivestockType }) {
+  const [step, setStep] = useState(0);
+  const dismiss = () => {
+    try { localStorage.setItem("agri_toured", "1"); } catch {}
+    onDone();
+  };
+
+  const STEPS = [
+    {
+      key: "livestock",
+      title: "What are you farming?",
+      desc: "Pick your livestock type. Each province has different breed recommendations, carrying capacity, and economics.",
+    },
+    {
+      key: "province",
+      title: "Select your province",
+      desc: "Close this guide and click any province on the map, or choose from the list below. This unlocks the full regional model — breeds, yields, and cashflow.",
+    },
+    {
+      key: "model",
+      title: "Set your numbers",
+      desc: TOUR_TIPS[livestockType] ?? TOUR_TIPS.sheep,
+    },
+    {
+      key: "report",
+      title: "Get your bankable report",
+      desc: "Once you have entered your data, the yellow button at the bottom shows your savings and unlocks the full 9-section AI feasibility report — the same quality as a R3,500 consultant report, ready in 30 seconds.",
+    },
+  ];
+
+  const current = STEPS[step];
+  const isLast  = step === STEPS.length - 1;
+  const next    = () => isLast ? dismiss() : setStep(s => s + 1);
+
+  const O = PALETTE;
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:9998,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0 0 20px"}}>
+      <div className="slide-up" style={{background:"#0e120e",border:`1px solid ${O.borderHover}`,borderRadius:16,maxWidth:"min(420px,calc(100vw - 24px))",width:"100%",overflow:"hidden"}}>
+        {/* Progress bar */}
+        <div style={{height:3,background:O.faint}}>
+          <div style={{height:"100%",background:O.accent,transition:"width .3s",width:`${((step+1)/STEPS.length)*100}%`}}/>
+        </div>
+
+        {/* Step content */}
+        <div style={{padding:"20px 20px 16px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div style={{fontSize:12,color:O.dim,textTransform:"uppercase",letterSpacing:1.5}}>
+              Step {step+1} of {STEPS.length}
+            </div>
+            <button onClick={dismiss} style={{background:"none",border:"none",color:O.dim,fontSize:20,cursor:"pointer",lineHeight:1,padding:"2px 4px"}}>×</button>
+          </div>
+
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,color:"#f0ece0",marginBottom:8,lineHeight:1.3}}>
+            {current.title}
+          </div>
+          <div style={{fontSize:14,color:O.muted,lineHeight:1.7,marginBottom:16}}>
+            {current.desc}
+          </div>
+
+          {/* Step 0: livestock type selector embedded in tour */}
+          {step === 0 && (
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
+              {[
+                {id:"sheep",  emoji:"🐑", label:"Sheep"},
+                {id:"cattle", emoji:"🐄", label:"Cattle"},
+                {id:"bees",   emoji:"🐝", label:"Bees"},
+              ].map(lt => (
+                <button key={lt.id} onClick={()=>setLivestockType(lt.id)}
+                  style={{padding:"12px 8px",background:livestockType===lt.id?O.faint:"transparent",border:`1px solid ${livestockType===lt.id?O.accent:O.faint}`,borderRadius:9,cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+                  <div style={{fontSize:28,marginBottom:4}}>{lt.emoji}</div>
+                  <div style={{fontSize:13,color:livestockType===lt.id?O.accent:O.muted,fontWeight:livestockType===lt.id?600:400}}>{lt.label}</div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 1: province hint visual */}
+          {step === 1 && (
+            <div style={{background:O.faint,borderRadius:9,padding:"10px 12px",marginBottom:16,fontSize:13,color:O.muted,lineHeight:1.6}}>
+              <span style={{color:O.accent,fontWeight:600}}>Tip:</span> Each province shows the recommended breeds, carrying capacity, and financial benchmarks for that exact region — not national averages.
+            </div>
+          )}
+
+          {/* Step 2: data quality tips */}
+          {step === 2 && (
+            <div style={{background:O.faint,borderRadius:9,padding:"10px 12px",marginBottom:16}}>
+              <div style={{fontSize:13,color:O.accent,fontWeight:600,marginBottom:6}}>Quick checklist</div>
+              {[
+                "✓ Use your real carcass / honey price — not a wish",
+                "✓ Start with your actual or planned flock size",
+                "✓ Check the Model tab to override feed and vet costs",
+              ].map((t,i)=>(
+                <div key={i} style={{fontSize:13,color:O.muted,marginBottom:3}}>{t}</div>
+              ))}
+            </div>
+          )}
+
+          {/* Step 3: report CTA */}
+          {step === 3 && (
+            <div style={{background:"rgba(212,181,90,.08)",border:`1px solid rgba(212,181,90,.2)`,borderRadius:9,padding:"10px 12px",marginBottom:16,fontSize:13,color:O.gold,lineHeight:1.6}}>
+              The report includes: 36-month cashflow · capital structure · breakeven analysis · risk assessment · implementation roadmap. Once-off R 497.
+            </div>
+          )}
+
+          <button className="glow-btn" onClick={next}
+            style={{width:"100%",padding:"12px",background:O.gold,color:O.bg,border:"none",borderRadius:9,fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px rgba(200,168,75,.25)`}}>
+            {isLast ? "Start exploring →" : step===0 ? `Continue with ${livestockType === "bees" ? "Bees" : livestockType === "cattle" ? "Cattle" : "Sheep"} →` : `Got it →`}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -2195,6 +2417,9 @@ function AgrimodelPro() {
   const [mapCollapsed,       setMapCollapsed]       = useState(false);
   const [showLivestockMenu,  setShowLivestockMenu]  = useState(false);
   const [livestockType,      setLivestockType]      = useState("sheep");
+  const [showTour,           setShowTour]           = useState(() => { try { return !localStorage.getItem("agri_toured"); } catch { return false; } });
+  const [operationMode,      setOperationMode]      = useState("breeding"); // "breeding" | "growout"
+  const [weanerPriceOverride,setWeanerPriceOverride]= useState(null);
   const mod  = LIVESTOCK_MODULES[livestockType] ?? LIVESTOCK_MODULES.sheep;
   const T    = mod.terms;
   const prov = selected ? mod.provinceData[selected] : null;
@@ -2293,6 +2518,8 @@ function AgrimodelPro() {
       setProductionSystem(def.system);
       setMarketChannel(def.market);
       setFeedSource(def.feed);
+      setOperationMode("breeding");
+      setWeanerPriceOverride(null);
       setActiveTab(0);
     }
   }, [selected]);
@@ -2345,7 +2572,8 @@ function AgrimodelPro() {
     const h = e => {
       if (e.key !== "Escape") return;
       if (reportStatus === "ready" || reportStatus === "error") { setReportStatus(null); return; }
-      if (showPay)      { setShowPay(false);      return; }
+      if (showTour)     { setShowTour(false);      return; }
+      if (showPay)      { setShowPay(false);       return; }
       if (showRestore)  { setShowRestore(false);   return; }
       if (showAdvisor)  { setShowAdvisor(false);   return; }
       setSelected(null);
@@ -2356,7 +2584,7 @@ function AgrimodelPro() {
 
   // Body scroll lock — prevent background page scroll when any overlay is open
   useEffect(() => {
-    const anyOpen = showPay || showRestore || showAdvisor || reportStatus === "loading" || reportStatus === "ready" || reportStatus === "error";
+    const anyOpen = showTour || showPay || showRestore || showAdvisor || reportStatus === "loading" || reportStatus === "ready" || reportStatus === "error";
     document.body.style.overflow = anyOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [showPay, showRestore, reportStatus]);
@@ -2364,14 +2592,18 @@ function AgrimodelPro() {
   const result = useMemo(() => {
     if (!prov) return null;
     const effectiveLabour = labourMode === "owner" ? labour : (prov.hired ?? 5594);
-    return mod.calcFn(prov, carcass, flockSize, effectiveLabour, prov.oh ?? 600, {
+    const extraCosts = {
       bond:           bondMonthly,
       feedOverride:   feedOverride,
       healthOverride: healthOverride,
       fencing:        fencingMonthly,
       misc:           miscMonthly,
-    });
-  }, [prov, carcass, flockSize, labour, labourMode, bondMonthly, feedOverride, healthOverride, fencingMonthly, miscMonthly, mod]);
+    };
+    if (operationMode === "growout" && mod.terms.unit !== "hive") {
+      return calcGrowOut(prov, carcass, flockSize, effectiveLabour, prov.oh ?? 600, extraCosts, weanerPriceOverride);
+    }
+    return mod.calcFn(prov, carcass, flockSize, effectiveLabour, prov.oh ?? 600, extraCosts);
+  }, [prov, carcass, flockSize, labour, labourMode, bondMonthly, feedOverride, healthOverride, fencingMonthly, miscMonthly, mod, operationMode, weanerPriceOverride]);
 
   const auditResult = useMemo(() => {
     if (!result || !prov) return null;
@@ -2437,6 +2669,7 @@ function AgrimodelPro() {
         } catch {}
         showToast("Access restored — welcome back!");
       }}/>}
+      {showTour && <OnboardingTour onDone={()=>setShowTour(false)} livestockType={livestockType} setLivestockType={(lt)=>{ setLivestockType(lt); setCarcass(LIVESTOCK_MODULES[lt]?.carcassDefault??87); setSelected(null); }}/>}
       {showPay && <PayModal region={selected} livestockType={livestockType} onClose={()=>setShowPay(false)} onSuccess={handlePaySuccess}/>}
       {showAdvisor && (
         <AdvisorWizard
@@ -2844,6 +3077,33 @@ function AgrimodelPro() {
                       ))}
                     </div>
                   )}
+                  {/* Bee subspecies info card */}
+                  {T.unit === "hive" && prov.subspecies && (
+                    <div style={{background: prov.subspecies==="capensis"?"rgba(90,154,220,.08)":prov.subspecies==="hybrid_zone"?"rgba(224,180,72,.08)":"rgba(122,204,58,.06)", border:`1px solid ${prov.subspecies==="capensis"?"rgba(90,154,220,.3)":prov.subspecies==="hybrid_zone"?"rgba(224,180,72,.3)":"rgba(122,204,58,.22)"}`, borderRadius:10, padding:"12px", marginBottom:8}}>
+                      <div style={{fontSize:13,color:prov.subspecies==="capensis"?"#5a9adc":prov.subspecies==="hybrid_zone"?PALETTE.gold:PALETTE.accent,textTransform:"uppercase",letterSpacing:.8,fontWeight:600,marginBottom:6}}>
+                        🐝 SUBSPECIES: {prov.subspecies==="capensis"?"Cape Honey Bee (Apis mellifera capensis)":prov.subspecies==="hybrid_zone"?"Hybrid Zone (capensis × scutellata)":"African Honey Bee (Apis mellifera scutellata)"}
+                      </div>
+                      {prov.subspecies === "capensis" && (
+                        <div style={{fontSize:13,color:PALETTE.muted,lineHeight:1.7}}>
+                          The Western Cape is <strong style={{color:"#f0ece0"}}>capensis territory</strong> — the Cape honey bee is gentler, produces larger honey yields on fynbos, and is commercially preferred here. Capensis workers can lay diploid eggs (thelytoky) — a unique reproductive trait found nowhere else on earth.<br/>
+                          <span style={{color:PALETTE.danger,fontWeight:600}}>⚠ Critical warning:</span> Never move capensis colonies to other provinces. Capensis workers introduced into scutellata colonies become "social parasites" — they lay eggs in the host colony and destroy it. This is a notifiable biosecurity risk in SA.
+                        </div>
+                      )}
+                      {prov.subspecies === "hybrid_zone" && (
+                        <div style={{fontSize:13,color:PALETTE.muted,lineHeight:1.7}}>
+                          The Eastern Cape is a <strong style={{color:"#f0ece0"}}>natural hybrid zone</strong> — both capensis (from the south and west) and scutellata (from the north) are present. Commercial operations near the coast behave more like capensis; inland operations behave more like scutellata.<br/>
+                          <span style={{color:PALETTE.gold,fontWeight:600}}>Management note:</span> Source local bees adapted to your specific sub-region. Avoid importing capensis colonies from the Western Cape into northern Eastern Cape areas — capensis social parasitism is a real risk in mixed-zone apiaries.
+                        </div>
+                      )}
+                      {prov.subspecies === "scutellata" && (
+                        <div style={{fontSize:13,color:PALETTE.muted,lineHeight:1.7}}>
+                          <strong style={{color:"#f0ece0"}}>African honey bee</strong> — the SA commercial standard for all provinces outside the Cape. Highly defensive, drought-hardy, excellent at managing Varroa through hygienic behaviour. Scutellata colonies abscond more readily under stress (drought, fire, heavy-handed handling) — stable water and forage are essential.<br/>
+                          <span style={{color:PALETTE.accent,fontWeight:600}}>Advantage:</span> Scutellata is the most productive bee in African conditions. Its defensive nature is manageable with proper protective equipment and gentle handling technique.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div style={{fontSize:14,color:PALETTE.dim,textAlign:"center",marginTop:8,lineHeight:1.6}}>
                     {T.unit==="hive"
                       ? "Full honey variety analysis and market pricing in the PDF report →"
@@ -2858,6 +3118,51 @@ function AgrimodelPro() {
                   <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>
                     {prov.primary[0]} · adjust inputs to model your scenario
                   </div>
+                  {/* Grow-out / breeding mode toggle — sheep and cattle only */}
+                  {T.unit !== "hive" && (
+                    <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:10,padding:"12px",marginBottom:12}}>
+                      <div style={{fontSize:14,color:PALETTE.muted,textTransform:"uppercase",letterSpacing:.7,marginBottom:5}}>Operation Mode</div>
+                      <div style={{display:"flex",gap:4,marginBottom:operationMode==="growout"?10:0}}>
+                        {[
+                          {id:"breeding", l:"Breeding flock", sub:`Start from ${T.units} / full herd`},
+                          {id:"growout",  l:"Buy & finish",   sub:`Buy weaners · grow to slaughter`},
+                        ].map(m=>(
+                          <button key={m.id} onClick={()=>setOperationMode(m.id)}
+                            style={{flex:1,padding:"6px 8px",background:operationMode===m.id?PALETTE.dim:"transparent",border:`1px solid ${operationMode===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
+                            <div style={{fontSize:13,color:operationMode===m.id?PALETTE.accent:PALETTE.muted,fontWeight:operationMode===m.id?600:400}}>{m.l}</div>
+                            <div style={{fontSize:12,color:PALETTE.dim}}>{m.sub}</div>
+                          </button>
+                        ))}
+                      </div>
+                      {operationMode === "growout" && (
+                        <div style={{borderTop:`1px solid ${PALETTE.faint}`,paddingTop:9}}>
+                          <div style={{fontSize:13,color:PALETTE.muted,marginBottom:6,lineHeight:1.5}}>
+                            Buy-and-finish model: purchase {T.youngs} at weaning weight, grow to slaughter, sell.
+                            {T.unit === "ewe" ? " ~2.2 cycles/year (165 days/cycle)." : " ~1.3 cycles/year (280 days/cycle)."}
+                            <span style={{color:PALETTE.gold}}> Lower capital, faster first revenue — ideal for small-scale entry.</span>
+                          </div>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                            <div>
+                              <div style={{fontSize:13,color:PALETTE.dim,marginBottom:3}}>Weaner buy price/head</div>
+                              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                                <span style={{fontSize:14,color:PALETTE.dim}}>R</span>
+                                <input type="number" value={weanerPriceOverride ?? (prov?.weanerPrice ?? (T.unit==="cow"?5500:600))}
+                                  onChange={e=>setWeanerPriceOverride(e.target.value>0?Number(e.target.value):null)}
+                                  style={{width:"100%",padding:"7px 9px",background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,color:PALETTE.text,fontSize:15,fontFamily:"'DM Mono',monospace"}}/>
+                              </div>
+                              <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>Default: {ZAR(prov?.weanerPrice ?? (T.unit==="cow"?5500:600))} (province avg)</div>
+                            </div>
+                            <div style={{background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"7px 9px"}}>
+                              <div style={{fontSize:12,color:PALETTE.dim,marginBottom:3}}>Capital required</div>
+                              <div style={{fontSize:16,color:PALETTE.gold,fontFamily:"'Playfair Display',serif",fontWeight:700}}>{result ? ZAR(result.capital) : "—"}</div>
+                              <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>vs {ZAR(prov ? prov.ewePrice * flockSize : 0)} breeding flock</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Inputs */}
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:10,padding:"12px",marginBottom:12}}>
                     <div style={{marginBottom:9}}>
