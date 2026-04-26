@@ -104,6 +104,8 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     productionSystem = "extensive",
     marketChannel    = "auction",
     feedSource       = "mixed",
+    operationMode    = "breeding",
+    weanerPrice      = null,
   } = inputs;
 
   // Apply client inputs with floors and fallbacks
@@ -167,6 +169,73 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     const beAdj = (rAdj - varPE) > 0 ? Math.ceil(fa / (rAdj - varPE)) : null;
     return { pct, adj, pp: pAdj, fp: pAdj * flock, roi: pAdj / r.ewePrice, be: beAdj };
   });
+  // ── Grow-out (buy-and-finish) branch ─────────────────────────────────────────
+  if (operationMode === "growout" && r.liveKg !== undefined) {
+    const isCattle      = r.liveKg >= 200;
+    const cyclesPerYear = isCattle ? 1.3 : 2.2;
+    const growDays      = isCattle ? 280 : 165;
+    const goWPrice      = weanerPrice ?? (r.weanerPrice ?? (isCattle ? 5500 : 600));
+    const goFeed        = feedCost * 1.35;
+    const goHealth      = healthCost * 0.75;
+    const carcassKgGO   = r.liveKg * (r.dressing / 100);
+    const revPerAnimal  = carcassKgGO * carcass;
+    const annualRevPS   = revPerAnimal * cyclesPerYear;  // revenue per batch slot per year
+    const wearerCostPY  = goWPrice * cyclesPerYear;
+    const fixedAnnualGO = (lab + r.oh) * 12;
+    const labShareGO    = fixedAnnualGO / flock;
+    const totalCostPS   = wearerCostPY + goFeed + goHealth + labShareGO;
+    const profitPS      = annualRevPS - totalCostPS;
+    const roiGO         = profitPS / goWPrice;
+    const varMarginPA   = revPerAnimal - goWPrice - goFeed / cyclesPerYear - goHealth / cyclesPerYear;
+    const varMarginPY   = varMarginPA * cyclesPerYear;
+    const beGO          = varMarginPY > 0 ? Math.ceil(fixedAnnualGO / varMarginPY) : null;
+    const weanerBatch   = flock * goWPrice;
+    const cycleMonths   = Math.round(12 / cyclesPerYear);
+    const growMonths    = Math.round(growDays / 30);
+    const monthlyOpex   = (goFeed / 12 + goHealth / 12) * flock + lab + r.oh;
+    const workingCap    = Math.round(monthlyOpex * growMonths);
+    const capitalGO     = weanerBatch + workingCap;
+    const npv5GO        = [-weanerBatch, ...Array(5).fill(profitPS * flock)]
+      .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+    const scalePointsGO = isCattle ? [5, 10, 20, 50, 100, 200] : [10, 20, 50, 100, 200, 500];
+    const scaleRowsGO   = scalePointsGO.map(n => {
+      const ls = fixedAnnualGO / n;
+      const p  = annualRevPS - wearerCostPY - goFeed - goHealth - ls;
+      return { n, pp: p, fp: p * n, rev: annualRevPS * n, roi: p / goWPrice, cap: n * goWPrice + workingCap, ok: p > 0 };
+    });
+    const batchRev = revPerAnimal * flock;
+    const cf36GO = Array.from({ length: 36 }, (_, i) => {
+      const m = i + 1;
+      const isHarv = m % cycleMonths === 0;
+      const rev = isHarv ? batchRev : 0;
+      return { m, mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), rev, lambRev: rev, woolRev: 0, cost: monthlyOpex, profit: rev - monthlyOpex, events: isHarv ? "Harvest & restock" : "" };
+    });
+    let cumGO = -weanerBatch;
+    cf36GO.forEach(row => { cumGO += row.profit; row.cum = Math.round(cumGO); });
+    const firstPositiveGO = cf36GO.find(row => row.rev > 0) ?? null;
+    const sensRowsGO = [-20,-15,-10,-5,0,5,10,15,20].map(pct => {
+      const adjC = carcass * (1 + pct / 100);
+      const adjR = carcassKgGO * adjC * cyclesPerYear;
+      const adjP = adjR - wearerCostPY - goFeed - goHealth - labShareGO;
+      const adjVm = (carcassKgGO * adjC - goWPrice - goFeed / cyclesPerYear - goHealth / cyclesPerYear) * cyclesPerYear;
+      const adjBe = adjVm > 0 ? Math.ceil(fixedAnnualGO / adjVm) : null;
+      return { pct, adj: adjC, pp: adjP, fp: adjP * flock, roi: adjP / goWPrice, be: adjBe };
+    });
+    return {
+      r, flock, lm, carcass, lab, fa: fixedAnnualGO,
+      revPE: annualRevPS, varPE: wearerCostPY + goFeed + goHealth, vm: varMarginPY,
+      be: beGO, pp: profitPS, capital: capitalGO, npv5: npv5GO,
+      scaleRows: scaleRowsGO, cfRows: cf36GO, firstPositive: firstPositiveGO,
+      sensRows: sensRowsGO, mc: monthlyOpex,
+      feedCost: goFeed, healthCost: goHealth,
+      productionSystem, marketChannel, feedSource,
+      yr1: cf36GO[11]?.cum ?? 0,
+      yr2: cf36GO[23]?.cum ?? 0,
+      yr3: cf36GO[35]?.cum ?? 0,
+      isGrowOut: true, cyclesPerYear, weanerPrice: goWPrice, growDays,
+    };
+  }
+
   return {
     r, flock, lm, carcass,
     lab, ck, lpe, fa, revPE, varPE, vm, be, pp, capital, npv5,
@@ -182,7 +251,157 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
 function generateSheepReport(reportData, buyerName, T) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
           scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
-          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
+          feedCost, healthCost, productionSystem, marketChannel, feedSource,
+          isGrowOut, cyclesPerYear, weanerPrice: goWPrice } = reportData;
+
+  // ── Grow-out mode: completely different narrative ─────────────────────────
+  if (isGrowOut) {
+    const lmNote  = lm === "owner" ? `owner-operated (${ZAR(lab)}/mo notional)` : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024)`;
+    const s20     = sensRows.find(s => s.pct === -20);
+    const verdict = pp > 0
+      ? `VIABLE — this ${flock}-slot buy-and-finish operation in ${r.name} generates ${ZAR(pp)}/slot/year net (${PCT(pp / goWPrice)} ROI on weaner capital).`
+      : `MARGINAL — at ${flock} batch slots, this operation falls below the ${be ?? "?"}-slot breakeven. Purchase cost and fixed overhead exceed current margin. Scale to at least ${be ?? flock + 10} slots or reduce weaner purchase price before committing capital.`;
+    const bankRatingGO = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+    const scaleStr = scaleRows.filter((_,i) => i % 2 === 0)
+      .map(rw => `${rw.n} slots: profit/slot ${ZAR(rw.pp)} · batch profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? "VIABLE" : "BELOW BE"}`)
+      .join("\n");
+    const sensTable = sensRows.filter(s => [-20,-10,0,10,20].includes(s.pct))
+      .map(s => `  ${s.pct>0?"+":""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/slot ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be||"∞"} slots`)
+      .join("\n");
+    const cfTable = cfRows.filter(r => r.rev > 0 || r.m === 1 || r.m % 12 === 0)
+      .map(rw => `Mo ${rw.m} (${rw.mo} Yr${rw.yr}): Rev ${ZAR(rw.rev)} · Cost ${ZAR(rw.cost)} · P&L ${ZAR(rw.profit)} · Cum ${ZAR(rw.cum)}`)
+      .join("\n");
+    const TITLES = [
+      "Executive Summary", "Regional Analysis", "Breed Analysis",
+      "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+      "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+      "Capital Structure & Financing", "Implementation Roadmap",
+    ];
+    const bodies = [
+      `${verdict}
+
+Operation profile: ${flock} ${r.breed} batch slots — buy-and-finish in ${r.name}. ${cyclesPerYear.toFixed(1)} cycles/year (~${Math.round(365/cyclesPerYear)} days/cycle). Production system: ${productionSystem} · Market: ${marketChannel} · Labour: ${lmNote}. Carcass basis: R${carcass}/kg A2 (AgriOrbit Apr 2025).
+
+Key financials: Revenue ${ZAR(revPE)}/slot/yr · Variable cost (incl. weaners) ${ZAR(varPE)}/slot · Variable margin ${ZAR(vm)}/slot · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} slots · Profit/slot ${ZAR(pp)}/yr · Batch profit ${ZAR(pp*flock)}/yr · ROI on weaner capital ${PCT(pp/goWPrice)} · Capital required ${ZAR(capital)} · 5-year NPV at 10%: ${ZAR(npv5)}.
+
+Weaner purchase price used: ${ZAR(goWPrice)}/head. First revenue: Month ${firstPositive?.m ?? cyclesPerYear <= 1.5 ? 7 : 6}.
+
+Three-year trajectory: Year 1 cumulative ${ZAR(yr1)}. Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. Sustainable annual batch profit from Year 2: ${ZAR(pp*flock)}/yr.
+
+Land Bank bankability rating: ${bankRatingGO}. ${bankRatingGO === "STRONG" ? "Strong cash-on-cash return with rapid capital turnover." : bankRatingGO === "MODERATE" ? "Viable but scale up — margin improves rapidly as fixed costs are diluted across more slots." : `Below the ${be}-slot breakeven — increase batch size or negotiate lower weaner purchase price before committing capital.`}`,
+
+      `${r.name} — ${r.climate}.
+
+Buy-and-finish context: ${r.name} suits batch operations where market proximity or intensive feed availability makes rapid turnover viable. Carcass price basis: R${carcass}/kg A2. Transport to abattoir: R15–45/animal (calculate exact distance cost).
+
+Market infrastructure: ${r.market}.
+
+${r.tip ? `Provincial insight: ${r.tip}` : ""}`,
+
+      `${r.breed} — buy-and-finish parameters used in this model.
+
+Carcass weight: ${Math.round(r.liveKg * r.dressing / 100)} kg (${r.liveKg} kg live × ${r.dressing}% dressing).
+Revenue per animal at R${carcass}/kg: ${ZAR(Math.round(r.liveKg * r.dressing / 100 * carcass))}.
+Cycles per year: ${cyclesPerYear.toFixed(1)} (~${Math.round(365/cyclesPerYear)}-day grow period).
+Annual revenue per batch slot: ${ZAR(Math.round(revPE))}.
+
+Weaner sourcing: ${BREED_SOURCES[r.breed] || BREED_SOURCES["_default"]}`,
+
+      `Buy-and-finish model assumptions — conservative, Land Bank-style benchmark.
+
+Revenue assumptions:
+• Weaner purchase price: ${ZAR(goWPrice)}/head
+• Slaughter weight: ${r.liveKg} kg live · Dressing: ${r.dressing}% · Carcass: ${Math.round(r.liveKg * r.dressing / 100)} kg
+• Carcass price: R${carcass}/kg A2 (AgriOrbit Apr 2025 — verify before finalising)
+• Cycles/year: ${cyclesPerYear.toFixed(1)} (~${Math.round(365/cyclesPerYear)}-day grow-out period)
+
+Cost assumptions:
+• Feed: ${ZAR(Math.round(feedCost))}/slot/yr (35% above breeding benchmark for intensive grow diet)
+• Health/vet: ${ZAR(Math.round(healthCost))}/slot/yr (25% below breeding — no reproductive costs)
+• Labour: ${lmNote}
+• Overhead: ${ZAR(r.oh ?? 600)}/mo — water, fuel, repairs, electricity, insurance
+
+Variable margin of ${ZAR(vm)}/slot/year is the critical number. Every slot above breakeven (${be ?? "N/A"}) drops ${ZAR(vm)} straight to profit.`,
+
+      `Buy-and-finish cashflow — ${flock} batch slots at ${cyclesPerYear.toFixed(1)} cycles/year.
+
+Revenue arrives at the end of each grow cycle (~month ${Math.round(12/cyclesPerYear)}).
+Monthly operating cost: ${ZAR(Math.round(mc))}.
+Initial weaner purchase: ${ZAR(flock * goWPrice)}.
+
+Key cashflow milestones:
+${cfTable}
+
+Year 1 cumulative: ${ZAR(yr1)}. Year 2: ${ZAR(yr2)}. Year 3: ${ZAR(yr3)}.
+
+Working capital requirement: ${ZAR(capital)} (weaner purchase + ${Math.round(365/cyclesPerYear)}-day operating costs + 15% contingency).`,
+
+      `Breakeven: ${be ?? "N/A"} batch slots. Variable margin ${ZAR(vm)}/slot/yr covers fixed overhead of ${ZAR(fa)}/yr at this scale.
+
+${scaleStr}
+
+Your position: ${flock} slots${be && flock < be ? ` — ${be - flock} slots below breakeven` : be ? ` — ${flock - be} slots above breakeven` : ""}.
+
+At what scale does this become a primary income? ${vm > 0 ? `${Math.round((fa + 180000) / vm)} slots generate approximately R180,000/year net.` : "Improve variable margin first."}`,
+
+      `1. PRICE RISK (High probability, manageable)
+${sensTable}
+
+2. SOURCING RISK
+Weaner price volatility is the biggest input cost variable. Lock in supply agreements with 2–3 established farms in ${r.name}. A 10% weaner price increase reduces profit by ${ZAR(Math.round(goWPrice * cyclesPerYear * 0.1))}/slot/yr.
+
+3. WEIGHT RISK
+Growth rate shortfalls reduce revenue directly. Weigh animals at intake and at 30-day intervals — remove underperforming animals early.
+
+4. DISEASE RISK
+Internal parasites are the primary health cost in grow-out. FAMACHA-based dosing at entry, mid-cycle, and pre-slaughter. Budget: ${ZAR(Math.round(healthCost))}/slot/yr.`,
+
+      `Total capital required: ${ZAR(capital)}.
+
+Weaner purchase component: ${ZAR(flock * goWPrice)} (${flock} × ${ZAR(goWPrice)}/head)
+Working capital (${Math.round(365/cyclesPerYear)}-day grow-out period): ${ZAR(capital - flock * goWPrice)}
+
+Financing options:
+• Short-term livestock finance (FNB Agri, ABSA Agri): 3–6 month term aligned to grow cycle — most appropriate structure.
+• Own capital preferred: ROI of ${PCT(pp/goWPrice)} on weaner cost makes this self-funding within 2 cycles if initial capital is available.
+• Land Bank production loan: applicable if integrated with own property and breeding stock.
+
+Cash-on-cash payback: ${pp > 0 ? `${(goWPrice / pp).toFixed(1)} years on weaner capital` : "not yet viable at current scale"}.`,
+
+      `MONTHS 1–2 — Setup:
+• Secure pen space, water, and handling equipment
+• Source ${flock} weaners at target weight (${Math.round(r.liveKg * 0.4)}–${Math.round(r.liveKg * 0.5)} kg intake)
+• Book abattoir slot for target slaughter date
+
+MONTH 1 — Weaner intake:
+• Weigh every animal at intake — discard underweight
+• Dose at intake: broad-spectrum anthelmintic + vitamin booster
+• Record: weight, date, batch number
+
+MONTHS 2–${Math.round(12/cyclesPerYear)} — Grow phase:
+• Monitor weight gain weekly (target ${Math.round((r.liveKg - r.liveKg * 0.45) / (365/cyclesPerYear/30))} kg/month)
+• FAMACHA score and dose at month 2 and mid-cycle
+• Adjust feed if animals fall below growth curve
+
+MONTH ${Math.round(12/cyclesPerYear)} — Harvest:
+• Grade animals — only send animals above ${Math.round(r.liveKg * 0.9)} kg to abattoir
+• Negotiate directly if volume exceeds 10 animals
+• Immediately restock next batch
+
+FIVE ACTIONS THIS WEEK:
+1. Get 3 quotes from weaner suppliers in ${r.name} — compare price per kg intake weight
+2. Visit target abattoir — confirm booking process and minimum animal requirements
+3. Check pen capacity: ${flock} animals at ${Math.round(r.liveKg * 0.5)} kg need ${Math.round(flock * 2.5)} m² minimum
+4. Open a dedicated batch account — track cash separately from household
+5. Calculate exact transport cost per animal to your nearest abattoir`,
+    ];
+    return {
+      sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+      raw: bodies.join("\n\n"),
+      reportData, buyerName, generatedAt: new Date().toISOString(), isSandbox: false,
+    };
+  }
+
   const lmNote = lm === "owner"
     ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo for reference)`
     : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL + housing allowance R800)`;
@@ -680,7 +899,64 @@ FIVE ACTIONS THIS WEEK:
 function generateCattleReport(reportData, buyerName, T) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
           scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
-          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
+          feedCost, healthCost, productionSystem, marketChannel, feedSource,
+          isGrowOut, cyclesPerYear, weanerPrice: goWPrice } = reportData;
+
+  // ── Grow-out (buy-and-finish) mode ────────────────────────────────────────
+  if (isGrowOut) {
+    const lmNote  = lm === "owner" ? `owner-operated (${ZAR(lab)}/mo notional)` : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024)`;
+    const carcassKgGO = Math.round(r.liveKg * r.dressing / 100);
+    const verdict = pp > 0
+      ? `VIABLE — this ${flock}-slot buy-and-finish cattle operation in ${r.name} generates ${ZAR(pp)}/slot/year net (${PCT(pp/goWPrice)} ROI on calf capital).`
+      : `MARGINAL — at ${flock} slots, this operation falls below the ${be ?? "?"}-slot breakeven. Increase to at least ${be ?? flock + 5} slots or reduce calf purchase price before committing capital.`;
+    const bankRatingGO = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+    const scaleStr = scaleRows.filter((_,i) => i % 2 === 0)
+      .map(rw => `${rw.n} slots: profit/slot ${ZAR(rw.pp)} · batch profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? "VIABLE" : "BELOW BE"}`)
+      .join("\n");
+    const sensTable = sensRows.filter(s => [-20,-10,0,10,20].includes(s.pct))
+      .map(s => `  ${s.pct>0?"+":""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/slot ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be||"∞"} slots`)
+      .join("\n");
+    const TITLES = [
+      "Executive Summary", "Regional Analysis", "Breed Analysis",
+      "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+      "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+      "Capital Structure & Financing", "Implementation Roadmap",
+    ];
+    const bodies = [
+      `${verdict}
+
+Operation: ${flock} ${r.breed} calf slots — buy-and-finish in ${r.name}. ${cyclesPerYear.toFixed(1)} cycles/year (~${Math.round(365/cyclesPerYear)}-day grow period). System: ${productionSystem} · Market: ${marketChannel} · Labour: ${lmNote}. Carcass basis: R${carcass}/kg.
+
+Key financials: Revenue ${ZAR(revPE)}/slot/yr · Variable cost (incl. calves) ${ZAR(varPE)}/slot · Variable margin ${ZAR(vm)}/slot · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} slots · Profit/slot ${ZAR(pp)}/yr · Batch profit ${ZAR(pp*flock)}/yr · ROI ${PCT(pp/goWPrice)} on calf capital · Capital required ${ZAR(capital)} · 5-yr NPV: ${ZAR(npv5)}.
+
+Calf purchase price: ${ZAR(goWPrice)}/head. Slaughter weight: ${r.liveKg} kg · Carcass: ${carcassKgGO} kg.
+
+Three-year trajectory: Year 1 ${ZAR(yr1)} · Year 2 ${ZAR(yr2)} · Year 3 ${ZAR(yr3)}. Sustainable batch profit from Year 2: ${ZAR(pp*flock)}/yr.
+
+Land Bank bankability: ${bankRatingGO}. ${bankRatingGO !== "MARGINAL" ? "Short-term livestock finance aligned to grow cycle is the appropriate instrument." : `Scale to ${be} slots minimum before approaching lenders.`}`,
+
+      `${r.name} — ${r.climate}.\n\nMarket infrastructure: ${r.market}.\n\n${r.tip ? `Provincial insight: ${r.tip}` : ""}`,
+
+      `${r.breed} — buy-and-finish parameters.\n\nCarcass: ${carcassKgGO} kg (${r.liveKg} kg × ${r.dressing}%). Revenue/animal at R${carcass}/kg: ${ZAR(carcassKgGO * carcass)}.\n\n${CATTLE_BREED_SOURCES[r.breed] || CATTLE_BREED_SOURCES["_default"]}`,
+
+      `Buy-and-finish model assumptions.\n\n• Calf purchase: ${ZAR(goWPrice)}/head\n• Cycles/year: ${cyclesPerYear.toFixed(1)} (~${Math.round(365/cyclesPerYear)} days)\n• Feed: ${ZAR(Math.round(feedCost))}/slot/yr (intensive grow diet)\n• Health: ${ZAR(Math.round(healthCost))}/slot/yr (tick control, vaccinations)\n• Labour: ${lmNote}\n• Overhead: ${ZAR(r.oh ?? 600)}/mo\n\nVariable margin ${ZAR(vm)}/slot/yr — every slot above ${be ?? "N/A"} is pure profit.`,
+
+      `36-month cashflow — revenue arrives every ~${Math.round(12/cyclesPerYear)} months.\n\nMonthly operating cost: ${ZAR(Math.round(mc))}. Initial calf purchase: ${ZAR(flock * goWPrice)}.\n\nYear 1 cumulative: ${ZAR(yr1)}. Year 2: ${ZAR(yr2)}. Year 3: ${ZAR(yr3)}.\n\nWorking capital required: ${ZAR(capital)}.`,
+
+      `Breakeven: ${be ?? "N/A"} slots.\n\n${scaleStr}`,
+
+      `Price sensitivity (carcass price ±%):\n${sensTable}\n\nPurchase price risk: R500 increase in calf price reduces profit by ${ZAR(Math.round(500 * cyclesPerYear))}/slot/yr — negotiate forward supply agreements.`,
+
+      `Total capital: ${ZAR(capital)}.\n\nCalf purchase: ${ZAR(flock * goWPrice)}\nWorking capital (${Math.round(365/cyclesPerYear)}-day period): ${ZAR(capital - flock * goWPrice)}\n\nBest instrument: short-term livestock finance (FNB Agri, ABSA Agri) with 6–9 month term aligned to harvest. Cash-on-cash payback: ${pp > 0 ? `${(goWPrice/pp).toFixed(1)} years` : "not yet viable"}.`,
+
+      `Month 1 — Calf intake:\n• Source ${flock} weaner calves at ${ZAR(goWPrice)}/head\n• Weigh, tag, dose on arrival\n• 14-day quarantine before joining existing animals\n\nMonths 2–${Math.round(12/cyclesPerYear)} — Grow phase:\n• Target ${Math.round((r.liveKg * 0.55) / (365/cyclesPerYear/30))} kg/month gain\n• FAMACHA and tick monitoring weekly\n• Tick control critical in ${r.name}\n\nMonth ${Math.round(12/cyclesPerYear)} — Harvest & restock:\n• Grade and book abattoir 2–3 weeks in advance\n• Immediately restock next batch\n\nFIVE ACTIONS:\n1. Source calves — 3 supplier quotes in ${r.name}\n2. Book abattoir slot\n3. Verify pen capacity (${flock} animals, ${Math.round(flock * 5)} m² minimum)\n4. Open dedicated batch account\n5. Register for tick control programme with local vet`,
+    ];
+    return {
+      sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+      raw: bodies.join("\n\n"),
+      reportData, buyerName, generatedAt: new Date().toISOString(), isSandbox: false,
+    };
+  }
 
   const calvesPerYear = Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.85);
   const carcassKg     = Math.round(r.liveKg * r.dressing / 100);
