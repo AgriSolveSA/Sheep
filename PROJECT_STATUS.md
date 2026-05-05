@@ -64,7 +64,7 @@ A South African livestock farming profitability platform. A farmer selects a pro
 | Module | Score | What's missing |
 |--------|-------|----------------|
 | 🐑 Sheep | 100% | Complete — all 9 sections fully parameterized via T terms object |
-| 🐄 Beef Cattle | 72% | Report prompt text still sheep-centric in ~4 of 9 sections |
+| 🐄 Beef Cattle | 100% | Complete — T-parameterized, FAMACHA bug fixed, all 9 sections cattle-specific |
 | 🐝 Bees | 68% | Report language issues in sections 1, 5, 6, 7 |
 | 🐐 Goats | 80% | Module active. Grow-out mode uses sheep path (numerically correct). Report sections could be tightened; no Angora/dairy goat variant |
 | 🐖 Pigs | 30% | BENCH sow entry · FCR/farrowing cycle model · Report text |
@@ -87,7 +87,7 @@ A South African livestock farming profitability platform. A farmer selects a pro
 ### Module Completeness
 
 - **Sheep (100%) ✅** — All 9 sections fully parameterized via T terms object. `generateSheepReport` now serves as a clean generic base template with no hardcoded species strings in financial outputs.
-- **Cattle (72%):** Language pass on breeding report sections (currently sheep-centric in ~4 of 9)
+- **Cattle (100%) ✅** — All 9 sections parameterized via T, FAMACHA replaced with cattle-correct tick count protocol, "sheep operations" comparison removed.
 - **Bees (68%):** Language pass on sections 1, 5, 6, 7
 - **Goats (80%):** Grow-out kid-finishing terminology pass; optional Angora/Savanna variant
 - **Pigs, Poultry, Dairy:** Full model + report work required before activation
@@ -128,7 +128,7 @@ A South African livestock farming profitability platform. A farmer selects a pro
 ## Recommended Build Order
 
 1. ~~**Sheep 100%**~~ ✅ Done
-2. **Cattle + Bees language pass** — cattle breeding sections (4 of 9) + bees sections 1/5/6/7
+2. ~~**Cattle + Bees language pass**~~ Cattle ✅ Done — Bees sections 1/5/6/7 still pending
 3. **Backend + ITN handler** — serverless function (Vercel/Netlify) that receives PayFast POST, validates signature, stores `{ accessCode, email, paid:true, timestamp }` in a database or KV store, sends email with code + report link
 4. **Email delivery** — Resend or SendGrid: send access code + summary PDF on confirmed payment
 5. **Real Claude API report** — backend endpoint receives report data, calls `claude-sonnet-4-6`, streams 9 sections back; gate behind confirmed payment

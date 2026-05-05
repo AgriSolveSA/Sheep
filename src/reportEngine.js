@@ -972,7 +972,7 @@ Land Bank bankability: ${bankRatingGO}. ${bankRatingGO !== "MARGINAL" ? "Short-t
 
       `Total capital: ${ZAR(capital)}.\n\nCalf purchase: ${ZAR(flock * goWPrice)}\nWorking capital (${Math.round(365/cyclesPerYear)}-day period): ${ZAR(capital - flock * goWPrice)}\n\nBest instrument: short-term livestock finance (FNB Agri, ABSA Agri) with 6–9 month term aligned to harvest. Cash-on-cash payback: ${pp > 0 ? `${(goWPrice/pp).toFixed(1)} years` : "not yet viable"}.`,
 
-      `Month 1 — Calf intake:\n• Source ${flock} weaner calves at ${ZAR(goWPrice)}/head\n• Weigh, tag, dose on arrival\n• 14-day quarantine before joining existing animals\n\nMonths 2–${Math.round(12/cyclesPerYear)} — Grow phase:\n• Target ${Math.round((r.liveKg * 0.55) / (365/cyclesPerYear/30))} kg/month gain\n• FAMACHA and tick monitoring weekly\n• Tick control critical in ${r.name}\n\nMonth ${Math.round(12/cyclesPerYear)} — Harvest & restock:\n• Grade and book abattoir 2–3 weeks in advance\n• Immediately restock next batch\n\nFIVE ACTIONS:\n1. Source calves — 3 supplier quotes in ${r.name}\n2. Book abattoir slot\n3. Verify pen capacity (${flock} animals, ${Math.round(flock * 5)} m² minimum)\n4. Open dedicated batch account\n5. Register for tick control programme with local vet`,
+      `Month 1 — Calf intake:\n• Source ${flock} weaner calves at ${ZAR(goWPrice)}/head\n• Weigh, tag, dose on arrival\n• 14-day quarantine before joining existing animals\n\nMonths 2–${Math.round(12/cyclesPerYear)} — Grow phase:\n• Target ${Math.round((r.liveKg * 0.55) / (365/cyclesPerYear/30))} kg/month gain\n• Weekly tick count inspection — treat immediately if >10 ticks/animal\n• Tick control critical in ${r.name}\n\nMonth ${Math.round(12/cyclesPerYear)} — Harvest & restock:\n• Grade and book abattoir 2–3 weeks in advance\n• Immediately restock next batch\n\nFIVE ACTIONS:\n1. Source calves — 3 supplier quotes in ${r.name}\n2. Book abattoir slot\n3. Verify pen capacity (${flock} animals, ${Math.round(flock * 5)} m² minimum)\n4. Open dedicated batch account\n5. Register for tick control programme with local vet`,
     ];
     return {
       sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
@@ -988,18 +988,18 @@ Land Bank bankability: ${bankRatingGO}. ${bankRatingGO !== "MARGINAL" ? "Short-t
     ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo)`
     : `hired manager at ${ZAR(r.hired)}/mo (BCEA 2024 Farm Worker Sectoral Determination)`;
   const feedNote   = feedCost !== r.feed
-    ? `${ZAR(feedCost)}/cow/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
-    : `${ZAR(feedCost)}/cow/yr — Land Bank extensive benchmark including salt licks, drought supplement, and creep feed for calves. Actual costs in drought years can reach ${ZAR(Math.round(feedCost * 2))}/cow.`;
+    ? `${ZAR(feedCost)}/${T.unit}/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/${T.unit}/yr — Land Bank extensive benchmark including salt licks, drought supplement, and creep feed for calves. Actual costs in drought years can reach ${ZAR(Math.round(feedCost * 2))}/${T.unit}.`;
   const healthNote = healthCost !== r.health
-    ? `${ZAR(healthCost)}/cow/yr — client-specified (province benchmark: ${ZAR(r.health)})`
-    : `${ZAR(healthCost)}/cow/yr — covers tick control, dipping/pour-on, annual vaccinations, pregnancy diagnosis, and emergency vet allowance. High-tick-pressure environments regularly reach ${ZAR(Math.round(healthCost * 1.4))}.`;
+    ? `${ZAR(healthCost)}/${T.unit}/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/${T.unit}/yr — covers tick control, dipping/pour-on, annual vaccinations, pregnancy diagnosis, and emergency vet allowance. High-tick-pressure environments regularly reach ${ZAR(Math.round(healthCost * 1.4))}.`;
   const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
   const s20 = sensRows.find(s => s.pct === -20);
   const s10 = sensRows.find(s => s.pct === -10);
   const scaleVi = scaleRows.find(rw => rw.ok);
   const viabilityVerdict = pp > 0
-    ? `VIABLE — this ${flock}-cow ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/cow/year net (${PCT(pp / r.ewePrice)} ROI on cow capital).`
-    : `MARGINAL — at ${flock} cows, this herd falls below the ${be ?? "?"}-cow breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered at this scale. Increasing to at least ${be ?? flock + 10} cows is the single most critical action before committing capital.`;
+    ? `VIABLE — this ${flock}-${T.unit} ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/${T.unit}/year net (${PCT(pp / r.ewePrice)} ROI on ${T.unit} capital).`
+    : `MARGINAL — at ${flock} ${T.units}, this ${T.group} falls below the ${be ?? "?"}-${T.unit} breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered at this scale. Increasing to at least ${be ?? flock + 10} ${T.units} is the single most critical action before committing capital.`;
   const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
   const ccGuide = CATTLE_CC[r.name] || `4–8 ha/LSU depending on veld type — obtain a professional carrying-capacity assessment before stocking`;
   const breedSource = (CATTLE_BREED_SOURCES[r.breed] || CATTLE_BREED_SOURCES["_default"]);
@@ -1007,10 +1007,10 @@ Land Bank bankability: ${bankRatingGO}. ${bankRatingGO !== "MARGINAL" ? "Short-t
     ? `Drought is the defining operational risk in ${r.name}. Carry a 90-day emergency feed reserve at all times — ${ZAR(Math.round(feedCost / 12 * 3 * flock))} for your herd at current feed cost. Set a clear destocking trigger at 50% of normal rainfall: selling cattle at 70c in the rand during drought is far cheaper than feeding them at full cost until they die. AgriSure CP (Comprehensive Plan) coverage is mandatory — register before the season opens. Drought camps (kept completely rested until emergency) add carrying capacity resilience at near-zero cost.`
     : `Drought management is important but less acute in ${r.name}. Maintain a 60-day feed reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your herd). AgriSure CP is recommended. Key discipline: move cattle off depleted camps before overgrazing damages veld — recovery from overgrazing takes 3–5 years.`;
   const scaleStr = scaleRows.filter((_, i) => i % 2 === 0)
-    .map(rw => `${rw.n} cows: profit/cow ${ZAR(rw.pp)} · herd profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.12 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
+    .map(rw => `${rw.n} ${T.units}: profit/${T.unit} ${ZAR(rw.pp)} · ${T.group} profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.12 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
     .join("\n");
   const sensTable = sensRows.filter(s => [-20, -10, 0, 10, 20].includes(s.pct))
-    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/cow ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} cows`)
+    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/${T.unit} ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} ${T.units}`)
     .join("\n");
   const primaryIncomeScale = vm > 0 ? Math.round((fa + 300000) / vm) : "N/A";
 
@@ -1029,22 +1029,22 @@ Land Bank bankability: ${bankRatingGO}. ${bankRatingGO !== "MARGINAL" ? "Short-t
   const bodies = [
     `${viabilityVerdict}
 
-Operation profile: ${flock} ${r.breed} cows in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg A2 dressed beef (AgriOrbit Apr 2025 benchmark).
+Operation profile: ${flock} ${r.breed} ${T.units} in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg A2 dressed beef (AgriOrbit Apr 2025 benchmark).
 
 Production economics:
-• Calving rate: ${r.lambing}% · Weaning survival: ${r.survival}% · Calves marketed per 100 cows: ${Math.round(r.lambing * r.survival * 0.85 / 100)}
+• Calving rate: ${r.lambing}% · Weaning survival: ${r.survival}% · ${T.youngs.charAt(0).toUpperCase() + T.youngs.slice(1)} marketed per 100 ${T.units}: ${Math.round(r.lambing * r.survival * 0.85 / 100)}
 • Live weight: ${r.liveKg}kg · Dressing: ${r.dressing}% · Carcass: ${carcassKg}kg · Revenue/animal: ${ZAR(revPerAnimal)}
-• Revenue/cow/yr: ${ZAR(revPE)} · Variable cost/cow: ${ZAR(varPE)} · Variable margin/cow: ${ZAR(vm)}
-• Fixed annual: ${ZAR(fa)} · Breakeven: ${be ?? "N/A"} cows · Profit/cow: ${ZAR(pp)} · Herd profit: ${ZAR(pp * flock)}/yr
-• ROI on cow capital: ${PCT(pp / r.ewePrice)} · Capital required: ${ZAR(capital)} · 5-year NPV (10% discount): ${ZAR(npv5)}
+• Revenue/${T.unit}/yr: ${ZAR(revPE)} · Variable cost/${T.unit}: ${ZAR(varPE)} · Variable margin/${T.unit}: ${ZAR(vm)}
+• Fixed annual: ${ZAR(fa)} · Breakeven: ${be ?? "N/A"} ${T.units} · Profit/${T.unit}: ${ZAR(pp)} · ${T.group.charAt(0).toUpperCase() + T.group.slice(1)} profit: ${ZAR(pp * flock)}/yr
+• ROI on ${T.unit} capital: ${PCT(pp / r.ewePrice)} · Capital required: ${ZAR(capital)} · 5-year NPV (10% discount): ${ZAR(npv5)}
 
-First revenue: Month ${firstPositive?.m ?? 13} (${firstPositive?.mo ?? "Jan"} Year ${firstPositive?.yr ?? 2}) — first calves reach slaughter/weaner weight. The preceding 12 months require ${ZAR(Math.abs(yr1))} in working capital before a single rand of cattle income is received.
+First revenue: Month ${firstPositive?.m ?? 13} (${firstPositive?.mo ?? "Jan"} Year ${firstPositive?.yr ?? 2}) — first ${T.youngs} reach slaughter/weaner weight. The preceding 12 months require ${ZAR(Math.abs(yr1))} in working capital before a single rand of cattle income is received.
 
-Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} (entirely negative — working capital phase). Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. From Year 3: ${ZAR(pp * flock)}/year sustainable herd profit.
+Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} (entirely negative — working capital phase). Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. From Year 3: ${ZAR(pp * flock)}/year sustainable ${T.group} profit.
 
-Land Bank bankability rating: ${bankRating}. ${bankRating === "STRONG" ? `This operation covers its fixed costs with a ${PCT((flock - (be ?? flock)) / flock)} herd-size buffer above breakeven and presents a credible repayment schedule aligned to calf sales.` : bankRating === "MODERATE" ? "Viable at current scale but limited margin — a lender will require management experience and a 12-month cash reserve." : `Below the ${be}-cow breakeven — scale up or reduce costs before approaching a lender for production finance.`}
+Land Bank bankability rating: ${bankRating}. ${bankRating === "STRONG" ? `This operation covers its fixed costs with a ${PCT((flock - (be ?? flock)) / flock)} ${T.group}-size buffer above breakeven and presents a credible repayment schedule aligned to ${T.young} sales.` : bankRating === "MODERATE" ? "Viable at current scale but limited margin — a lender will require management experience and a 12-month cash reserve." : `Below the ${be}-${T.unit} breakeven — scale up or reduce costs before approaching a lender for production finance.`}
 
-Recommended immediate action: ${be && flock < be ? `Increase herd to at least ${be} cows before committing capital — at ${flock} cows the operation cannot cover fixed costs.` : `Proceed with the ${flock}-cow operation, securing a revolving credit facility of ${ZAR(Math.round(Math.abs(yr1) * 1.1))} to bridge the working capital gap to Month ${firstPositive?.m ?? 13}.`}`,
+Recommended immediate action: ${be && flock < be ? `Increase ${T.group} to at least ${be} ${T.units} before committing capital — at ${flock} ${T.units} the operation cannot cover fixed costs.` : `Proceed with the ${flock}-${T.unit} operation, securing a revolving credit facility of ${ZAR(Math.round(Math.abs(yr1) * 1.1))} to bridge the working capital gap to Month ${firstPositive?.m ?? 13}.`}`,
 
     `${r.name} — ${r.climate}.
 
@@ -1071,14 +1071,14 @@ Production parameters for this model:
 • Weaning survival: ${r.survival}% — accounts for normal calf mortality and culls
 • Calves marketed per cow per year: ${((r.lambing / 100) * (r.survival / 100) * 0.85).toFixed(2)}
 • Live weight at sale/slaughter: ${r.liveKg}kg · Dressing: ${r.dressing}% · Carcass: ${carcassKg}kg
-• Secondary income: ${r.wool > 0 ? ZAR(r.wool) + "/cow/yr (hide or by-product)" : "R0 — no secondary product income modelled"}
-• Revenue per cow at R${carcass}/kg A2: ${ZAR(revPE)}
+• Secondary income: ${r.wool > 0 ? ZAR(r.wool) + `/${T.unit}/yr (hide or by-product)` : "R0 — no secondary product income modelled"}
+• Revenue per ${T.unit} at R${carcass}/kg A2: ${ZAR(revPE)}
 
 ${r.breed} genetic priorities for ${r.name}: Tick tolerance (measured by Tick Resistance Score in modern EBVs), heat adaptation (critical above 35°C — European breeds lose appetite and condition), and maternal fertility (calving interval below 370 days). Bull selection drives improvement across your entire cow herd — one excellent bull improves ${Math.ceil(flock / 28)} × 5-year calf crops = ${Math.ceil(flock / 28) * 5} additional calves at zero extra cost.
 
 Where to source ${r.breed} in ${r.name}: ${breedSource}
 
-At ${flock} cows, manage as a straight commercial herd — no reason to maintain a stud at this scale. Use production-tested bulls (1:25–30 cow ratio = ${Math.ceil(flock / 28)} bulls for your herd) sourced from a recording-scheme stud. Leasing bulls rather than purchasing is viable if capital is constrained: a proven commercial bull is available for lease at R2,500–R4,500/month during mating season from stud operations in ${r.name}.
+At ${flock} ${T.units}, manage as a straight commercial herd — no reason to maintain a stud at this scale. Use production-tested bulls (1:25–30 ${T.unit} ratio = ${Math.ceil(flock / 28)} bulls for your ${T.group}) sourced from a recording-scheme stud. Leasing bulls rather than purchasing is viable if capital is constrained: a proven commercial bull is available for lease at R2,500–R4,500/month during mating season from stud operations in ${r.name}.
 
 HIDDEN INCOME STREAM 1 — Bull leasing:
 Once your primary bull has two full seasons of weaner weights recorded, you have a valuable asset that sits idle for 10 months of the year. Lease him to neighbouring operations at R3,000–R5,000/month during mating season (6–8 weeks = R4,500–R10,000/year). The bull continues his full mating role on your own herd outside the lease period. Register bull performance with the ${r.breed === "Bonsmara" ? "Bonsmara SA Breeders' Society (bonsmara.co.za)" : r.breed === "Nguni" ? "Nguni Cattle Breeders' Society (nguni.co.za)" : r.breed === "Angus" ? "Angus SA (angus.co.za)" : "relevant SA breed society"} — this is the prerequisite for leasing at premium rates. A documented weaning weight index is the single most important factor in bull lease pricing.
@@ -1098,11 +1098,11 @@ Revenue assumptions:
 Cost assumptions:
 • Feed: ${feedNote}
 • Health: ${healthNote}
-• Replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/cow = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/cow/yr
+• Replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/${T.unit} = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/${T.unit}/yr
 • Overhead: ${ZAR(r.oh)}/mo — water, vehicle, maintenance, electricity, insurance
 • Labour: ${lmNote}
 
-The variable margin of ${ZAR(vm)}/cow is the key number. Fixed costs consume ${ZAR(Math.round(fa / flock))}/cow/yr at ${flock} cows. Every cow above breakeven drops ${ZAR(vm)} to profit — the dilution economics of fixed costs make scale the primary lever.
+The variable margin of ${ZAR(vm)}/${T.unit} is the key number. Fixed costs consume ${ZAR(Math.round(fa / flock))}/${T.unit}/yr at ${flock} ${T.units}. Every ${T.unit} above breakeven drops ${ZAR(vm)} to profit — the dilution economics of fixed costs make scale the primary lever.
 
 Most likely wrong assumption: Calving rate. A 5% improvement in calving rate (from ${r.lambing}% to ${r.lambing + 5}%) adds ${Math.round(flock * 0.05 * (r.survival / 100) * 0.85)} calves per year at zero extra fixed cost — worth ${ZAR(Math.round(flock * 0.05 * (r.survival / 100) * 0.85 * revPerAnimal))} in additional annual revenue.`,
 
@@ -1110,35 +1110,35 @@ Most likely wrong assumption: Calving rate. A 5% improvement in calving rate (fr
 
 Phase 1 — Working capital (Months 1–12): Cows are purchased, mated, and carrying calves. Every month is cash-negative. Monthly operating cost: ${ZAR(Math.round(mc))} (labour, overhead, feed, health, replacement reserve). At Month 12 the cumulative position is ${ZAR(yr1)} — this is the biological investment in your first calf crop. Plan for it deliberately; operations that run out of working capital before first calf sales sell their breeding herd at the worst possible time.
 
-Phase 2 — First revenue (Month ${firstPositive?.m ?? 13}, ${firstPositive?.mo ?? "January"} Year ${firstPositive?.yr ?? 2}): First calf cheque. With ${flock} cows at ${r.lambing}% calving, approximately ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.5)} calves available in the first sale group (50% of crop). At R${carcass}/kg and ${carcassKg}kg carcass, this is a substantial single cash event. Year 2 cumulative: ${ZAR(yr2)}.
+Phase 2 — First revenue (Month ${firstPositive?.m ?? 13}, ${firstPositive?.mo ?? "January"} Year ${firstPositive?.yr ?? 2}): First ${T.young} cheque. With ${flock} ${T.units} at ${r.lambing}% calving, approximately ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.5)} ${T.youngs} available in the first sale group (50% of crop). At R${carcass}/kg and ${carcassKg}kg carcass, this is a substantial single cash event. Year 2 cumulative: ${ZAR(yr2)}.
 
 Phase 3 — Normal production (Year 3+): Annual revenue ${ZAR(Math.round(revPE * flock))}, annual costs ${ZAR(Math.round((varPE + fa / flock) * flock))}, sustainable free cash ${ZAR(Math.round(pp * flock))}/yr. Year 3 cumulative: ${ZAR(yr3)}.
 
-${pp < 0 ? `WARNING: At ${flock} cows, this operation never achieves cumulative-positive in 36 months. Increase to at least ${be ?? flock + 10} cows before proceeding.` : `The operation ${yr2 >= 0 ? "recovers all working capital by Year 2" : "requires the full 36-month period to recover working capital"}.`}
+${pp < 0 ? `WARNING: At ${flock} ${T.units}, this operation never achieves cumulative-positive in 36 months. Increase to at least ${be ?? flock + 10} ${T.units} before proceeding.` : `The operation ${yr2 >= 0 ? "recovers all working capital by Year 2" : "requires the full 36-month period to recover working capital"}.`}
 
-Working capital requirement: ${ZAR(Math.round(Math.abs(yr1) * 1.15))} (Year 1 drawdown + 15% contingency). At ${ZAR(r.ewePrice)}/cow, cattle operations require more working capital than sheep operations of equivalent income — this is the primary reason cattle operations need formal production lending.
+Working capital requirement: ${ZAR(Math.round(Math.abs(yr1) * 1.15))} (Year 1 drawdown + 15% contingency). At ${ZAR(r.ewePrice)}/cow, the high per-unit capital cost of cattle means the absolute working capital requirement is substantial — this is the primary reason cattle operations need formal production lending rather than personal savings bridges.
 
 Recommended bridging instrument: 12-month revolving credit facility from FNB Agri or ABSA Agri, drawdown monthly, repay after first calf sales. Quarterly interest-only payments during the first year. Never use fixed-term loans for cattle working capital — the seasonal revenue pattern requires revolving facility flexibility.`,
 
-    `Breakeven: ${be ?? "N/A"} cows. Variable margin ${ZAR(vm)}/cow covers fixed costs of ${ZAR(fa)}/yr at this scale.
+    `Breakeven: ${be ?? "N/A"} ${T.units}. Variable margin ${ZAR(vm)}/${T.unit} covers fixed costs of ${ZAR(fa)}/yr at this scale.
 
 Scale table (at current input prices):
 ${scaleStr}
 
-${scaleVi ? `First viable scale: ${scaleVi.n} cows — herd profit ${ZAR(scaleVi.fp)}/yr, ROI ${PCT(scaleVi.roi)}.` : "No viable scale found at current input prices — review cost structure before committing capital."}
+${scaleVi ? `First viable scale: ${scaleVi.n} ${T.units} — ${T.group} profit ${ZAR(scaleVi.fp)}/yr, ROI ${PCT(scaleVi.roi)}.` : "No viable scale found at current input prices — review cost structure before committing capital."}
 
 Commercial viability thresholds for SA beef operations:
-• Under 20 cows: sub-economic — fixed costs cannot be diluted, land use inefficient
-• 20–50 cows: marginal commercial — viable with zero debt and minimal overhead
-• 50–150 cows: commercial viable — full-time operator income possible
-• 150–300 cows: strong commercial — supports hired management and debt service
-• 300+ cows: primary income at scale — optimal for Land Bank production finance
+• Under 20 ${T.units}: sub-economic — fixed costs cannot be diluted, land use inefficient
+• 20–50 ${T.units}: marginal commercial — viable with zero debt and minimal overhead
+• 50–150 ${T.units}: commercially viable — full-time operator income possible
+• 150–300 ${T.units}: strong commercial — supports hired management and debt service
+• 300+ ${T.units}: primary income at scale — optimal for Land Bank production finance
 
-Your current position: ${flock} cows · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} cows above breakeven (${PCT((flock - (be ?? 0)) / flock)} safety buffer)` : `${(be ?? flock) - flock} cows below breakeven`}.
+Your current position: ${flock} ${T.units} · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} ${T.units} above breakeven (${PCT((flock - (be ?? 0)) / flock)} safety buffer)` : `${(be ?? flock) - flock} ${T.units} below breakeven`}.
 
-At what scale does this become a primary income? ${primaryIncomeScale === "N/A" ? "Not achievable at current variable margin — review input costs." : `${primaryIncomeScale} cows generate approximately R300,000/year net.`}
+At what scale does this become a primary income? ${primaryIncomeScale === "N/A" ? "Not achievable at current variable margin — review input costs." : `${primaryIncomeScale} ${T.units} generate approximately R300,000/year net.`}
 
-Most important Year 3 reinvestment decision: retain the best 15–20% of heifer calves instead of selling them. This grows your herd by ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.175)} cows/year at zero purchase cost — compounding return on capital without additional debt.`,
+Most important Year 3 reinvestment decision: retain the best 15–20% of heifer ${T.youngs} instead of selling them. This grows your ${T.group} by ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.175)} ${T.units}/year at zero purchase cost — compounding return on capital without additional debt.`,
 
     `1. DROUGHT RISK (${r.drought} in ${r.name})
 ${droughtAdvice}
@@ -1151,11 +1151,11 @@ FMD outbreaks trigger immediate movement restrictions and market closure. Cattle
 
 4. CARCASS PRICE RISK
 ${sensTable}
-At -20% (R${(carcass * 0.8).toFixed(0)}/kg): profit/cow ${ZAR(s20?.pp ?? 0)} — ${(s20?.pp ?? 0) > -2000 ? "manageable with a cash reserve" : "severe — requires emergency cost reduction or strategic destocking"}.
+At -20% (R${(carcass * 0.8).toFixed(0)}/kg): profit/${T.unit} ${ZAR(s20?.pp ?? 0)} — ${(s20?.pp ?? 0) > -2000 ? "manageable with a cash reserve" : "severe — requires emergency cost reduction or strategic destocking"}.
 Mitigation: develop relationships with at least 2 alternative buyers (auction, direct abattoir, feedlot contract). Feedlot weaner contracts at R22–28/kg live weight provide price certainty at the cost of a slight discount to spot.
 
 5. CAPITAL CONCENTRATION RISK
-At ${ZAR(r.ewePrice)}/cow, your ${flock}-cow herd represents ${ZAR(flock * r.ewePrice)} in a single asset class. A disease event, drought destocking, or theft incident affecting 20% of your herd costs ${ZAR(Math.round(flock * 0.2 * r.ewePrice))}. Insurance: AGRI SA multi-peril herd insurance covers theft (a growing risk — branded and ear-tagged cattle are harder to sell at auction, reducing theft profitability), FMD movement restriction losses, and drought emergency slaughter. Budget R200–R400/cow/year.
+At ${ZAR(r.ewePrice)}/${T.unit}, your ${flock}-${T.unit} ${T.group} represents ${ZAR(flock * r.ewePrice)} in a single asset class. A disease event, drought destocking, or theft incident affecting 20% of your ${T.group} costs ${ZAR(Math.round(flock * 0.2 * r.ewePrice))}. Insurance: AGRI SA multi-peril herd insurance covers theft (a growing risk — branded and ear-tagged cattle are harder to sell at auction, reducing theft profitability), FMD movement restriction losses, and drought emergency slaughter. Budget R200–R400/${T.unit}/year.
 
 6. THEFT RISK
 Cattle theft is a significant operational risk, especially for operations near urban areas or unfenced veld. Mitigation: fire-brand or freeze-brand every animal (legally required in most provinces), maintain a photographic ear-tag register, install a perimeter alarm on kraals where cattle are kraaled at night, and register with your local farm watch structure.
@@ -1164,14 +1164,14 @@ Recommended contingency reserve: ${ZAR(Math.round(fa * 0.5))} minimum (6 months 
 
     `Total capital required: ${ZAR(capital)}.
 
-Cow herd: ${ZAR(flock * r.ewePrice)} (${flock} cows × ${ZAR(r.ewePrice)}/cow)
-Financing route: Land Bank production loan, typically prime + 1.5–2.5%, 3–5 year term, semi-annual repayments aligned to calf sales. Security: notarial livestock bond over animals, cession of multi-peril insurance, personal surety or property bond. Minimum own contribution: 30% (${ZAR(Math.round(flock * r.ewePrice * 0.3))}).
+Breeding ${T.group}: ${ZAR(flock * r.ewePrice)} (${flock} ${T.units} × ${ZAR(r.ewePrice)}/${T.unit})
+Financing route: Land Bank production loan, typically prime + 1.5–2.5%, 3–5 year term, semi-annual repayments aligned to ${T.young} sales. Security: notarial livestock bond over animals, cession of multi-peril insurance, personal surety or property bond. Minimum own contribution: 30% (${ZAR(Math.round(flock * r.ewePrice * 0.3))}).
 
 Bulls: ${Math.ceil(flock / 28)} bulls at ${ZAR(Math.round(r.ewePrice * 0.8 * Math.ceil(flock / 28)))} estimated. Alternatively, lease proven bulls at R3,000–R5,000/month during mating season — reduces upfront capital by ${ZAR(Math.round(r.ewePrice * 0.8 * Math.ceil(flock / 28)))} and eliminates year-round bull keep.
 
 Infrastructure:
 • Handling facility (crush, loading ramp, dip tank/spray race): R30,000–R80,000 depending on existing structures
-• Water infrastructure: solar pump + JoJo tanks (5 points for ${flock} cows across recommended camps): R60,000–R120,000 — the single highest-ROI infrastructure investment for cattle
+• Water infrastructure: solar pump + JoJo tanks (5 points for ${flock} ${T.units} across recommended camps): R60,000–R120,000 — the single highest-ROI infrastructure investment for cattle
 • Fencing (rotational grazing camps — minimum 4 camps): R35–R80/metre installed
 • Total infrastructure estimate: R90,000–R200,000 depending on existing condition
 
@@ -1192,14 +1192,14 @@ Critical timing note: budget 3–6 months from loan application to cattle on far
     `MONTHS 1–2 — Infrastructure and funding:
 • Install or refurbish handling facilities: crush, loading ramp, dip tank or spray race (a functioning crush is mandatory before any cattle arrive)
 • Confirm water supply: boreholes, dams, pipelines — cattle will not walk more than 5km to water; every extra km destroys condition and weaning weights
-• Fence camps for rotational grazing — minimum 4 camps for ${flock} cows
+• Fence camps for rotational grazing — minimum 4 camps for ${flock} ${T.units}
 • Open a dedicated farm bank account
 • Apply for Land Bank or FNB Agri production loan NOW — 8–14 week process
 • Register with your local veterinarian and establish a tick-control protocol before cattle arrive
 
 MONTH 3 — Stock procurement:
-• Source ${r.breed} cows from ${r.name} livestock auctions or registered breeders
-• Price benchmark: ${ZAR(r.ewePrice)}/cow for pregnancy-tested in-calf cows
+• Source ${r.breed} ${T.units} from ${r.name} livestock auctions or registered breeders
+• Price benchmark: ${ZAR(r.ewePrice)}/${T.unit} for pregnancy-tested in-calf ${T.units}
 • Source ${Math.ceil(flock / 28)} bulls from a recording-scheme stud (1:28 ratio). Alternatively, arrange a bull lease for the mating season
 • Transport with a veterinary health certificate; quarantine all new cattle 14 days
 
