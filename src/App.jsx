@@ -1151,7 +1151,7 @@ const LIVESTOCK_TYPES = [
   { id:"sheep",   emoji:"🐑", label:"Sheep",         sub:"Wool, meat & dual-purpose breeds",  status:"active" },
   { id:"cattle",  emoji:"🐄", label:"Beef Cattle",   sub:"Commercial & stud beef operations", status:"active" },
   { id:"bees",    emoji:"🐝", label:"Apiary / Bees", sub:"Honey production & pollination",    status:"active" },
-  { id:"goats",   emoji:"🐐", label:"Goats",         sub:"Boer goat & dairy operations",      status:"soon"   },
+  { id:"goats",   emoji:"🐐", label:"Goats",         sub:"Boer goat & dairy operations",      status:"active" },
   { id:"pigs",    emoji:"🐖", label:"Pigs",          sub:"Commercial piggery models",          status:"soon"   },
   { id:"poultry", emoji:"🐓", label:"Poultry",       sub:"Broiler & layer operations",         status:"soon"   },
   { id:"dairy",   emoji:"🐮", label:"Dairy Cattle",  sub:"Milk production feasibility",        status:"soon"   },

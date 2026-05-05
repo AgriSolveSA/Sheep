@@ -14,6 +14,7 @@ const BENCH = {
   hive: { health: 25,  feed: 80  },  // R/hive/yr — oxalic acid protocol; forage-placed apiary
   cow:  { health: 200, feed: 900 },  // R/cow/yr  — co-op generics + tick protocol; bulk roughage
   ewe:  { health: 65,  feed: 300 },  // R/ewe/yr  — FAMACHA + co-op generics; bulk/part home-grown
+  doe:  { health: 110, feed: 350 },  // R/doe/yr  — FAMACHA mandatory (goats > susceptible than sheep); browse + supplement
 };
 
 export function runInefficiencyAudit(inputs, result) {

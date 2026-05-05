@@ -430,31 +430,31 @@ FIVE ACTIONS THIS WEEK:
     ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo for reference)`
     : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL + housing allowance R800)`;
   const feedNote   = feedCost !== r.feed
-    ? `${ZAR(feedCost)}/ewe/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
-    : `${ZAR(feedCost)}/ewe/yr — Land Bank extensive benchmark including salt, drought supplement, creep feed`;
+    ? `${ZAR(feedCost)}/${T.unit}/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/${T.unit}/yr — Land Bank extensive benchmark including salt, drought supplement, creep feed`;
   const healthNote = healthCost !== r.health
-    ? `${ZAR(healthCost)}/ewe/yr — client-specified (province benchmark: ${ZAR(r.health)})`
-    : `${ZAR(healthCost)}/ewe/yr — ProAgri 3-cycle dosing schedule plus foot care and annual vet`;
+    ? `${ZAR(healthCost)}/${T.unit}/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/${T.unit}/yr — ProAgri 3-cycle dosing schedule plus foot care and annual vet`;
   const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
   const s20 = sensRows.find(s => s.pct === -20);
   const s10 = sensRows.find(s => s.pct === -10);
   const scaleVi = scaleRows.find(rw => rw.ok);
   const viabilityVerdict = pp > 0
-    ? `VIABLE — this ${flock}-ewe ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/ewe/year net (${PCT(pp / r.ewePrice)} ROI on stock capital).`
-    : `MARGINAL — at ${flock} ewes, this operation falls below the ${be ?? "?"}-ewe breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered by the current flock. Increasing to at least ${be ?? flock + 20} ewes is the single most critical action before committing capital.`;
+    ? `VIABLE — this ${flock}-${T.unit} ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/${T.unit}/year net (${PCT(pp / r.ewePrice)} ROI on stock capital).`
+    : `MARGINAL — at ${flock} ${T.units}, this operation falls below the ${be ?? "?"}-${T.unit} breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered by the current ${T.group}. Increasing to at least ${be ?? flock + 20} ${T.units} is the single most critical action before committing capital.`;
   const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
-  const ccGuide = PROV_CC[r.name] || `4–8 ha/ewe depending on rainfall zone — obtain a professional carrying-capacity assessment before stocking`;
+  const ccGuide = PROV_CC[r.name] || `4–8 ha/${T.unit} depending on rainfall zone — obtain a professional carrying-capacity assessment before stocking`;
   const breedSource = (BREED_SOURCES[r.breed] || BREED_SOURCES["_default"]).replace(/\$\{r => ZAR\(r\.wool\)\}/g, ZAR(r.wool));
   const droughtAdvice = (r.drought === "Severe, frequent" || r.drought === "Frequent")
-    ? `Drought is the defining operational risk in ${r.name}. Carry a 90-day supplementary feed reserve at all times — ${ZAR(Math.round(feedCost / 12 * 3 * flock))} for your flock at current feed cost. AgriSure CP (Comprehensive Plan) coverage is mandatory — register before the production season opens. Set a trigger stocking rate reduction at 50% of normal rainfall.`
-    : `Drought is a periodic risk in ${r.name}, manageable with preparation. Maintain a 60-day supplementary feed reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your flock). AgriSure CP is strongly recommended. Key discipline: sell the right animals at the right time rather than holding through drought waiting for better prices.`;
+    ? `Drought is the defining operational risk in ${r.name}. Carry a 90-day supplementary feed reserve at all times — ${ZAR(Math.round(feedCost / 12 * 3 * flock))} for your ${T.group} at current feed cost. AgriSure CP (Comprehensive Plan) coverage is mandatory — register before the production season opens. Set a trigger stocking rate reduction at 50% of normal rainfall.`
+    : `Drought is a periodic risk in ${r.name}, manageable with preparation. Maintain a 60-day supplementary feed reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your ${T.group}). AgriSure CP is strongly recommended. Key discipline: sell the right animals at the right time rather than holding through drought waiting for better prices.`;
   const scaleStr = scaleRows.filter((_, i) => i % 2 === 0)
-    .map(rw => `${rw.n} ewes: profit/ewe ${ZAR(rw.pp)} · flock profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.15 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
+    .map(rw => `${rw.n} ${T.units}: profit/${T.unit} ${ZAR(rw.pp)} · ${T.group} profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.15 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
     .join("\n");
   const sensTable = sensRows.filter(s => [-20, -10, 0, 10, 20].includes(s.pct))
-    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/ewe ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} ewes`)
+    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/${T.unit} ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} ${T.units}`)
     .join("\n");
-  const primaryIncomeEwes = vm > 0 ? Math.round((fa + 180000) / vm) : "N/A";
+  const primaryIncomeScale = vm > 0 ? Math.round((fa + 180000) / vm) : "N/A";
 
   const TITLES = [
     "Executive Summary", "Regional Analysis", "Breed Analysis",
@@ -466,17 +466,17 @@ FIVE ACTIONS THIS WEEK:
   const bodies = [
     `${viabilityVerdict}
 
-Operation profile: ${flock} ${r.breed} ewes in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg A2 (AgriOrbit Apr 2025).
+Operation profile: ${flock} ${r.breed} ${T.units} in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg A2 (AgriOrbit Apr 2025).
 
-Key financials: Revenue ${ZAR(revPE)}/ewe/yr · Variable cost ${ZAR(varPE)}/ewe/yr · Variable margin ${ZAR(vm)}/ewe · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} ewes · Profit/ewe ${ZAR(pp)} · Flock profit ${ZAR(pp * flock)}/yr · ROI on stock capital ${PCT(pp / r.ewePrice)} · Capital required ${ZAR(capital)} · 5-year NPV at 10% discount rate: ${ZAR(npv5)}.
+Key financials: Revenue ${ZAR(revPE)}/${T.unit}/yr · Variable cost ${ZAR(varPE)}/${T.unit}/yr · Variable margin ${ZAR(vm)}/${T.unit} · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} ${T.units} · Profit/${T.unit} ${ZAR(pp)} · ${T.group.charAt(0).toUpperCase() + T.group.slice(1)} profit ${ZAR(pp * flock)}/yr · ROI on stock capital ${PCT(pp / r.ewePrice)} · Capital required ${ZAR(capital)} · 5-year NPV at 10% discount rate: ${ZAR(npv5)}.
 
-Cashflow turning point: Month ${firstPositive?.m ?? 13} (${firstPositive?.mo ?? "Jan"} Year ${firstPositive?.yr ?? 2}) — first lamb cheque. The preceding 12 months require ${ZAR(Math.abs(yr1))} in working capital before revenue arrives.
+Cashflow turning point: Month ${firstPositive?.m ?? 13} (${firstPositive?.mo ?? "Jan"} Year ${firstPositive?.yr ?? 2}) — first ${T.young} cheque. The preceding 12 months require ${ZAR(Math.abs(yr1))} in working capital before revenue arrives.
 
-Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} (working capital phase). Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. From Year 3 onwards: ${ZAR(pp * flock)}/year sustainable flock profit.
+Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} (working capital phase). Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. From Year 3 onwards: ${ZAR(pp * flock)}/year sustainable ${T.group} profit.
 
-Land Bank bankability rating: ${bankRating}. ${bankRating === "STRONG" ? `This operation covers fixed costs with a ${PCT((flock - (be ?? flock)) / flock)} safety buffer above breakeven.` : bankRating === "MODERATE" ? "Viable but limited margin — a lender will require management experience and a 12-month cash reserve." : `Below the ${be}-ewe breakeven — flock expansion or cost reduction is required before applying for production finance.`}
+Land Bank bankability rating: ${bankRating}. ${bankRating === "STRONG" ? `This operation covers fixed costs with a ${PCT((flock - (be ?? flock)) / flock)} safety buffer above breakeven.` : bankRating === "MODERATE" ? "Viable but limited margin — a lender will require management experience and a 12-month cash reserve." : `Below the ${be}-${T.unit} breakeven — ${T.group} expansion or cost reduction is required before applying for production finance.`}
 
-Recommended immediate action: ${be && flock < be ? `Increase flock size to at least ${be} ewes before committing capital.` : `Proceed with the ${flock}-ewe operation, securing a revolving credit facility of ${ZAR(Math.round(Math.abs(yr1) * 1.1))} to bridge the working capital gap to Month ${firstPositive?.m ?? 13}.`}`,
+Recommended immediate action: ${be && flock < be ? `Increase ${T.group} size to at least ${be} ${T.units} before committing capital.` : `Proceed with the ${flock}-${T.unit} operation, securing a revolving credit facility of ${ZAR(Math.round(Math.abs(yr1) * 1.1))} to bridge the working capital gap to Month ${firstPositive?.m ?? 13}.`}`,
 
     `${r.name} — ${r.climate}.
 
@@ -499,17 +499,17 @@ Why ${r.breed} suits ${r.name}: ${r.why}
 Production parameters for this model:
 • Lambing rate: ${r.lambing}% (${r.name} commercial average)
 • Survival to weaning: ${r.survival}%
-• Effective lambs sold/ewe/yr: ${((r.lambing / 100) * (r.survival / 100) * 0.85).toFixed(2)} (85% selection rate applied)
+• Effective ${T.youngs} sold/${T.unit}/yr: ${((r.lambing / 100) * (r.survival / 100) * 0.85).toFixed(2)} (85% selection rate applied)
 • Slaughter weight: ${r.liveKg}kg live · Dressing: ${r.dressing}% · Carcass: ${(r.liveKg * r.dressing / 100).toFixed(1)}kg
-• Wool income: ${r.wool > 0 ? ZAR(r.wool) + "/ewe/yr" : "R0 — hair breed, zero shearing cost and shearing labour requirement"}
+• Wool income: ${r.wool > 0 ? ZAR(r.wool) + `/${T.unit}/yr` : "R0 — hair breed, zero shearing cost and shearing labour requirement"}
 
-Revenue per ewe at R${carcass}/kg A2: ${ZAR(revPE)} (lamb carcass ${ZAR(Math.round(((r.lambing / 100) * (r.survival / 100) * 0.85) * (r.liveKg * r.dressing / 100) * carcass))}${r.wool > 0 ? ` + wool ${ZAR(r.wool)}` : ""}).
+Revenue per ${T.unit} at R${carcass}/kg A2: ${ZAR(revPE)} (${T.young} carcass ${ZAR(Math.round(((r.lambing / 100) * (r.survival / 100) * 0.85) * (r.liveKg * r.dressing / 100) * carcass))}${r.wool > 0 ? ` + wool ${ZAR(r.wool)}` : ""}).
 
 Where to source ${r.breed} in ${r.name}: ${breedSource}
 
-At ${flock} ewes, a commercial flock is appropriate — no reason to maintain a stud. Use performance-tested stud rams (1:35 ratio = ${Math.ceil(flock / 35)} rams) sourced from a recording-scheme stud. Stud overhead adds cost without proportionate benefit below 500 ewes.
+At ${flock} ${T.units}, a commercial flock is appropriate — no reason to maintain a stud. Use performance-tested stud rams (1:35 ratio = ${Math.ceil(flock / 35)} rams) sourced from a recording-scheme stud. Stud overhead adds cost without proportionate benefit below 500 ${T.units}.
 
-Health priorities for ${r.breed} in ${r.name}: ${r.parasites !== "Very low" && r.parasites !== "Low" ? `Internal parasite management is the primary ongoing cost driver. Implement FAMACHA-based dosing — this reduces anthelmintic use by 30–40% and delays resistance development. The health budget of ${ZAR(healthCost)}/ewe/yr assumes 3 strategic dosings per year. Maintain a ${ZAR(Math.round(healthCost * 0.5 * flock))} contingency for outbreak years.` : `Low parasite pressure in ${r.name} reduces health costs. Maintain prophylactic dosing at minimum 2 cycles/year and monitor for Bluetongue in summer months.`}
+Health priorities for ${r.breed} in ${r.name}: ${r.parasites !== "Very low" && r.parasites !== "Low" ? `Internal parasite management is the primary ongoing cost driver. Implement FAMACHA-based dosing — this reduces anthelmintic use by 30–40% and delays resistance development. The health budget of ${ZAR(healthCost)}/${T.unit}/yr assumes 3 strategic dosings per year. Maintain a ${ZAR(Math.round(healthCost * 0.5 * flock))} contingency for outbreak years.` : `Low parasite pressure in ${r.name} reduces health costs. Maintain prophylactic dosing at minimum 2 cycles/year and monitor for Bluetongue in summer months.`}
 
 HIDDEN INCOME STREAM — Carbon credits + direct freezer-lamb sales:
 Most sheep operations in ${r.name} leave two significant income streams untapped. First: register your veld under a voluntary carbon programme (Verra VCS or BioCarbon Fund at agricarbon.co.za for the SA verification pathway). Holistic planned grazing on 500ha of degraded veld generates R22,500–R60,000/year in verified carbon credits — pure income addition with no reduction in livestock numbers, no extra land required. Second: direct freezer-lamb sales to urban consumers at R90–110/kg deadweight vs R52/kg abattoir price add R1,500–R2,300 per animal. A WhatsApp order group in your nearest town and a licensed mobile abattoir booking (R250–R400/animal) is the entire infrastructure required. Start with 5% of your crop — price discovery is immediate.`,
@@ -522,56 +522,56 @@ Revenue assumptions:
 • Live weight at slaughter: ${r.liveKg}kg — market standard for ${r.breed} in ${r.name}
 • Dressing percentage: ${r.dressing}% — A2 grade standard
 • Carcass price: R${carcass}/kg A2 (AgriOrbit Apr 2025 — verify current price before finalising finance)
-• Wool: ${r.wool > 0 ? ZAR(r.wool) + "/ewe/yr — clip weight × current Cape Wools A-grade price" : "R0 — hair breed"}
+• Wool: ${r.wool > 0 ? ZAR(r.wool) + `/${T.unit}/yr — clip weight × current Cape Wools A-grade price` : "R0 — hair breed"}
 
 Cost assumptions:
 • Feed: ${feedNote}
 • Health: ${healthNote}
-• Replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/ewe = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/ewe/yr
+• Replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/${T.unit} = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/${T.unit}/yr
 • Overhead: ${ZAR(r.oh)}/mo — water, fuel, repairs, electricity, insurance
 • Labour: ${lmNote}
 
-The variable margin of ${ZAR(vm)}/ewe is the most important number in this model. At ${flock} ewes, fixed costs consume ${ZAR(Math.round(fa / flock))}/ewe/yr. At 200 ewes, fixed cost per ewe drops to ${ZAR(Math.round(fa / 200))}. Every ewe above breakeven drops ${ZAR(vm)} straight to profit.
+The variable margin of ${ZAR(vm)}/${T.unit} is the most important number in this model. At ${flock} ${T.units}, fixed costs consume ${ZAR(Math.round(fa / flock))}/${T.unit}/yr. At 200 ${T.units}, fixed cost per ${T.unit} drops to ${ZAR(Math.round(fa / 200))}. Every ${T.unit} above breakeven drops ${ZAR(vm)} straight to profit.
 
-Most likely wrong assumption: Carcass price. A ±R10/kg swing changes profit/ewe by ${ZAR(Math.round(((r.lambing / 100) * (r.survival / 100) * 0.85) * (r.liveKg * r.dressing / 100) * 10))} — review the sensitivity analysis in Section 7.`,
+Most likely wrong assumption: Carcass price. A ±R10/kg swing changes profit/${T.unit} by ${ZAR(Math.round(((r.lambing / 100) * (r.survival / 100) * 0.85) * (r.liveKg * r.dressing / 100) * 10))} — review the sensitivity analysis in Section 7.`,
 
     `The cashflow story has three distinct phases.
 
 Phase 1 — Working capital (Months 1–${(firstPositive?.m ?? 13) - 1}): Every month is cash-negative. Monthly operating cost: ${ZAR(Math.round(mc))}. At Month 12 the cumulative position is ${ZAR(yr1)} — this is the working capital investment in your first crop, not a loss.
 
-Phase 2 — First revenue (Month ${firstPositive?.m ?? 13}, ${firstPositive?.mo ?? "January"} Year ${firstPositive?.yr ?? 2}): First lamb cheque. With ${flock} ewes at ${r.lambing}% lambing, approximately ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.5)} lambs available in the first batch. At R${carcass}/kg and ${(r.liveKg * r.dressing / 100).toFixed(1)}kg carcass. Year 2 cumulative: ${ZAR(yr2)}.
+Phase 2 — First revenue (Month ${firstPositive?.m ?? 13}, ${firstPositive?.mo ?? "January"} Year ${firstPositive?.yr ?? 2}): First ${T.young} cheque. With ${flock} ${T.units} at ${r.lambing}% lambing, approximately ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.5)} ${T.youngs} available in the first batch. At R${carcass}/kg and ${(r.liveKg * r.dressing / 100).toFixed(1)}kg carcass. Year 2 cumulative: ${ZAR(yr2)}.
 
 Phase 3 — Normalisation (Year 3+): Annual revenue ${ZAR(Math.round(revPE * flock))}, annual costs ${ZAR(Math.round((varPE + fa / flock) * flock))}, sustainable free cash ${ZAR(Math.round(pp * flock))}/yr. Year 3 cumulative: ${ZAR(yr3)}.
 
-${pp < 0 ? `WARNING: At ${flock} ewes, this operation never turns cumulative-positive in 36 months. Increase to at least ${be ?? flock + 20} ewes before proceeding.` : `The operation ${yr2 >= 0 ? "recovers working capital by Year 2" : "requires the full 36-month period to recover working capital — a long-term view is required"}.`}
+${pp < 0 ? `WARNING: At ${flock} ${T.units}, this operation never turns cumulative-positive in 36 months. Increase to at least ${be ?? flock + 20} ${T.units} before proceeding.` : `The operation ${yr2 >= 0 ? "recovers working capital by Year 2" : "requires the full 36-month period to recover working capital — a long-term view is required"}.`}
 
 Working capital requirement: ${ZAR(Math.round(Math.abs(yr1) * 1.15))} (Year 1 drawdown + 15% contingency).
 
-Best bridging instrument: 12-month revolving credit facility from FNB Agri or ABSA Agri, with monthly drawdowns and repayment timed to the January/February lamb sales. Avoid fixed-term loans for working capital.`,
+Best bridging instrument: 12-month revolving credit facility from FNB Agri or ABSA Agri, with monthly drawdowns and repayment timed to the January/February ${T.young} sales. Avoid fixed-term loans for working capital.`,
 
-    `Breakeven: ${be ?? "N/A"} ewes. Variable margin ${ZAR(vm)}/ewe covers fixed costs of ${ZAR(fa)}/yr at this scale.
+    `Breakeven: ${be ?? "N/A"} ${T.units}. Variable margin ${ZAR(vm)}/${T.unit} covers fixed costs of ${ZAR(fa)}/yr at this scale.
 
 Scale table (at current input prices):
 ${scaleStr}
 
-${scaleVi ? `First viable scale: ${scaleVi.n} ewes — flock profit ${ZAR(scaleVi.fp)}/yr, ROI ${PCT(scaleVi.roi)}.` : "No viable scale found at current input prices — review cost structure."}
+${scaleVi ? `First viable scale: ${scaleVi.n} ${T.units} — ${T.group} profit ${ZAR(scaleVi.fp)}/yr, ROI ${PCT(scaleVi.roi)}.` : "No viable scale found at current input prices — review cost structure."}
 
-Your current position: ${flock} ewes · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} ewes above breakeven (${PCT((flock - (be ?? 0)) / flock)} safety buffer)` : `${(be ?? flock) - flock} ewes below breakeven`}.
+Your current position: ${flock} ${T.units} · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} ${T.units} above breakeven (${PCT((flock - (be ?? 0)) / flock)} safety buffer)` : `${(be ?? flock) - flock} ${T.units} below breakeven`}.
 
-At what scale does this become a primary income? ${primaryIncomeEwes === "N/A" ? "Not achievable at current variable margin — review input costs." : `${primaryIncomeEwes} ewes generate approximately R180,000/year net.`}
+At what scale does this become a primary income? ${primaryIncomeScale === "N/A" ? "Not achievable at current variable margin — review input costs." : `${primaryIncomeScale} ${T.units} generate approximately R180,000/year net.`}
 
-Most important reinvestment decision in Year 3: retain the best 20% of ewe lambs instead of selling them — grows your flock by ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.2)} ewes/year at zero purchase cost.`,
+Most important reinvestment decision in Year 3: retain the best 20% of ${T.youngs} instead of selling them — grows your ${T.group} by ${Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.2)} ${T.units}/year at zero purchase cost.`,
 
     `1. PRICE RISK (High probability, manageable with planning)
 ${sensTable}
-At -20% (R${(carcass * 0.8).toFixed(0)}/kg): profit/ewe ${ZAR(s20?.pp ?? 0)} — ${(s20?.pp ?? 0) > -500 ? "survivable with a cash reserve" : "severe — emergency cost reduction required"}.
+At -20% (R${(carcass * 0.8).toFixed(0)}/kg): profit/${T.unit} ${ZAR(s20?.pp ?? 0)} — ${(s20?.pp ?? 0) > -500 ? "survivable with a cash reserve" : "severe — emergency cost reduction required"}.
 Mitigation: forward-sale relationship with your nearest abattoir (some accept 3-month forward contracts).
 
 2. DROUGHT RISK (${r.drought} in ${r.name})
 ${droughtAdvice}
 
 3. DISEASE RISK
-Key threats for ${r.breed} in ${r.name}: ${r.parasites !== "Very low" ? "internal parasites (primary cost driver — " + r.parasites + " pressure)" : "low parasite pressure — maintain prevention"}, Bluetongue (notifiable, vaccine available), Rift Valley Fever (cyclical outbreak risk), foot rot (wet conditions). Health budget ${ZAR(healthCost)}/ewe/yr covers prevention — budget ${ZAR(Math.round(healthCost * 0.5 * flock))} contingency for outbreak years.
+Key threats for ${r.breed} in ${r.name}: ${r.parasites !== "Very low" ? "internal parasites (primary cost driver — " + r.parasites + " pressure)" : "low parasite pressure — maintain prevention"}, Bluetongue (notifiable, vaccine available), Rift Valley Fever (cyclical outbreak risk), foot rot (wet conditions). Health budget ${ZAR(healthCost)}/${T.unit}/yr covers prevention — budget ${ZAR(Math.round(healthCost * 0.5 * flock))} contingency for outbreak years.
 
 4. MARKET RISK
 ${r.market}. Develop at least 2 active sale relationships — never be 100% dependent on a single buyer.
@@ -583,8 +583,8 @@ Recommended contingency reserve: ${ZAR(Math.round(fa * 0.5))} minimum (6 months 
 
     `Total capital required: ${ZAR(capital)}.
 
-Stock component: ${ZAR(flock * r.ewePrice)} (${flock} ewes × ${ZAR(r.ewePrice)}/ewe)
-Route: Land Bank production loan, typically prime + 1.5–2.5%, 3–5 year term, quarterly repayments aligned to lamb sales. Security: notarial livestock bond, cession of fire and multi-peril insurance, personal surety. Minimum own contribution: 30% (${ZAR(Math.round(flock * r.ewePrice * 0.3))}).
+Stock component: ${ZAR(flock * r.ewePrice)} (${flock} ${T.units} × ${ZAR(r.ewePrice)}/${T.unit})
+Route: Land Bank production loan, typically prime + 1.5–2.5%, 3–5 year term, quarterly repayments aligned to ${T.young} sales. Security: notarial livestock bond, cession of fire and multi-peril insurance, personal surety. Minimum own contribution: 30% (${ZAR(Math.round(flock * r.ewePrice * 0.3))}).
 
 Working capital: ${ZAR(Math.round(Math.abs(yr1) * 1.1))} (Year 1 + 10% buffer)
 Instrument: 12-month revolving credit facility — drawdown monthly, repay in full after each sales event.
@@ -602,14 +602,14 @@ Honest caution: First-time applicants consistently underestimate time from appli
     `MONTHS 1–2 — Site preparation and funding:
 • Install or refurbish handling facilities: crush, loading ramp, dip tank or spray race
 • Confirm water supply — sheep will not walk more than 3km to water
-• Fence 4 camps minimum for ${flock} ewes (7-day rotational grazing)
+• Fence 4 camps minimum for ${flock} ${T.units} (7-day rotational grazing)
 • Open a dedicated farm bank account
 • Apply for Land Bank / FNB Agri production loan NOW (8–14 week process)
 • Register with your local veterinarian
 
 MONTH 3 — Stock procurement:
-• Source ${r.breed} ewes from ${r.name} livestock auctions or registered breeders
-• Price benchmark: ${ZAR(r.ewePrice)}/ewe for certified breeding-status animals
+• Source ${r.breed} ${T.units} from ${r.name} livestock auctions or registered breeders
+• Price benchmark: ${ZAR(r.ewePrice)}/${T.unit} for certified breeding-status animals
 • Purchase ${Math.ceil(flock / 35)} stud rams (1:35 ratio) from a recording-scheme stud
 • Quarantine all new animals 14 days before joining existing flock
 
@@ -1251,10 +1251,263 @@ FIVE ACTIONS THIS WEEK:
   };
 }
 
+// ── GOAT CARRYING CAPACITY ────────────────────────────────────────────────────
+const GOAT_CC = {
+  "Limpopo":       "3–5 ha/doe on bushveld — acacia, mopane, and mixed thorn scrub provide excellent year-round browse. Goats outperform sheep on sparse Limpopo veld where grass cover is insufficient for ewes.",
+  "North West":    "3–6 ha/doe across the Kalahari fringe — Boer goats thrive on mixed Kalahari scrub and thorn. Better-rainfall areas (Magaliesberg) support 2–4 ha/doe with rotational management.",
+  "Gauteng":       "1–2 ha/doe on improved pasture — land cost is the binding constraint. Semi-intensive and intensive management justified only where market proximity offsets land premium.",
+  "Mpumalanga":    "2–4 ha/doe on mixed highveld — goats utilise forbs and shrubs not available to cattle. Avoid waterlogged soils in the eastern lowveld where internal parasite burden peaks severely.",
+  "Free State":    "3–6 ha/doe — northern Free State grassland suits semi-intensive Boer goat production. Karoo transition zone (Trompsburg/Springfontein) is excellent goat country at 4–6 ha/doe.",
+  "KwaZulu-Natal": "1.5–3 ha/doe in the coastal midlands — high humidity increases internal parasite pressure dramatically. FAMACHA monitoring is non-negotiable and must be performed every 4–6 weeks without exception.",
+  "Western Cape":  "2–4 ha/doe — the Klein Karoo (Oudtshoorn/Calitzdorp) is SA's most productive commercial goat region. Karoo scrub, renosterveld, and fynbos provide high-energy browse year-round for Boer and Kalahari Red does.",
+  "Eastern Cape":  "2–5 ha/doe — Karoo interior is prime goat country; goats outcompete sheep on sparse Karoo scrub. Midlands suits semi-intensive production at 2–3 ha/doe. One of SA's most versatile goat provinces.",
+  "Northern Cape": "4–12 ha/doe in the Kalahari — Kalahari Red and Boer goats are the natural inhabitants of this veld type. Namaqualand requires 10–15 ha/doe. Supplement with licks; never rely solely on natural browse in drought years.",
+};
+
+// ── GOAT BREED SOURCES ────────────────────────────────────────────────────────
+const GOAT_BREED_SOURCES = {
+  "Boer Goat":
+    "The SA Boer Goat Breeders' Society (SABGA — sabga.co.za) is the primary registration and stud directory. Premier production events: National Boer Goat Show (Kimberly, September — Northern Cape), Free State Production Sale (Bloemfontein, May), Limpopo Stud Sale (Mokopane, April). Insist on animals from the SA National Small Stock Improvement Scheme (NSSIS) with published BLUP index values — top-indexed does improve kidding rate by 10–15% over unrecorded stock. Source bucks from performance-tested studs only: a single poor buck depresses the entire kid crop.",
+  "Kalahari Red":
+    "The SA Kalahari Red Goat Breeders' Society (kalaharired.co.za) coordinates annual production days in Upington, Kenhardt, and Calvinia. The Kalahari Red's pigmented skin and red coat reduce UV damage and heat stress in the Northern Cape — this is a practical production advantage, not cosmetic. For harsh semi-arid conditions where Boer Goat does struggle with browse scarcity, the Kalahari Red's fat reserves and tolerance for sparse veld are measurable commercial assets. Source from registered breeders with at least two generations of performance records in the specific environment (Kalahari/Namaqualand) — do not cross-source from high-rainfall areas.",
+  "_default":
+    "Contact the relevant SA goat breed society for your province — both SABGA (sabga.co.za) and the SA Kalahari Red Breeders' Society coordinate annual production events with performance-tested animals. For commercial replacements, district livestock auctions offer certified breeding-status does at competitive prices. Always request health history, kidding records, and FAMACHA scores before purchase — internal parasite susceptibility is heritable and a single high-susceptible doe can skew your entire health cost.",
+};
+
+// ── GOATS REPORT ──────────────────────────────────────────────────────────────
+function generateGoatsReport(reportData, buyerName, T) {
+  const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
+
+  const kidsPerYear   = Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.85);
+  const carcassKg     = Math.round(r.liveKg * r.dressing / 100);
+  const revPerKid     = Math.round(carcassKg * carcass);
+  const lmNote = lm === "owner"
+    ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo for reference)`
+    : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL + housing allowance R800)`;
+  const feedNote = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/doe/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/doe/yr — browse access + protein lick + kidding supplement. Fully home-grown browse eliminates this cost entirely.`;
+  const healthNote = healthCost !== r.health
+    ? `${ZAR(healthCost)}/doe/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/doe/yr — FAMACHA-based dosing (4–6 cycles/yr), foot care, clostridial vaccinations, and emergency vet allowance. Internal parasite pressure is the primary variable — wet regions add 30–40% to this benchmark.`;
+  const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
+  const s20 = sensRows.find(s => s.pct === -20);
+  const s10 = sensRows.find(s => s.pct === -10);
+  const scaleVi = scaleRows.find(rw => rw.ok);
+  const viabilityVerdict = pp > 0
+    ? `VIABLE — this ${flock}-doe ${r.breed} operation in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/doe/year net (${PCT(pp / r.ewePrice)} ROI on doe capital).`
+    : `MARGINAL — at ${flock} does, this herd falls below the ${be ?? "?"}-doe breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered at this scale. Increasing to at least ${be ?? flock + 20} does is the single most critical action before committing capital.`;
+  const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+  const ccGuide = GOAT_CC[r.name] || `3–6 ha/doe depending on veld type — obtain a professional veld assessment before stocking`;
+  const breedSource = GOAT_BREED_SOURCES[r.breed] || GOAT_BREED_SOURCES["_default"];
+  const droughtAdvice = (r.drought === "Severe, frequent" || r.drought === "Frequent" || r.drought === "Very frequent")
+    ? `Drought is the defining risk in ${r.name}. Boer goats are more drought-resilient than sheep — their browsing habit and fat reserves provide a buffer. However, internal parasite larvae concentrate on the remaining moist browse in dry spells: paradoxically, drought often increases worm burden. Carry a 90-day supplementary lick reserve (${ZAR(Math.round(feedCost / 12 * 3 * flock))} at current feed cost). Destocking trigger: when body condition drops below 2.5, sell before condition loss becomes irreversible. AgriSure CP coverage is recommended.`
+    : `Drought is a periodic risk but Boer goats in ${r.name} are well-adapted to browse on sparse veld. Maintain a 60-day feed and lick reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your herd). Key discipline: move does off depleted camps early — overgrazing removes the shrubs and forbs that goats rely on, and unlike grass, shrub regeneration takes 2–5 years.`;
+  const scaleStr = scaleRows.filter((_, i) => i % 2 === 0)
+    .map(rw => `${rw.n} does: profit/doe ${ZAR(rw.pp)} · herd profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.14 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
+    .join("\n");
+  const sensTable = sensRows.filter(s => [-20, -10, 0, 10, 20].includes(s.pct))
+    .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/doe ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} does`)
+    .join("\n");
+  const primaryIncomeScale = vm > 0 ? Math.round((fa + 180000) / vm) : "N/A";
+
+  const TITLES = [
+    "Executive Summary", "Regional Analysis", "Breed Analysis",
+    "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+    "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+    "Capital Structure & Financing", "Implementation Roadmap",
+  ];
+
+  const bodies = [
+    `${viabilityVerdict}
+
+Operation profile: ${flock} ${r.breed} does in ${r.name}. ${profileLine}. Labour: ${lmNote}. Carcass price basis: R${carcass}/kg (SA fresh goat/chevon market).
+
+Key financials: Revenue ${ZAR(revPE)}/doe/yr · Variable cost ${ZAR(varPE)}/doe/yr · Variable margin ${ZAR(vm)}/doe · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} does · Profit/doe ${ZAR(pp)} · Herd profit ${ZAR(pp * flock)}/yr · ROI on doe capital ${PCT(pp / r.ewePrice)} · Capital required ${ZAR(capital)} · 5-year NPV at 10% discount rate: ${ZAR(npv5)}.
+
+Production parameters: Kidding rate ${r.lambing}% · Kid survival ${r.survival}% · Kids marketed/doe/yr ${(r.lambing / 100 * r.survival / 100 * 0.85).toFixed(2)} · Slaughter weight ${r.liveKg}kg · Carcass weight ${carcassKg}kg (${r.dressing}% dressing) · Revenue/kid at R${carcass}/kg: ${ZAR(revPerKid)}.
+
+Cashflow turning point: Month ${firstPositive?.m ?? 13} (${firstPositive?.mo ?? "Jan"} Year ${firstPositive?.yr ?? 2}) — first kid sales. The preceding months require ${ZAR(Math.abs(yr1))} in working capital before revenue arrives.
+
+Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} (establishment phase). Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. From Year 3 onwards: ${ZAR(pp * flock)}/year sustainable herd profit.
+
+Land Bank bankability: ${bankRating}. ${bankRating === "STRONG" ? `This operation covers fixed costs with a ${PCT((flock - (be ?? flock)) / flock)} safety buffer above breakeven.` : bankRating === "MODERATE" ? "Viable but limited margin — a lender will require management experience and a 12-month cash reserve." : `Below the ${be}-doe breakeven — herd expansion or cost reduction is required before applying for production finance.`}
+
+Recommended immediate action: ${be && flock < be ? `Increase herd size to at least ${be} does before committing capital.` : `Proceed with the ${flock}-doe operation, securing a revolving credit facility of ${ZAR(Math.round(Math.abs(yr1) * 1.1))} to bridge the working capital gap to Month ${firstPositive?.m ?? 13}.`}`,
+
+    `${r.name} — ${r.climate}.
+
+Climate and production environment: Rainfall ${r.climate.match(/\d+[–\-]\d+mm/)?.[0] ?? "variable"} · Season: ${r.season ?? "summer"} · Frost: ${r.frost} · Parasite pressure: ${r.parasites} · Drought frequency: ${r.drought}.
+
+Carrying capacity: ${ccGuide}. Goats are browsers by nature — they preferentially select leaves, forbs, and shrubs over grass. This means they can productively utilise veld that is unsuitable or marginal for cattle and sheep. However, goats must never be confined to camps without browse cover — forced grazing of grass under starvation pressure damages the rumen flora developed for a browse diet and suppresses production dramatically.
+
+Internal parasite management is the defining success factor in ${r.name} goat farming. Unlike sheep, goats do not develop significant acquired immunity to Haemonchus contortus (wireworm) — a mature doe is almost as susceptible to fatal anaemia as a kid. FAMACHA scoring every 4–6 weeks is non-negotiable and must be performed by the farmer or a trained farm worker, not estimated visually at distance. A reactive dosing protocol (dose only FAMACHA score 4–5 animals) reduces anthelmintic resistance — the greatest long-term threat to goat farming in ${r.name}.
+
+Market infrastructure: ${r.market}. The Islamic halaal market — Eid al-Adha sacrificial demand in June/July — consistently pays R10–20/kg premium above standard fresh goat price for certified halaal animals. Align your kidding season to have market-ready animals (22–28kg live weight) available 6 weeks before Eid al-Adha.
+
+${r.tip ? `Provincial insight: ${r.tip}` : ""}
+
+Predation risk in ${r.name}: Caracal and black-backed jackal are the primary predators of goat kids. Losses of 5–15% of the kid crop are common without active predator management. Night-kraaling (100% of kids in secure pens overnight) is non-negotiable for the first 6 weeks of life. Livestock guard dogs (Anatolian Shepherd, Kangal) are the most cost-effective long-term solution at R3,000–R6,000 per trained dog — a single dog protects 100–200 does and pays back in 1–2 kidding seasons.`,
+
+    `${r.breed} is the dominant commercial meat goat breed in ${r.name} and the most widely produced goat breed in South Africa.
+
+Production parameters in ${r.name}:
+• Kidding rate: ${r.lambing}% (Boer goat twins are common — over 50% of does in a well-managed herd produce twins annually)
+• Kid survival to 90 days: ${r.survival}% — primary losses are predation (night), hypothermia in frost areas, and scours in the first 72 hours
+• Slaughter weight: ${r.liveKg}kg live weight at 4–6 months
+• Carcass weight: ${carcassKg}kg (${r.dressing}% dressing percentage)
+• Revenue per kid at R${carcass}/kg: ${ZAR(revPerKid)}
+
+What the breed selection means for your operation in ${r.name}:
+Boer Goat produces a wide, blocky carcass with high muscle-to-bone ratio — the commercial standard for SA fresh goat and export chevon. The white body with red head is the registration standard, but commercial does show colour variation without affecting production. The Boer Goat's weakness is internal parasite susceptibility — it was selected for meat production, not parasite resistance. Any management system for Boer Goats in ${r.name} must have FAMACHA built into the monthly routine.
+
+${breedSource}
+
+HIDDEN INCOME STREAM — Stud buck leasing:
+A performance-tested Boer buck from a top-decile NSSIS stud sells for R8,000–R25,000. Rather than purchasing and depreciating a buck, lease a proven sire from a registered stud at R1,500–R3,000/season (6–8 weeks). This eliminates the capital cost and the genetic risk of a single poor sire inflating your replacement buck expense. Conversely, if you invest in a top buck and your own herd is performing well, leasing him to neighbouring commercial farmers at R2,000/season recovers 40–60% of his annual ownership cost.`,
+
+    `This model applies a conservative commercial Boer Goat benchmark for ${r.name}.
+
+Revenue assumptions:
+• Kidding rate: ${r.lambing}% × survival ${r.survival}% × 85% marketing rate = ${(r.lambing / 100 * r.survival / 100 * 0.85).toFixed(2)} kids marketed/doe/yr
+• Carcass: ${carcassKg}kg × R${carcass}/kg = ${ZAR(revPerKid)}/kid
+• Revenue/doe/yr: ${ZAR(Math.round(revPE))} (no wool — Boer Goat is a pure meat breed)
+• Halaal premium opportunity: R10–20/kg above base price for certified halaal slaughter — adds ${ZAR(Math.round(kidsPerYear * carcassKg * 15))} annually on ${kidsPerYear} kids if marketed through halaal channels
+
+Cost assumptions:
+• Feed / browse supplement: ${feedNote}
+• Health (FAMACHA-based dosing): ${healthNote}
+• Doe replacement: ${r.rep}% annually at ${ZAR(r.ewePrice)}/doe = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/doe/yr
+• Overhead: ${ZAR(r.oh)}/mo — handling, transport, guard dogs, equipment maintenance
+• Labour: ${lmNote}
+
+The variable margin of ${ZAR(vm)}/doe is the key driver. At ${flock} does, fixed costs consume ${ZAR(Math.round(fa / flock))}/doe/yr. At 200 does, this drops to ${ZAR(Math.round(fa / 200))} — scale is the primary lever for profitability in extensive Boer Goat operations.
+
+Most likely wrong assumption: Internal parasite cost. In high-rainfall or KZN coastal environments, health costs can run 1.5–2× the benchmark without a rigorous FAMACHA protocol. If ${r.name} has parasite pressure rated '${r.parasites}', budget an additional ${ZAR(Math.round(healthCost * 0.4))}/doe/yr as a contingency until you have two seasons of actual dosing records.`,
+
+    `The cashflow story for a ${r.name} goat operation has three phases.
+
+Phase 1 — Establishment (Months 1–12): Does are mated in Month 1–2. Gestation is 150 days (5 months) — kids arrive in Month 6–7. No revenue during establishment. Monthly operating cost: ${ZAR(Math.round(mc))}. Cumulative Year 1 position: ${ZAR(yr1)}.
+
+Phase 2 — First kid sales (Month 13–14): First crop of kids reaches market weight (${r.liveKg}kg live). With ${flock} does at ${r.lambing}% kidding and ${r.survival}% survival, approximately ${Math.round(flock * r.lambing / 100 * r.survival / 100 * 0.85 * 0.5)} kids are marketed in the first batch. Year 2 cumulative: ${ZAR(yr2)}.
+
+Phase 3 — Normal production (Year 2+): ${flock} does × ${(r.lambing / 100 * r.survival / 100 * 0.85).toFixed(2)} kids/doe/yr = ${kidsPerYear} kids/yr. Annual revenue ${ZAR(Math.round(revPE * flock))}, annual costs ${ZAR(Math.round((varPE + fa / flock) * flock))}. Year 3 cumulative: ${ZAR(yr3)}.
+
+${pp < 0 ? `WARNING: At ${flock} does, this herd does not reach cumulative-positive in 36 months. Scale to at least ${be ?? flock + 20} does before committing capital.` : `The operation ${yr2 >= 0 ? "recovers working capital by Year 2" : "requires the full 36-month period to recover working capital — normal for first-time operations where establishment costs peak in Year 1"}.`}
+
+Working capital requirement: ${ZAR(Math.round(Math.abs(yr1) * 1.1))} — budget this before a single animal is purchased. The most common cause of Boer Goat operation failure is insufficient working capital in the 12-month establishment phase, not drought or disease.
+
+Seasonal cash flow pattern: Align mating with your target market. Kidding 5 months later should produce market-weight animals for the halaal peak (Eid), September Braai Day demand, or December/January Christmas retail — all of which pay 15–25% above off-peak prices.`,
+
+    `Breakeven: ${be ?? "N/A"} does. The variable margin of ${ZAR(vm)}/doe covers fixed costs of ${ZAR(fa)}/yr exactly at this scale.
+
+Scale table (at current carcass price of R${carcass}/kg):
+${scaleStr}
+
+${scaleVi ? `First viable scale: ${scaleVi.n} does — herd profit ${ZAR(scaleVi.fp)}/yr, ROI ${PCT(scaleVi.roi)}.` : "No viable scale at current carcass price — consider increasing direct-market proportion or reducing fixed costs."}
+
+Commercial thresholds for SA Boer Goat operations:
+• 1–30 does: hobby/smallholder — rarely covers all fixed and opportunity costs
+• 30–80 does: entry commercial, owner-managed — viable with good market access
+• 80–200 does: established commercial — full-time owner justified, buck leasing becomes viable
+• 200–500 does: large commercial — employed labour, volume abattoir contracts, stud buck investment returns justified
+• 500+ does: industrial — migratory or multi-farm, requires full management infrastructure
+
+Your position: ${flock} does · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} does above breakeven` : `${(be ?? flock) - flock} does below breakeven — increase herd size before committing to infrastructure`}.
+
+To reach primary income at R180,000/yr net: ${typeof primaryIncomeScale === "number" ? `${primaryIncomeScale} does required` : "improve variable margin first"}.`,
+
+    `1. INTERNAL PARASITE RISK (Critical — primary ongoing cost and mortality driver)
+Haemonchus contortus (wireworm/bloodworm) is the number one killer of Boer goats in SA. Goats do not develop the acquired immunity that adult sheep build over time — a 4-year-old doe is almost as susceptible as a 4-month-old kid. Parasite pressure: ${r.parasites}.
+Protocol: FAMACHA score every 4–6 weeks. Dose only animals scoring 4–5 (pale/white conjunctiva). Never blanket-dose — resistance develops within 3–5 years of routine whole-herd treatment. Use combination drenches (benzimidazole + levamisole) and rotate with macrocyclic lactones. Record every dosing event with individual animal ID — this data is your resistance early-warning system.
+Cost of failure: A parasite outbreak in a ${flock}-doe herd can kill 20–30% of kids and 5–10% of does in a single season. The annual cost of FAMACHA monitoring (R${Math.round(flock * 5)}/yr in time and materials) is trivially small compared to the losses.
+
+2. PREDATION RISK (High in ${r.name})
+Caracal and black-backed jackal cause 5–15% kid losses in unprotected operations. Night-kraaling all kids under 6 weeks is the most effective intervention (zero capital cost). Livestock guard dogs (Anatolian Shepherd, Kangal — R3,000–R6,000 per trained dog) are the preferred long-term solution. Jackal-proof netting (1.2m high + 30cm underground apron) costs R130–R180/m installed — calculate the perimeter of your kidding camps and compare against predation losses at ${ZAR(revPerKid)}/kid.
+
+3. PRICE SENSITIVITY (Carcass price ±%)
+${sensTable}
+
+At a 20% price drop (to R${s20?.adj.toFixed(0) ?? "?"}/kg): ${s20 && s20.pp < 0 ? `this operation moves below breakeven — ${flock} does is insufficient scale to absorb the shock.` : `profit/doe drops to ${ZAR(s20?.pp ?? 0)} — the herd remains viable but margin is compressed.`}
+At a 10% price drop (to R${s10?.adj.toFixed(0) ?? "?"}/kg): profit/doe ${ZAR(s10?.pp ?? 0)}.
+
+4. DROUGHT RISK
+${droughtAdvice}
+
+5. ANTHELMINTIC RESISTANCE RISK (Long-term, systemic)
+Routine blanket dosing is already causing resistance in most SA goat populations. The risk is that within 5–10 years, effective chemical control of internal parasites may no longer be possible on your farm. Mitigation now: FAMACHA-based selective treatment, genetic selection for FAMACHA resistance (cull does that consistently score 4–5), rotational browsing camps with 6–8 week rest periods to break larval life cycles.`,
+
+    `Total capital required: ${ZAR(capital)}.
+
+Doe component: ${ZAR(flock * r.ewePrice)} (${flock} does × ${ZAR(r.ewePrice)}/doe)
+Buck component: ${ZAR(Math.round(Math.ceil(flock / 30) * r.ewePrice * 2.5))} (${Math.ceil(flock / 30)} bucks at 1:30 ratio — alternatively lease at R2,000/season)
+Working capital (Year 1): ${ZAR(Math.round(Math.abs(yr1) * 1.1))}
+
+Lending instruments:
+• Land Bank Agri-Finance: primary instrument for doe purchase. Term 3–5 years, quarterly repayments aligned to kid sales. Minimum own contribution: 30% (${ZAR(Math.round(flock * r.ewePrice * 0.3))}). Security: notarial livestock bond + insurance cession.
+• FNB Agri: faster approval (4–6 weeks vs Land Bank 8–14 weeks) — preferred if you have existing collateral and cannot wait for Land Bank processing.
+• MAFISA: applicable for emerging/small-scale farmers — subsidised interest rate, smaller loan sizes.
+
+Optimal capital structure at ${ZAR(capital)}: 40% own equity (${ZAR(Math.round(capital * 0.4))}), 60% debt (${ZAR(Math.round(capital * 0.6))}). Goat operations have faster capital recovery than cattle (shorter production cycle) — a 3-year loan term is achievable if kidding rates exceed ${r.lambing - 10}%.
+
+Insurance: Register with AgriSure CP for multi-peril livestock cover before the first animals arrive. Boer goat cover is available at 2.5–4% of livestock value — for ${ZAR(flock * r.ewePrice)} of does, annual premium is ${ZAR(Math.round(flock * r.ewePrice * 0.03))}. Non-negotiable in drought-prone areas.
+
+Honest caution: Buck quality is undervalued by most first-time goat producers. A poor-performance buck is the most expensive animal on the farm — every substandard kid he sires costs you at every sale for the next 5 years. Spend on buck genetics before any other optional capital item.`,
+
+    `MONTHS 1–2 — Site preparation and funding:
+• Install night kraal for kids: minimum 30m² per 10 does, predator-proof, lockable
+• Confirm water supply — does with kids will not walk more than 1.5km to water
+• Fence 4–6 browse camps for rotational management
+• Install salt/mineral lick stations in each camp
+• Apply for Land Bank / FNB Agri production loan NOW (8–14 week process)
+• Engage a local veterinarian familiar with small stock FAMACHA protocol
+
+MONTH 3 — Doe procurement:
+• Source ${r.breed} does from ${r.name} livestock auctions or registered SABGA studs
+• Price benchmark: ${ZAR(r.ewePrice)}/doe for certified breeding-status animals
+• Purchase ${Math.ceil(flock / 30)} proven bucks (1:30 ratio) — or arrange leasing from a registered stud at R1,500–R2,500/season
+• 14-day quarantine: FAMACHA score, dose for internal parasites, and vaccinate all incoming animals before joining existing herd
+
+MONTH 4–5 — Mating:
+• Remove bucks after 6 weeks — record mating dates for each camp
+• Pregnancy scan 45 days post-mating: sort singles, twins, empties
+• Increase does' feed and browse access from Month 4 of pregnancy
+
+MONTHS 6–7 — Kidding:
+• Check every 3–4 hours during peak kidding (first 72 hours are critical for bonding and colostrum)
+• Night-kraal all kids for the first 6 weeks — no exceptions, regardless of weather
+• Tag and weigh every kid at birth
+• FAMACHA score all does within 2 weeks of kidding — parturition depresses immunity sharply
+
+MONTHS 10–12 — First kid sales:
+• Grade animals before booking — target ${r.liveKg}kg+ live weight
+• Book directly with halaal abattoir 3–4 weeks in advance for Eid premium pricing
+• Compare actual kidding%, survival%, and carcass weight against model assumptions — adjust next year's plan accordingly
+
+FIVE ACTIONS THIS WEEK:
+1. Contact SABGA (sabga.co.za) — register as a member and request the stud directory for ${r.name}
+2. Source a predator-proof night kraal design — local agricultural extension officer or AGRI SA can provide drawings
+3. Register with your nearest livestock auction house as a buyer — get the ${r.name} sale calendar
+4. Contact your regional Land Bank agri-assessor — book an initial consultation before submitting an application
+5. Speak to a local veterinarian about FAMACHA training — most offer a 2-hour on-farm session at no charge for new producers`,
+  ];
+
+  return {
+    sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+    raw: bodies.join("\n\n"),
+    reportData, buyerName,
+    generatedAt: new Date().toISOString(),
+    isSandbox: false,
+  };
+}
+
 // ── DISPATCHER ────────────────────────────────────────────────────────────────
 export function generateProReport(reportData, buyerName, terms) {
   const T = terms ?? { unit:"ewe", units:"ewes", group:"flock", young:"lamb", youngs:"lambs", rateLabel:"Lambing" };
   if (T.unit === "hive") return generateBeesReport(reportData, buyerName, T);
   if (T.unit === "cow")  return generateCattleReport(reportData, buyerName, T);
+  if (T.unit === "doe")  return generateGoatsReport(reportData, buyerName, T);
   return generateSheepReport(reportData, buyerName, T);
 }
