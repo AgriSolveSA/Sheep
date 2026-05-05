@@ -42,6 +42,10 @@ const BREED_SOURCES = {
     "The Damara Breeders' Society of SA holds annual production events — leading studs in the Northern Cape (Upington/Kakamas) and North West. Source animals from DAFF-registered breeders and avoid informal auctions where health status cannot be verified.",
   "Van Rooy":
     "SA Van Rooy Sheep Breeders' Society. Best sourced at regional livestock auctions in Upington and Calvinia. Fat-tail reserves sustain ewe condition through dry periods without costly supplementary feeding.",
+  "Blackhead Persian":
+    "The Blackhead Persian is one of the oldest fat-tail breeds in southern Africa. Source from registered breeders in the Northern Cape and North West via the SA Blackhead Persian Breeders' Society. Extremely heat and drought tolerant; thrives on sparse Karoo veld where other breeds fail.",
+  "Namaqua Afrikaner":
+    "An indigenous fat-tail breed adapted to the arid Namaqualand and Northern Cape. The Namaqua Afrikaner Breeders' Society coordinates periodic production sales in Springbok and Loeriesfontein. This breed stores energy in its fat tail, requires minimal supplementary feeding, and suits low-input Karoo operations.",
   "_default":
     "Contact the relevant SA breed society for your province — most coordinate annual production days where you can inspect performance-tested animals. For commercial replacements, local livestock auctions offer certified breeding-status ewes at competitive prices. Always request health and production history before purchase.",
 };
@@ -60,6 +64,14 @@ const CATTLE_BREED_SOURCES = {
     "The SA Brahman Breeders' Society coordinates annual bull sales. Source bulls with documented tick resistance and a Frame Score of 5–6 for feedlot-acceptable weaner weights. Brahman × Bonsmara F1 crosses are the SA commercial standard for hot, tick-pressured environments.",
   "Drakensberger":
     "The Drakensberger Breeders' Society holds production sales in the Eastern Cape. This indigenous SA breed offers strong drought tolerance and is gaining recognition in the premium grass-fed beef sector.",
+  "Beefmaster":
+    "Beefmaster SA coordinates performance-tested bull sales. A triple-purpose breed (beef, hardiness, fertility), the Beefmaster excels in hot, semi-arid environments such as Limpopo and the Northern Cape. Source bulls with Frame Score 5–6 and documented tick-resistance pedigree for best commercial performance.",
+  "Simbra":
+    "Simbra — a Simmentaler × Brahman composite — combines hybrid vigour with tick tolerance. The Simbra Breeders' Society of SA coordinates production sales in KZN and the Eastern Cape. Best suited as a terminal sire on Nguni or Bonsmara cow herds for maximum weaner weight in tick-pressured environments.",
+  "Charolais":
+    "Charolais SA (charolais.co.za) coordinates production sales. As the heaviest-muscled European breed used in SA, Charolais is most effective as a terminal sire in feedlot-orientated systems. Source bulls with Frame Score 6–7 and above-average retail beef yield EBVs for maximum carcass value.",
+  "Hereford":
+    "Hereford SA coordinates production-tested bull sales. Herefords offer docility, good carcass quality, and strong performance on mixed veld/pasture. The polled Hereford is favoured for low-input operations — request polled genetics where available to reduce dehorning costs.",
   "_default":
     "Contact the relevant SA cattle breed society for your province — most coordinate annual bull performance tests and production days. For commercial cow herds, local livestock auctions offer pregnancy-tested cows at competitive prices. Always verify pregnancy status, tick-treatment history, and vaccination records before purchase.",
 };
@@ -108,6 +120,9 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     weanerPrice      = null,
     sellWeightKg     = null,
     livePriceKg      = null,
+    bondMonthly      = 0,
+    fencingMonthly   = 0,
+    miscMonthly      = 0,
   } = inputs;
 
   // Apply client inputs with floors and fallbacks
@@ -117,10 +132,11 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     : Math.max(MIN_OWNER_LABOUR, labourOverride !== null ? labourOverride : r.labour);
   const feedCost   = feedOverride   !== null ? feedOverride   : r.feed;
   const healthCost = healthOverride !== null ? healthOverride : r.health;
+  const extraFixed = (bondMonthly || 0) + (fencingMonthly || 0) + (miscMonthly || 0);
 
   const ck  = r.liveKg * (r.dressing / 100);
   const lpe = (r.lambing / 100) * (r.survival / 100) * 0.85;
-  const fa  = (lab + r.oh) * 12;
+  const fa  = (lab + r.oh + extraFixed) * 12;
   const revPE = lpe * ck * carcass + r.wool;
   const varPE = feedCost + healthCost + r.ewePrice * (r.rep / 100);
   const vm    = revPE - varPE;
@@ -147,17 +163,19 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
   const mc  = (lab + r.oh) + (feedCost / 12 + healthCost / 12) * flock + r.ewePrice * (r.rep / 100) * flock / 12;
   const lrm = Math.floor(flock * lpe * 0.5) * ck * carcass;
   const wrm = r.wool * flock;
-  let cum = 0;
+  const isBee    = r.dressing === 100;
+  const isCattle = !isBee && r.liveKg >= 100;
+  let cum = -(flock * r.ewePrice);
   const cfRows = Array.from({ length: 36 }, (_, i) => {
     const m  = i + 1;
     const ev = [];
-    if (m === 1)                             ev.push("Stock purchased");
-    if (m === 4  || m === 16)                ev.push("Mating");
-    if (m === 9  || m === 21)                ev.push("Lambing");
-    if ([2, 7, 11, 14, 19, 23].includes(m)) ev.push("Dosing");
-    if (m === 6  || m === 18)                ev.push("Preg scan");
-    if (isWool(m))                           ev.push("Wool clip");
-    if (isSale(m))                           ev.push("Lamb sales");
+    if (m === 1)                               ev.push(isBee ? "Hives installed" : "Stock purchased");
+    if (!isBee && (m === 4 || m === 16))       ev.push("Mating");
+    if (m === 9  || m === 21)                  ev.push(isBee ? "Hive inspection" : isCattle ? "Calving" : "Lambing");
+    if ([2, 7, 11, 14, 19, 23].includes(m))   ev.push(isBee ? "Varroa check" : isCattle ? "Tick dosing" : "Dosing");
+    if (!isBee && (m === 6  || m === 18))      ev.push("Preg scan");
+    if (isWool(m))                             ev.push(isBee ? "Beeswax harvest" : "Wool clip");
+    if (isSale(m))                             ev.push(isBee ? "Honey harvest" : isCattle ? "Calf sales" : "Lamb sales");
     const rev    = (isSale(m) ? lrm : 0) + (isWool(m) ? wrm : 0);
     const profit = rev - mc;
     cum += profit;
@@ -183,7 +201,7 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     const revPerAnimal  = (sellWeightKg && livePriceKg) ? sellWeightKg * livePriceKg : carcassKgGO * carcass;
     const annualRevPS   = revPerAnimal * cyclesPerYear;  // revenue per batch slot per year
     const wearerCostPY  = goWPrice * cyclesPerYear;
-    const fixedAnnualGO = (lab + r.oh) * 12;
+    const fixedAnnualGO = (lab + r.oh + extraFixed) * 12;
     const labShareGO    = fixedAnnualGO / flock;
     const totalCostPS   = wearerCostPY + goFeed + goHealth + labShareGO;
     const profitPS      = annualRevPS - totalCostPS;
@@ -641,7 +659,6 @@ function generateBeesReport(reportData, buyerName, T) {
   const honeyRevHive = Math.round(r.liveKg * carcass);
   const waxRevHive   = r.wool;
   const grossRevHive = honeyRevHive + waxRevHive;
-  const calvsPerHive = Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.85);
   const lmNote = lm === "owner"
     ? `owner-managed (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo)`
     : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 rate)`;

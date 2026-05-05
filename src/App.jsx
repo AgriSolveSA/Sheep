@@ -496,10 +496,14 @@ const BEE_PROVINCE_DATA = {
   },
 };
 
+// Bee carrying capacity: hives per ha of farm land.
+// Bees forage a ~3km radius (~2,800 ha) regardless of farm size, so the binding
+// constraint is apiary infrastructure density, not hectares owned.
+// Values represent practical hive density per farm hectare across management systems.
 const BEE_CARRYING_CAPACITY = {
-  extensive:     { limpopo:0.5, north_west:0.3, gauteng:0.8, mpumalanga:1.0, free_state:0.4, kwazulu_natal:0.8, eastern_cape:0.4, western_cape:1.0, northern_cape:0.15 },
-  semiIntensive: { limpopo:1.5, north_west:1.0, gauteng:2.5, mpumalanga:3.0, free_state:1.2, kwazulu_natal:2.5, eastern_cape:1.2, western_cape:3.0, northern_cape:0.5  },
-  intensive:     { limpopo:4.0, north_west:3.0, gauteng:6.0, mpumalanga:8.0, free_state:3.5, kwazulu_natal:6.0, eastern_cape:3.5, western_cape:8.0, northern_cape:1.5  },
+  extensive:     { limpopo:5,  north_west:3,  gauteng:8,  mpumalanga:10, free_state:4,  kwazulu_natal:8,  eastern_cape:4,  western_cape:10, northern_cape:1.5 },
+  semiIntensive: { limpopo:15, north_west:10, gauteng:25, mpumalanga:30, free_state:12, kwazulu_natal:25, eastern_cape:12, western_cape:30, northern_cape:5   },
+  intensive:     { limpopo:40, north_west:30, gauteng:60, mpumalanga:80, free_state:35, kwazulu_natal:60, eastern_cape:35, western_cape:80, northern_cape:15  },
 };
 
 const BEE_PROVINCE_DEFAULTS = {
@@ -527,12 +531,149 @@ const BREED_PARAMS = {
   "Van Rooy":      { lambing:115, liveKg:37,  dressing:47, wool:0,   ewePrice:2400  },
   "Damara":        { lambing:120, liveKg:35,  dressing:46, wool:0,   ewePrice:2200  },
   "Ile de France": { lambing:160, liveKg:44,  dressing:50, wool:200, ewePrice:3500  },
-  "Bonsmara":      { lambing:85,  liveKg:220, dressing:52, wool:0,   ewePrice:12000 },
-  "Nguni":         { lambing:78,  liveKg:200, dressing:50, wool:0,   ewePrice:9000  },
-  "Angus":         { lambing:88,  liveKg:250, dressing:54, wool:0,   ewePrice:14000 },
-  "Simmentaler":   { lambing:85,  liveKg:270, dressing:53, wool:0,   ewePrice:13000 },
-  "Brahman":       { lambing:80,  liveKg:230, dressing:51, wool:0,   ewePrice:11000 },
-  "Drakensberger": { lambing:80,  liveKg:220, dressing:51, wool:0,   ewePrice:10000 },
+  "Bonsmara":           { lambing:85,  liveKg:220, dressing:52, wool:0, ewePrice:12000 },
+  "Nguni":              { lambing:78,  liveKg:200, dressing:50, wool:0, ewePrice:9000  },
+  "Angus":              { lambing:88,  liveKg:250, dressing:54, wool:0, ewePrice:14000 },
+  "Simmentaler":        { lambing:85,  liveKg:270, dressing:53, wool:0, ewePrice:13000 },
+  "Brahman":            { lambing:80,  liveKg:230, dressing:51, wool:0, ewePrice:11000 },
+  "Drakensberger":      { lambing:80,  liveKg:220, dressing:51, wool:0, ewePrice:10000 },
+  "Beefmaster":         { lambing:82,  liveKg:230, dressing:52, wool:0, ewePrice:11500 },
+  "Simbra":             { lambing:83,  liveKg:240, dressing:52, wool:0, ewePrice:12500 },
+  "Charolais":          { lambing:87,  liveKg:280, dressing:54, wool:0, ewePrice:15000 },
+  "Hereford":           { lambing:85,  liveKg:240, dressing:53, wool:0, ewePrice:13000 },
+  "Blackhead Persian":  { lambing:110, liveKg:32,  dressing:45, wool:0, ewePrice:2000  },
+  "Namaqua Afrikaner":  { lambing:100, liveKg:30,  dressing:44, wool:0, ewePrice:1900  },
+};
+
+// ─── GOAT MODULE (Boer Goat / Kalahari Red) ──────────────────────────────────
+// PLACEHOLDER — activate by changing status to "active" in LIVESTOCK_TYPES
+// Numbers based on SA Boer Goat industry benchmarks (2025). Flesh out per province when activating.
+const GOAT_PROVINCE_DATA = {
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#8B5E3C", stroke:"#5c3a20", hoverFill:"#a67248", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Medium", drought:"Frequent", goatDensity:"High", primary:["Boer Goat","Kalahari Red"], secondary:["Savanna","Tankwa"], avoid:["Angora"], why:"Limpopo bushveld suits Boer Goat perfectly. Browse-heavy diet, high heat tolerance. Predator control (jackal, caracal) is the primary management challenge.", tip:"5–8 does/ha on good bushveld. Plan jackal-proof fencing from the start.", breed:"Boer Goat", type:"Meat", market:"Polokwane auction · local abattoirs · Eid markets", rep:15, oh:500, labour:1400, hired:5000, woolMonth:0, lambing:160, survival:80, liveKg:38, dressing:48, wool:0, feed:400, health:150, ewePrice:2200, weanerPrice:850, be:35 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#7a4f2e", stroke:"#4e2e18", hoverFill:"#9a6840", climate:"Semi-arid Bushveld · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Marico and Vryburg Boer Goat country. Low parasite pressure, good browse, but water infrastructure is critical.", tip:"Budget 6–10 does/ha extensive. Drought destocking strategy is non-negotiable.", breed:"Boer Goat", type:"Meat", market:"Vryburg auction · Rustenburg abattoir · Eid markets", rep:15, oh:480, labour:1300, hired:4800, woolMonth:0, lambing:155, survival:82, liveKg:37, dressing:48, wool:0, feed:380, health:140, ewePrice:2100, weanerPrice:800, be:38 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#6b4a28", stroke:"#3e2810", hoverFill:"#8a6038", climate:"Highveld · 600–800mm · Mild · Summer rain", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", goatDensity:"Low", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Gauteng's market access is the advantage — close to abattoirs and Eid buyers. Small-scale peri-urban goat farming increasingly viable.", tip:"Peri-urban operations benefit from direct-to-consumer Eid pricing (R70–90/kg live weight).", breed:"Boer Goat", type:"Meat", market:"Joburg Eid markets · Irene abattoir · direct",  rep:15, oh:550, labour:1500, hired:5200, woolMonth:0, lambing:155, survival:83, liveKg:39, dressing:49, wool:0, feed:450, health:165, ewePrice:2400, weanerPrice:950, be:30 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#7d5632", stroke:"#4e3018", hoverFill:"#9e6e42", climate:"Highveld/Lowveld mix · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Light to moderate", humidity:"Medium", parasites:"Medium–High", drought:"Occasional", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Diverse terrain suits commercial Boer Goat on the highveld. Lowveld operations face higher parasite pressure — FAMACHA protocol essential.", tip:"Highveld Mpumalanga suits semi-intensive systems with rotational camps.", breed:"Boer Goat", type:"Meat", market:"Ermelo auction · Nelspruit abattoir · Eid markets", rep:15, oh:520, labour:1400, hired:5000, woolMonth:0, lambing:155, survival:81, liveKg:38, dressing:48, wool:0, feed:420, health:160, ewePrice:2200, weanerPrice:860, be:34 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#8a6035", stroke:"#5a3a18", hoverFill:"#aa7848", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red","Tankwa"], avoid:["Angora"], why:"Free State's harsh winters and low parasite pressure suit Boer Goat well. Cold tolerance is good — does kid effectively in cold conditions with shelter.", tip:"Budget for shelter/lambing structures. Winter kidding requires management investment.", breed:"Boer Goat", type:"Meat", market:"Bloemfontein auction · Free State abattoirs · Eid markets", rep:15, oh:490, labour:1400, hired:4900, woolMonth:0, lambing:158, survival:80, liveKg:38, dressing:48, wool:0, feed:400, health:140, ewePrice:2100, weanerPrice:820, be:37 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#9a6840", stroke:"#5e3e20", hoverFill:"#b88050", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None–Light", humidity:"High", parasites:"High", drought:"Rare", goatDensity:"Medium", primary:["Boer Goat","Indigenous Nguni goat"], secondary:["Savanna"], avoid:["Angora"], why:"KZN's humidity and parasite pressure makes FAMACHA essential. Indigenous crosses show better resistance. Strong Eid and informal market access.", tip:"Dosing protocol critical — Haemonchus is the primary production constraint.", breed:"Boer Goat", type:"Meat", market:"Tongaat · Newcastle auction · KZN Eid markets", rep:15, oh:550, labour:1500, hired:5200, woolMonth:0, lambing:158, survival:78, liveKg:37, dressing:47, wool:0, feed:430, health:190, ewePrice:2200, weanerPrice:860, be:36 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#7a5230", stroke:"#4a2e18", hoverFill:"#986840", climate:"Diverse · 250–700mm · Semi-arid to sub-humid", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", goatDensity:"High", primary:["Boer Goat","Savanna"], secondary:["Tankwa","Kalahari Red"], avoid:["Angora (Karoo only)"], why:"Eastern Cape is SA's largest goat province by numbers. Communal and commercial operations coexist. Strong Eid demand, proximity to Gauteng and coastal markets.", tip:"Graaff-Reinet area: 4–6 does/ha extensive. Cull aggressively — the market rewards quality over volume.", breed:"Boer Goat", type:"Meat", market:"Graaff-Reinet auction · East London abattoir · Eid markets", rep:15, oh:480, labour:1300, hired:4700, woolMonth:0, lambing:155, survival:80, liveKg:37, dressing:47, wool:0, feed:370, health:150, ewePrice:2000, weanerPrice:780, be:40 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#6e4828", stroke:"#3e2a14", hoverFill:"#8a5e36", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low–Medium", drought:"Seasonal", goatDensity:"Low", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Western Cape suits small-scale intensive Boer Goat with good direct-market access. Winter rainfall system means spring kidding aligns with Ramadan/Eid demand.", tip:"Direct-to-consumer Eid pricing (R80–100/kg live weight) makes small WC operations viable.", breed:"Boer Goat", type:"Meat", market:"Boland Agri auction · Cape Town Eid · Wellington abattoir", rep:15, oh:540, labour:1450, hired:5100, woolMonth:0, lambing:155, survival:82, liveKg:39, dressing:49, wool:0, feed:440, health:155, ewePrice:2300, weanerPrice:900, be:28 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#a07040", stroke:"#644428", hoverFill:"#be8c52", climate:"Arid · 150–300mm · Extreme heat and cold", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", goatDensity:"Very high", primary:["Boer Goat","Kalahari Red","Tankwa"], secondary:["Savanna"], avoid:["Angora (central Karoo excepted)"], why:"Northern Cape is SA's traditional Boer Goat heartland — the Kalahari Red was developed here. Ultra-low parasite pressure, excellent browse, extreme drought tolerance required.", tip:"Kalahari Red outperforms Boer Goat on very arid veld. Budget 10–20 ha/doe. Water infrastructure is everything.", breed:"Kalahari Red", type:"Meat", market:"Upington auction · De Aar abattoir · long-haul Eid markets", rep:15, oh:420, labour:1200, hired:4200, woolMonth:0, lambing:150, survival:83, liveKg:36, dressing:47, wool:0, feed:280, health:110, ewePrice:1900, weanerPrice:720, be:48 },
+};
+const GOAT_CARRYING_CAPACITY = {
+  extensive:     { limpopo:6,  north_west:5,  gauteng:8,  mpumalanga:7,  free_state:5,  kwazulu_natal:6,  eastern_cape:4,  western_cape:6,  northern_cape:0.8 },
+  semiIntensive: { limpopo:12, north_west:10, gauteng:18, mpumalanga:14, free_state:10, kwazulu_natal:12, eastern_cape:8,  western_cape:12, northern_cape:2   },
+  intensive:     { limpopo:25, north_west:20, gauteng:40, mpumalanga:30, free_state:22, kwazulu_natal:28, eastern_cape:18, western_cape:25, northern_cape:6   },
+};
+const GOAT_PROVINCE_DEFAULTS = {
+  limpopo:       { system:"extensive",     market:"auction",  feed:"purchased" },
+  north_west:    { system:"extensive",     market:"auction",  feed:"purchased" },
+  gauteng:       { system:"semiIntensive", market:"direct",   feed:"mixed"     },
+  mpumalanga:    { system:"semiIntensive", market:"abattoir", feed:"mixed"     },
+  free_state:    { system:"extensive",     market:"auction",  feed:"purchased" },
+  kwazulu_natal: { system:"extensive",     market:"auction",  feed:"purchased" },
+  eastern_cape:  { system:"extensive",     market:"auction",  feed:"purchased" },
+  western_cape:  { system:"semiIntensive", market:"direct",   feed:"mixed"     },
+  northern_cape: { system:"extensive",     market:"auction",  feed:"purchased" },
+};
+
+// ─── PIG MODULE (Commercial Pork) ─────────────────────────────────────────────
+// PLACEHOLDER — activate by changing status to "active" in LIVESTOCK_TYPES
+// Pig economics use the same calcFull model. rep=30 reflects sow replacement every ~3 years.
+// Farrowing rate (lambing field) simplified to 200 = ~2 litters/yr baseline; real model should use
+// litters × piglets × survival for full accuracy. Flesh out when activating.
+const PIG_PROVINCE_DATA = {
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c04880", stroke:"#7a2850", hoverFill:"#d86898", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Medium", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:["Outdoor systems"], why:"Limpopo heat requires climate-controlled housing. Small-scale intensive piggeries viable near Polokwane. Feed costs elevated due to transport.", tip:"Closed, climate-controlled housing non-negotiable. Source feed locally where possible.", breed:"Large White", type:"Pork", market:"Polokwane processors · local butcheries", rep:30, oh:1800, labour:3500, hired:8000, woolMonth:0, lambing:200, survival:85, liveKg:110, dressing:75, wool:0, feed:2400, health:480, ewePrice:4500, weanerPrice:600, be:22 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#b03870", stroke:"#6e2044", hoverFill:"#c85888", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc","Pietrain"], avoid:["Outdoor systems"], why:"Commercial piggeries around Rustenburg supply Gauteng processors. Feed sourcing from North West maize belt reduces input costs.", tip:"Position near maize production areas to cut feed transport costs by 15–25%.", breed:"Large White × Landrace", type:"Pork", market:"Vryburg processors · Gauteng supply chains", rep:30, oh:1700, labour:3200, hired:7500, woolMonth:0, lambing:200, survival:86, liveKg:112, dressing:75, wool:0, feed:2300, health:460, ewePrice:4400, weanerPrice:580, be:20 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#d05090", stroke:"#8a3060", hoverFill:"#e870a8", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Gauteng has SA's largest pig processing capacity. Short supply chains, premium fresh pork market access. Space and zoning are the binding constraints.", tip:"Proximity to Rainbow Chicken and Pioneer Foods processing plants reduces logistics cost.", breed:"Large White × Landrace", type:"Pork", market:"Joburg fresh market · Eskort · Pioneer Foods", rep:30, oh:2200, labour:4000, hired:9500, woolMonth:0, lambing:210, survival:88, liveKg:115, dressing:76, wool:0, feed:2500, health:500, ewePrice:5000, weanerPrice:650, be:18 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#b84080", stroke:"#782858", hoverFill:"#d06098", climate:"Highveld/Lowveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Light", humidity:"Medium", parasites:"Medium", drought:"Occasional", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"Mpumalanga maize belt reduces feed costs. Proximity to Gauteng markets. Suitable climate for well-designed piggery facilities.", tip:"Maize sourcing from local cooperatives. Consider manure-to-biogas to offset energy costs.", breed:"Large White", type:"Pork", market:"Ermelo processors · Nelspruit butcheries · Gauteng supply", rep:30, oh:1750, labour:3300, hired:7800, woolMonth:0, lambing:200, survival:86, liveKg:112, dressing:75, wool:0, feed:2300, health:460, ewePrice:4400, weanerPrice:580, be:21 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#c04888", stroke:"#7a3058", hoverFill:"#d868a0", climate:"Semi-arid · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Free State maize belt makes it SA's lowest-feed-cost pig province. Bethlehem and Bloemfontein processors. Cold winters require heating investment in farrowing houses.", tip:"Free State producers enjoy SA's lowest maize prices — a 15–20% feed cost advantage over coastal provinces.", breed:"Large White × Duroc", type:"Pork", market:"Bloemfontein processors · Eskort · Boxer Superstores supply", rep:30, oh:1600, labour:3000, hired:7000, woolMonth:0, lambing:205, survival:87, liveKg:113, dressing:75, wool:0, feed:2100, health:440, ewePrice:4300, weanerPrice:560, be:19 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#c85090", stroke:"#803568", hoverFill:"#e070a8", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Medium", drought:"Rare", pigDensity:"Medium", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"KZN's coastal markets (Durban) offer premium pork pricing. Humidity requires ventilation investment but climate is otherwise favourable.", tip:"Ventilation system design is critical — heat stress above 28°C reduces sow productivity.", breed:"Large White", type:"Pork", market:"Durban fresh market · RCL Foods KZN · coastal butcheries", rep:30, oh:1900, labour:3600, hired:8200, woolMonth:0, lambing:200, survival:85, liveKg:112, dressing:75, wool:0, feed:2400, health:480, ewePrice:4600, weanerPrice:610, be:20 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#b04080", stroke:"#6e2850", hoverFill:"#c86098", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Low–Medium", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"Eastern Cape has limited commercial piggery infrastructure. Buffalo City and Gqeberha markets emerging. Feed cost elevated vs Free State.", tip:"Small-scale intensive units (50–200 sows) near East London or Gqeberha have the best market access.", breed:"Large White", type:"Pork", market:"Gqeberha butcheries · East London processors · local supply", rep:30, oh:1750, labour:3200, hired:7500, woolMonth:0, lambing:195, survival:84, liveKg:110, dressing:74, wool:0, feed:2350, health:470, ewePrice:4400, weanerPrice:570, be:24 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#d05898", stroke:"#8a3868", hoverFill:"#e878b0", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Western Cape produces SA's premium pork for retail and exports. Abattoir capacity (Boland) and cold chain infrastructure excellent. Land cost is the main barrier.", tip:"Organic and free-range premium adds 20–30% to carcass price — increasingly demanded by Cape retail.", breed:"Large White × Duroc", type:"Pork", market:"Boland Agri abattoir · Woolworths supply · premium Cape retail", rep:30, oh:2200, labour:4000, hired:9500, woolMonth:0, lambing:210, survival:88, liveKg:115, dressing:76, wool:0, feed:2500, health:500, ewePrice:5200, weanerPrice:680, be:17 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#a83870", stroke:"#6a2048", hoverFill:"#c05888", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", pigDensity:"Very low", primary:["Large White","Landrace"], secondary:[], avoid:["Outdoor systems"], why:"Very limited commercial piggery in Northern Cape. Upington and Kimberley have small operations. Feed transport cost is the major barrier. Only viable with strong local supply chain.", tip:"Only consider if you have local maize/soya supply and a committed offtake buyer. Market access is limited.", breed:"Large White", type:"Pork", market:"Kimberley local supply · Upington butcheries", rep:30, oh:1500, labour:2800, hired:6500, woolMonth:0, lambing:190, survival:83, liveKg:108, dressing:74, wool:0, feed:2600, health:440, ewePrice:4200, weanerPrice:540, be:30 },
+};
+const PIG_CARRYING_CAPACITY = {
+  extensive:     { limpopo:0,  north_west:0,  gauteng:0,  mpumalanga:0,  free_state:0,  kwazulu_natal:0,  eastern_cape:0,  western_cape:0,  northern_cape:0 },
+  semiIntensive: { limpopo:20, north_west:20, gauteng:30, mpumalanga:25, free_state:25, kwazulu_natal:20, eastern_cape:20, western_cape:30, northern_cape:10 },
+  intensive:     { limpopo:60, north_west:60, gauteng:100,mpumalanga:80, free_state:80, kwazulu_natal:60, eastern_cape:60, western_cape:100,northern_cape:30 },
+};
+const PIG_PROVINCE_DEFAULTS = {
+  limpopo:       { system:"intensive", market:"abattoir", feed:"purchased" },
+  north_west:    { system:"intensive", market:"abattoir", feed:"purchased" },
+  gauteng:       { system:"intensive", market:"abattoir", feed:"purchased" },
+  mpumalanga:    { system:"intensive", market:"abattoir", feed:"purchased" },
+  free_state:    { system:"intensive", market:"abattoir", feed:"purchased" },
+  kwazulu_natal: { system:"intensive", market:"abattoir", feed:"purchased" },
+  eastern_cape:  { system:"intensive", market:"abattoir", feed:"purchased" },
+  western_cape:  { system:"intensive", market:"direct",   feed:"purchased" },
+  northern_cape: { system:"intensive", market:"abattoir", feed:"purchased" },
+};
+
+// ─── POULTRY MODULE (Broiler / Layer) ─────────────────────────────────────────
+// PLACEHOLDER — activate by changing status to "active" in LIVESTOCK_TYPES
+// Models one "bird slot" in a commercial house cycling 6 batches/year (broilers).
+// lambing=600 represents 6 batches; liveKg=2.5 is broiler slaughter weight.
+// A dedicated poultry model should replace calcFull with cycle-based economics. Flesh out when activating.
+const POULTRY_PROVINCE_DATA = {
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c8900a", stroke:"#7a5806", hoverFill:"#e0aa18", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown (layers)"], avoid:["Free-range in lowveld heat"], why:"Climate-controlled broiler houses viable near Polokwane. Heat management critical above 35°C. Limited local processing capacity.", tip:"Tunnel-ventilated houses essential. Source feed from Limpopo maize belt cooperatives.", breed:"Ross 308 Broiler", type:"Broiler", market:"Country Bird Polokwane · local fresh markets", rep:0, oh:2000, labour:4000, hired:9000, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:280, health:35, ewePrice:120, weanerPrice:12, be:1200 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#b87810", stroke:"#724806", hoverFill:"#d09020", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Commercial broiler operations near Rustenburg and Potchefstroom. Maize from local cooperatives reduces feed cost.", tip:"Water security planning critical — broilers consume 2× their body weight in water daily.", breed:"Ross 308 Broiler", type:"Broiler", market:"Vryburg processors · Gauteng broiler supply chains", rep:0, oh:1900, labour:3800, hired:8500, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:270, health:33, ewePrice:110, weanerPrice:12, be:1100 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#d4aa0e", stroke:"#847008", hoverFill:"#e8c420", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Low", drought:"Occasional", poultryDensity:"High", primary:["Ross 308","Cobb 500","Lohmann Brown"], secondary:["Arbor Acres"], avoid:[], why:"Gauteng is SA's poultry hub. Country Bird, Astral, RCL all operate here. Best processing infrastructure, largest fresh market, most integrators available for contract growing.", tip:"Contract growing (integrator-supplied chicks + feed) reduces input risk for new entrants.", breed:"Ross 308 Broiler", type:"Broiler", market:"Astral Foods · Country Bird · Joburg fresh market", rep:0, oh:2500, labour:4500, hired:10000, woolMonth:0, lambing:600, survival:96, liveKg:2.6, dressing:73, wool:0, feed:290, health:38, ewePrice:130, weanerPrice:13, be:900 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c89e12", stroke:"#7a600a", hoverFill:"#e0b828", climate:"Highveld/Lowveld · 600–900mm", rainfall:"600–900mm", season:"Summer", frost:"Light", humidity:"Medium", parasites:"Low", drought:"Occasional", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Mpumalanga maize belt and Highveld climate suit broiler production well. Astral Foods Mpumalanga operations. Moderate competition vs Gauteng.", tip:"Highveld climate is ideal — less heat stress, lower energy costs than bushveld provinces.", breed:"Ross 308 Broiler", type:"Broiler", market:"Astral Foods · Ermelo processors · regional fresh markets", rep:0, oh:2000, labour:4000, hired:9000, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:275, health:34, ewePrice:120, weanerPrice:12, be:1000 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#d09808", stroke:"#806006", hoverFill:"#e8b018", climate:"Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"SA's lowest maize prices give Free State broiler producers a 15–20% feed cost advantage. Cold winters require additional house heating but moderate summer heat is a benefit.", tip:"Heating cost in winter must be factored — offset with insulated tunnel houses.", breed:"Ross 308 Broiler", type:"Broiler", market:"Bloemfontein processors · Free State fresh supply · Gauteng exports", rep:0, oh:1900, labour:3800, hired:8500, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:255, health:32, ewePrice:110, weanerPrice:11, be:900 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#c08010", stroke:"#785008", hoverFill:"#d89820", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Medium", drought:"Rare", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"KZN coastline has high humidity — house design critical. Inland Midlands better suited. Strong Durban fresh market demand. Humidity promotes disease challenge.", tip:"Avoid coastal sites below 200m altitude. Midlands operations have lower disease pressure.", breed:"Ross 308 Broiler", type:"Broiler", market:"Durban fresh market · RCL Foods KZN · Tongaat processors", rep:0, oh:2200, labour:4200, hired:9500, woolMonth:0, lambing:590, survival:94, liveKg:2.5, dressing:72, wool:0, feed:285, health:40, ewePrice:125, weanerPrice:13, be:1100 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#b87800", stroke:"#704800", hoverFill:"#d09010", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Limited commercial poultry infrastructure in Eastern Cape. Growing market in Gqeberha and East London. High feed transport cost from Gauteng and Free State.", tip:"Explore farm-own maize production to offset feed transport premiums.", breed:"Ross 308 Broiler", type:"Broiler", market:"Gqeberha fresh market · East London processors · regional butcheries", rep:0, oh:2000, labour:3800, hired:8500, woolMonth:0, lambing:590, survival:94, liveKg:2.4, dressing:71, wool:0, feed:290, health:36, ewePrice:115, weanerPrice:12, be:1200 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#d4a010", stroke:"#846408", hoverFill:"#ecb828", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", poultryDensity:"Medium", primary:["Ross 308","Cobb 500","Lohmann Brown"], secondary:["Arbor Acres"], avoid:[], why:"Western Cape has strong premium poultry market (Woolworths, Pick n Pay). Free-range and organic certification commands 30–50% price premium. Excellent cold chain infrastructure.", tip:"Consider free-range certification — R10–15/kg premium over conventional for WC retail.", breed:"Ross 308 Broiler / Free-range", type:"Broiler", market:"Astral WC · Spar supply · Woolworths free-range · Cape fresh markets", rep:0, oh:2500, labour:4500, hired:10000, woolMonth:0, lambing:580, survival:94, liveKg:2.5, dressing:72, wool:0, feed:295, health:38, ewePrice:130, weanerPrice:14, be:950 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#a86800", stroke:"#664000", hoverFill:"#c07808", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", poultryDensity:"Very low", primary:["Ross 308"], secondary:[], avoid:["Outdoor systems"], why:"Very limited commercial poultry in Northern Cape. Extreme heat and cold require high energy input. Kimberley and Upington small operations only. Feed transport is prohibitive.", tip:"Only viable with committed offtake buyer and local feed sourcing. Market is very thin.", breed:"Ross 308 Broiler", type:"Broiler", market:"Kimberley local supply · Upington butcheries", rep:0, oh:1800, labour:3500, hired:7500, woolMonth:0, lambing:560, survival:92, liveKg:2.4, dressing:70, wool:0, feed:320, health:38, ewePrice:100, weanerPrice:11, be:1500 },
+};
+const POULTRY_CARRYING_CAPACITY = {
+  extensive:     { limpopo:0,    north_west:0,    gauteng:0,    mpumalanga:0,    free_state:0,    kwazulu_natal:0,    eastern_cape:0,    western_cape:0,    northern_cape:0    },
+  semiIntensive: { limpopo:500,  north_west:500,  gauteng:800,  mpumalanga:600,  free_state:600,  kwazulu_natal:500,  eastern_cape:500,  western_cape:800,  northern_cape:200  },
+  intensive:     { limpopo:2000, north_west:2000, gauteng:4000, mpumalanga:3000, free_state:3000, kwazulu_natal:2000, eastern_cape:2000, western_cape:4000, northern_cape:1000 },
+};
+const POULTRY_PROVINCE_DEFAULTS = {
+  limpopo:       { system:"intensive", market:"abattoir", feed:"purchased" },
+  north_west:    { system:"intensive", market:"abattoir", feed:"purchased" },
+  gauteng:       { system:"intensive", market:"abattoir", feed:"purchased" },
+  mpumalanga:    { system:"intensive", market:"abattoir", feed:"purchased" },
+  free_state:    { system:"intensive", market:"abattoir", feed:"purchased" },
+  kwazulu_natal: { system:"intensive", market:"abattoir", feed:"purchased" },
+  eastern_cape:  { system:"intensive", market:"abattoir", feed:"purchased" },
+  western_cape:  { system:"intensive", market:"direct",   feed:"purchased" },
+  northern_cape: { system:"intensive", market:"abattoir", feed:"purchased" },
+};
+
+// ─── DAIRY CATTLE MODULE ──────────────────────────────────────────────────────
+// PLACEHOLDER — activate by changing status to "active" in LIVESTOCK_TYPES
+// NOTE: Dairy economics are milk-revenue driven, not carcass driven. This placeholder
+// uses calcFull with carcassDefault=7 (R/litre) and liveKg/dressing representing normalised
+// milk litres. A dedicated dairy model (milk yield × litres × price) should replace calcFull
+// when activating. Flesh out fully before going live.
+const DAIRY_PROVINCE_DATA = {
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#1a5c9a", stroke:"#0e3860", hoverFill:"#2472b8", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"High", drought:"Frequent", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:["Holstein"], avoid:["Holstein in lowveld heat"], why:"Very limited commercial dairy in Limpopo. Highveld fringe (Tzaneen irrigation area) viable with Bos taurus-tolerant breeds and good feed supply. Heat stress significantly reduces Holstein production.", tip:"Tzaneen area only — irrigation for year-round fodder essential. Jersey more heat-tolerant than Holstein.", breed:"Jersey", type:"Dairy", market:"Parmalat Polokwane · local fresh milk supply", rep:25, oh:1800, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:220, dressing:45, wool:0, feed:8000, health:1400, ewePrice:22000, weanerPrice:6000, be:28 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#14508a", stroke:"#0a3055", hoverFill:"#1c68a8", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Medium", drought:"Frequent", dairyDensity:"Low", primary:["Holstein","Guernsey"], secondary:["Jersey"], avoid:[], why:"Marico and Potchefstroom irrigation schemes support small-scale dairy. Lucerne production for year-round feed. Supply to Gauteng processors.", tip:"Irrigation and fodder self-sufficiency are prerequisites. Without feed security, dairy is high risk.", breed:"Holstein", type:"Dairy", market:"Gauteng processors · Nestlé Mossel Bay · Parmalat supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:8500, health:1500, ewePrice:24000, weanerPrice:6500, be:25 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#1e6aaa", stroke:"#123e68", hoverFill:"#2880c8", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Gauteng peri-urban dairy faces land cost and zoning challenges. Strong milk demand. Proximity to Clover, Parmalat, and Nestlé processing. Few remaining commercial dairies.", tip:"Few large operations viable given land cost. Focus on value-add (artisanal cheese, pasteurised direct sales).", breed:"Holstein", type:"Dairy", market:"Clover Pretoria · Parmalat Johannesburg · premium fresh milk", rep:25, oh:2500, labour:6000, hired:12000, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:9000, health:1600, ewePrice:28000, weanerPrice:7500, be:22 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#1862a0", stroke:"#0e3c62", hoverFill:"#2278bc", climate:"Highveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey"], avoid:[], why:"Highveld Mpumalanga (Dullstroom, Lydenburg area) has excellent dairy climate. Good fodder production. Supply to Gauteng and Mozambique border markets.", tip:"Standerton and Lydenburg — good dairy potential with irrigation. Consider cheese/yoghurt value-add.", breed:"Holstein", type:"Dairy", market:"Parmalat Mpumalanga · Gauteng supply · regional processors", rep:25, oh:2000, labour:5400, hired:11000, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8500, health:1500, ewePrice:25000, weanerPrice:6800, be:24 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#1670b0", stroke:"#0e4268", hoverFill:"#2088cc", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Bloemfontein basin and Wepener area support commercial dairy. Low parasite pressure. Cold winters reduce mastitis pressure. Strong Clover and Parmalat procurement in province.", tip:"Winter fodder planning critical. Good maize silage production possible on centre pivots.", breed:"Holstein", type:"Dairy", market:"Clover Bloemfontein · Parmalat Free State · Nestlé supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8000, health:1400, ewePrice:24000, weanerPrice:6500, be:23 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#1a78b8", stroke:"#104870", hoverFill:"#2490d4", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Very high", drought:"Rare", dairyDensity:"Medium", primary:["Holstein","Guernsey"], secondary:["Jersey","Ayrshire"], avoid:["Holstein in hot coastal zones"], why:"KZN Midlands (Nottingham Road, Mooi River) is SA's most scenic dairy country. Excellent rainfall, year-round grazing possible. Mastitis management essential in high humidity.", tip:"Notties-Mooi River: the benchmark for SA pasture-based dairy. Excellent grass growth year-round.", breed:"Holstein × Guernsey", type:"Dairy", market:"Clover KZN · Nestlé Mossel Bay supply · Natal Fresh Produce", rep:25, oh:2200, labour:5600, hired:11500, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:7500, health:1600, ewePrice:26000, weanerPrice:7000, be:21 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#1468a8", stroke:"#0c3e66", hoverFill:"#1c80c4", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey","Ayrshire"], secondary:["Guernsey"], avoid:[], why:"Eastern Cape (Tsitsikamma, Humansdorp, Queenstown) has strong dairy heritage. Tsitsikamma pasture-based systems internationally renowned. Good milk processor access.", tip:"Tsitsikamma: SA's premium pasture-based dairy region. Jersey grass milk commands retail premiums.", breed:"Jersey", type:"Dairy", market:"Parmalat Eastern Cape · Woodlands Dairy · Keiskamma Trust", rep:25, oh:1900, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:7800, health:1400, ewePrice:23000, weanerPrice:6200, be:25 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#2080c0", stroke:"#144e78", hoverFill:"#2c98dc", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", dairyDensity:"Very high", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Western Cape (Overberg, Swartland, George) dominates SA dairy. SA's most productive dairy region. Year-round grass growth in coastal areas. Excellent cold chain, processor access and export potential.", tip:"Overberg is SA's dairy heartland — Caledon to Bredasdorp. Jersey pasture milk fetches R9–12/litre from premium processors.", breed:"Holstein / Jersey", type:"Dairy", market:"Clover WC · Danone South Africa · Parmalat WC · Woolworths milk supply", rep:25, oh:2500, labour:6000, hired:12500, woolMonth:0, lambing:93, survival:91, liveKg:250, dressing:47, wool:0, feed:8500, health:1500, ewePrice:30000, weanerPrice:8000, be:18 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#1258a0", stroke:"#0a3460", hoverFill:"#1a70bc", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:[], avoid:["Holstein without full TMR and cooling"], why:"Very limited dairy in Northern Cape. Upington and Springbok small operations on irrigation. High feed import cost. Only viable with irrigation water rights and committed processor contract.", tip:"Only consider with permanent irrigation and a signed processor contract. Heat stress cooling system mandatory.", breed:"Jersey", type:"Dairy", market:"Kimberley local supply · small-scale fresh milk", rep:25, oh:1700, labour:4800, hired:9500, woolMonth:0, lambing:87, survival:86, liveKg:200, dressing:44, wool:0, feed:9000, health:1600, ewePrice:20000, weanerPrice:5500, be:38 },
+};
+const DAIRY_CARRYING_CAPACITY = {
+  extensive:     { limpopo:0.5, north_west:0.4, gauteng:0.8, mpumalanga:0.7, free_state:0.5, kwazulu_natal:0.8, eastern_cape:0.5, western_cape:1.0, northern_cape:0.2 },
+  semiIntensive: { limpopo:1.2, north_west:1.0, gauteng:2.0, mpumalanga:1.6, free_state:1.2, kwazulu_natal:2.0, eastern_cape:1.2, western_cape:2.5, northern_cape:0.5 },
+  intensive:     { limpopo:3,   north_west:2.5, gauteng:5,   mpumalanga:4,   free_state:3,   kwazulu_natal:4,   eastern_cape:3,   western_cape:6,   northern_cape:1.5 },
+};
+const DAIRY_PROVINCE_DEFAULTS = {
+  limpopo:       { system:"intensive",     market:"abattoir", feed:"purchased" },
+  north_west:    { system:"intensive",     market:"abattoir", feed:"purchased" },
+  gauteng:       { system:"intensive",     market:"direct",   feed:"purchased" },
+  mpumalanga:    { system:"semiIntensive", market:"abattoir", feed:"mixed"     },
+  free_state:    { system:"semiIntensive", market:"abattoir", feed:"mixed"     },
+  kwazulu_natal: { system:"semiIntensive", market:"abattoir", feed:"mixed"     },
+  eastern_cape:  { system:"semiIntensive", market:"abattoir", feed:"mixed"     },
+  western_cape:  { system:"semiIntensive", market:"direct",   feed:"mixed"     },
+  northern_cape: { system:"intensive",     market:"abattoir", feed:"purchased" },
 };
 
 // ─── LIVESTOCK MODULE REGISTRY ─────────────────────────────────────────────────
@@ -573,6 +714,55 @@ const LIVESTOCK_MODULES = {
       calcFull(reg, carcass, size, labour, overhead, extra, [10, 25, 50, 100, 200, 500]),
     carcassDefault: 60,
     carcassLabel: "Honey R/kg",
+  },
+  // ── Placeholder modules — change status to "active" in LIVESTOCK_TYPES to enable ──
+  goats: {
+    id:"goats", emoji:"🐐", label:"Goats", labelPlural:"SA Goat Farming",
+    terms:{ unit:"doe", units:"does", group:"herd", young:"kid", youngs:"kids",
+            rateLabel:"Kidding", priceLabel:"Doe price", saleMonthLabel:"Kid sale months" },
+    provinceData: GOAT_PROVINCE_DATA,
+    carryingCapacity: GOAT_CARRYING_CAPACITY,
+    provinceDefaults: GOAT_PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [20, 50, 100, 200, 500, 1000]),
+    carcassDefault: 50,
+    carcassLabel: "Carcass R/kg",
+  },
+  pigs: {
+    id:"pigs", emoji:"🐖", label:"Pigs", labelPlural:"SA Commercial Pigs",
+    terms:{ unit:"sow", units:"sows", group:"piggery", young:"piglet", youngs:"piglets",
+            rateLabel:"Farrowing", priceLabel:"Sow price", saleMonthLabel:"Slaughter months" },
+    provinceData: PIG_PROVINCE_DATA,
+    carryingCapacity: PIG_CARRYING_CAPACITY,
+    provinceDefaults: PIG_PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [10, 20, 50, 100, 200, 500]),
+    carcassDefault: 38,
+    carcassLabel: "Pork R/kg",
+  },
+  poultry: {
+    id:"poultry", emoji:"🐓", label:"Poultry", labelPlural:"SA Poultry",
+    terms:{ unit:"bird", units:"birds", group:"flock", young:"chick", youngs:"chicks",
+            rateLabel:"Production", priceLabel:"Bird slot cost", saleMonthLabel:"Harvest months" },
+    provinceData: POULTRY_PROVINCE_DATA,
+    carryingCapacity: POULTRY_CARRYING_CAPACITY,
+    provinceDefaults: POULTRY_PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [500, 1000, 2000, 5000, 10000, 20000]),
+    carcassDefault: 28,
+    carcassLabel: "Chicken R/kg",
+  },
+  dairy: {
+    id:"dairy", emoji:"🐮", label:"Dairy Cattle", labelPlural:"SA Dairy Cattle",
+    terms:{ unit:"cow", units:"cows", group:"herd", young:"heifer", youngs:"heifers",
+            rateLabel:"Calving", priceLabel:"Cow price", saleMonthLabel:"Peak milk months" },
+    provinceData: DAIRY_PROVINCE_DATA,
+    carryingCapacity: DAIRY_CARRYING_CAPACITY,
+    provinceDefaults: DAIRY_PROVINCE_DEFAULTS,
+    calcFn: (reg, carcass, size, labour, overhead, extra) =>
+      calcFull(reg, carcass, size, labour, overhead, extra, [5, 10, 20, 50, 100, 200]),
+    carcassDefault: 7,
+    carcassLabel: "Milk R/litre (placeholder)",
   },
 };
 
@@ -797,9 +987,9 @@ const PF = {
   merchantId:  import.meta.env?.VITE_PF_MERCHANT_ID  || "REPLACE_MERCHANT_ID",
   merchantKey: import.meta.env?.VITE_PF_MERCHANT_KEY || "REPLACE_MERCHANT_KEY",
   passphrase:  import.meta.env?.VITE_PF_PASSPHRASE   || "REPLACE_PASSPHRASE",
-  returnUrl:   "https://agrisolvesa.netlify.app/success",
-  cancelUrl:   "https://agrisolvesa.netlify.app/",
-  notifyUrl:   "https://agrisolvesa.netlify.app/api/payfast-notify",
+  returnUrl:   "https://agrimodel.co.za/success",
+  cancelUrl:   "https://agrimodel.co.za/",
+  notifyUrl:   "https://agrimodel.co.za/api/payfast-notify",
   sandbox:     false,
   price:       497,
 };
@@ -820,6 +1010,76 @@ function buildPFUrl(name, email, region) {
     item_description: "Lifetime access: all livestock modules, inefficiency engine + AI feasibility report",
   });
   return `${base}?${p.toString()}`;
+}
+
+// Returns a livestock- and mode-specific label for each cost breakdown row.
+// key = costBreakdown key (feed | health | labour | overhead | replace | bond | fencing | misc)
+// unit = T.unit ("ewe" | "cow" | "hive")
+// isGO = grow-out mode boolean
+function getCostLabel(key, unit, isGO) {
+  const map = {
+    hive: {
+      feed:     "Supplemental syrup & pollen",
+      health:   "Varroa + hive treatments",
+      labour:   "Labour",
+      overhead: "Overhead",
+      replace:  "Hive / colony replacement",
+      bond:     "Bond repayment",
+      fencing:  "Infrastructure maintenance",
+      misc:     "Miscellaneous",
+    },
+    cow: {
+      feed:     isGO ? "Feed (feedlot phase)"      : "Roughage, licks & supplements",
+      health:   isGO ? "Vet + treatments (grow)"   : "Vet, dipping & treatments",
+      labour:   "Labour",
+      overhead: "Overhead",
+      replace:  isGO ? "Calf purchase"             : "Cow replacement",
+      bond:     "Bond repayment",
+      fencing:  "Fencing / infrastructure",
+      misc:     "Miscellaneous",
+    },
+    ewe: {
+      feed:     isGO ? "Feed (grow phase)"          : "Grazing & feed supplement",
+      health:   isGO ? "Meds + vet (grow phase)"    : "Meds + vet (ewes & lambs)",
+      labour:   "Labour",
+      overhead: "Overhead",
+      replace:  isGO ? "Weaner purchase"            : "Ewe replacement",
+      bond:     "Bond repayment",
+      fencing:  "Fencing / infra",
+      misc:     "Miscellaneous",
+    },
+    doe: {
+      feed:     isGO ? "Feed (grow phase)"          : "Browse & feed supplement",
+      health:   isGO ? "Meds + vet (grow phase)"    : "Meds + vet (does & kids)",
+      labour:   "Labour",
+      overhead: "Overhead",
+      replace:  isGO ? "Kid purchase"               : "Doe replacement",
+      bond:     "Bond repayment",
+      fencing:  "Fencing / predator control",
+      misc:     "Miscellaneous",
+    },
+    sow: {
+      feed:     "Feed & rations (sows + weaners)",
+      health:   "Vet, vaccines & treatments",
+      labour:   "Labour",
+      overhead: "Overhead",
+      replace:  isGO ? "Piglet purchase"            : "Sow replacement",
+      bond:     "Bond repayment",
+      fencing:  "House maintenance",
+      misc:     "Miscellaneous",
+    },
+    bird: {
+      feed:     "Feed (mash / pellets)",
+      health:   "Vaccines + disease management",
+      labour:   "Labour",
+      overhead: "Overhead (electricity, litter)",
+      replace:  "Chick / pullet purchase",
+      bond:     "Bond repayment",
+      fencing:  "House & equipment maintenance",
+      misc:     "Miscellaneous",
+    },
+  };
+  return map[unit]?.[key] ?? null;
 }
 
 const PALETTE = {
@@ -862,6 +1122,12 @@ const CSS = `
   ::-webkit-scrollbar-thumb{background:${PALETTE.faint};border-radius:2px;}
   ::-webkit-scrollbar-thumb:hover{background:${PALETTE.dim};}
   .risk-low{color:#82d448;} .risk-med{color:#c8a84b;} .risk-high{color:#e05c3a;}
+  .hdr-btn-short{display:none;}
+  .hdr-btn-full{display:inline;}
+  @media(max-width:520px){
+    .hdr-btn-short{display:inline;}
+    .hdr-btn-full{display:none;}
+  }
   @media(max-width:480px){
     .leaflet-container{height:44vh!important;}
     .report-kpi-grid{grid-template-columns:repeat(3,1fr)!important;}
@@ -1143,7 +1409,7 @@ function PayModal({ region, livestockType, onClose, onSuccess }) {
   const [method, setMethod]   = useState("");
   const [emailErr, setEmailErr] = useState(false);
   const [genCode]             = useState(() => Math.random().toString(36).slice(2,8).toUpperCase());
-  const prov = PROVINCE_DATA[region] || {};
+  const prov = (LIVESTOCK_MODULES[livestockType]?.provinceData ?? PROVINCE_DATA)[region] || {};
   const pitchContent = PITCH_CONTENT[livestockType] ?? PITCH_CONTENT.sheep;
   const validEmail = v => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const canPay = name.trim().length >= 2 && (email === "" || validEmail(email));
@@ -1406,7 +1672,14 @@ function printSummaryPDF({ prov, result, T, mod, flockSize, carcass, productionS
 </body></html>`;
 
   const w = window.open("", "_blank", "width=794,height=1123");
-  if (!w) { alert("Allow pop-ups to export the summary PDF."); return; }
+  if (!w) {
+    const blob = new Blob([html], { type: "text/html" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener";
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    return;
+  }
   w.document.write(html);
   w.document.close();
   setTimeout(() => { try { w.focus(); w.print(); } catch {} }, 700);
@@ -1502,7 +1775,7 @@ function MiniCashflow36({ cf36, ewePurchase }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',height:H,display:'block'}}>
-      {[13, 25].map(m => {
+      {cf36.reduce((acc, d, i) => acc.length < 2 && d.rev > 0 ? [...acc, i + 1] : acc, []).map(m => {
         const x = PAD.l + (m - 1) * bW + bW / 2;
         return <line key={m} x1={x} y1={PAD.t} x2={x} y2={H - PAD.b}
                      stroke={PALETTE.gold} strokeWidth={0.8} strokeDasharray="2,2" opacity={0.45}/>;
@@ -1515,7 +1788,7 @@ function MiniCashflow36({ cf36, ewePurchase }) {
                      fill={d.profit >= 0 ? PALETTE.accent : PALETTE.danger} opacity={0.72} rx={0.7}/>;
       })}
       <line x1={PAD.l} y1={cumZeroY} x2={W - PAD.r} y2={cumZeroY}
-            stroke="rgba(255,255,255,0.13)" strokeWidth={0.8} strokeDasharray="3,4}"/>
+            stroke="rgba(255,255,255,0.13)" strokeWidth={0.8} strokeDasharray="3,4"/>
       <polyline points={pts} fill="none" stroke={PALETTE.gold} strokeWidth={1.5} strokeLinejoin="round"/>
       {cf36.map((d, i) => {
         if (i > 0 && d.cum >= 0 && cf36[i - 1].cum < 0) {
@@ -1524,12 +1797,16 @@ function MiniCashflow36({ cf36, ewePurchase }) {
         }
         return null;
       })}
-      {[1, 13, 24, 25, 36].map(m => {
-        const x     = PAD.l + (m - 1) * bW + bW / 2;
-        const isKey = m === 13 || m === 25;
-        return <text key={m} x={x} y={H - 3} textAnchor="middle" fontSize={isKey ? 7 : 6}
-                     fill={isKey ? PALETTE.gold : PALETTE.dim}>{m}</text>;
-      })}
+      {(() => {
+        const revMs = cf36.reduce((a,d)=>d.rev>0?[...a,d.m]:a,[]);
+        const ticks = [...new Set([1, ...revMs, 36])].sort((a,b)=>a-b);
+        return ticks.map(m => {
+          const x = PAD.l + (m - 1) * bW + bW / 2;
+          const isKey = revMs.includes(m);
+          return <text key={m} x={x} y={H - 3} textAnchor="middle" fontSize={isKey ? 7 : 6}
+                       fill={isKey ? PALETTE.gold : PALETTE.dim}>{m}</text>;
+        });
+      })()}
     </svg>
   );
 }
@@ -1635,7 +1912,7 @@ function printReport(report) {
       const GN2 = PT.group.charAt(0).toUpperCase()+PT.group.slice(1);
       const UN2 = PT.unit.charAt(0).toUpperCase()+PT.unit.slice(1);
       extra = `<div class="tbl-wrap">
-        <p class="tbl-title">Sensitivity Analysis — 9 Carcass Price Scenarios at ${flock} ${PT.units}</p>
+        <p class="tbl-title">Sensitivity Analysis — 9 ${PT.unit === "hive" ? "Honey" : "Carcass"} Price Scenarios at ${flock} ${PT.units}</p>
         <table>
           <thead><tr>
             <th>Scenario</th><th>R/kg</th><th>Profit/${UN2}</th>
@@ -1775,7 +2052,7 @@ function printReport(report) {
       </div>
       <div style="text-align:right;font-family:'Courier New',monospace;font-size:7.5pt;color:#999;flex-shrink:1;min-width:0;white-space:nowrap;">
         <div style="font-size:14pt;line-height:1;margin-bottom:2pt;">🌿</div>
-        <div>agrisolvesa.netlify.app</div>
+        <div>agrimodel.co.za</div>
       </div>
     </div>
     <div class="kpi-grid">${kpiHtml}</div>
@@ -1784,13 +2061,21 @@ function printReport(report) {
   ${secHtml}
 
   <div style="margin-top:18pt;padding-top:7pt;border-top:0.5pt solid #ccc;font-size:7pt;color:#aaa;text-align:center;font-family:'Courier New',monospace;">
-    Generated by Agrimodel Pro · agrisolvesa.netlify.app · ${date} · Financial benchmarks based on AgriOrbit Apr 2025 carcass prices · For informational purposes only — not financial advice
+    Generated by Agrimodel Pro · agrimodel.co.za · ${date} · Financial benchmarks based on AgriOrbit Apr 2025 carcass prices · For informational purposes only — not financial advice
   </div>
 </body>
 </html>`;
 
   const w = window.open("", "_blank");
-  if (!w) { alert("Allow pop-ups for this site to save the PDF."); return; }
+  if (!w) {
+    const blob = new Blob([html], { type: "text/html" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    return;
+  }
   w.document.write(html);
   w.document.close();
   setTimeout(() => { w.focus(); w.print(); }, 600);
@@ -1815,7 +2100,7 @@ function ReportViewer({ report, onClose }) {
               Agrimodel Pro · Professional Feasibility Report
             </div>
             <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:900,color:"#f0ece0"}}>
-              {r.name} — {r.breed}
+              {r.name} — {reportData.isGrowOut ? `Buy & Finish · ${r.breed}` : r.breed}
             </div>
             <div style={{fontSize:14,color:PALETTE.muted,marginTop:3}}>
               Prepared for: {buyerName} · {new Date(generatedAt).toLocaleDateString("en-ZA",{year:"numeric",month:"long",day:"numeric"})}
@@ -1841,7 +2126,7 @@ function ReportViewer({ report, onClose }) {
           {[
             {l:RT.group.charAt(0).toUpperCase()+RT.group.slice(1), v:`${flock} ${RT.units}`, c:"#f0ece0"},
             {l:`Profit/${RT.unit}`, v:`${SGN(pp)}${ZAR(pp)}`,           c:pp>=0?PALETTE.accent:PALETTE.danger},
-            {l:"Breakeven",  v:`${be} ${RT.units}`,                      c:PALETTE.gold},
+            {l:"Breakeven",  v: be != null ? `${be} ${RT.units}` : "N/A", c:PALETTE.gold},
             {l:"Capital",    v:ZAR(capital),                             c:PALETTE.gold},
             {l:"5-yr NPV",   v:`${SGN(npv5)}${ZAR(Math.abs(npv5))}`,   c:npv5>=0?PALETTE.accent:PALETTE.danger},
           ].map((s,i) => (
@@ -1910,7 +2195,7 @@ function ReportViewer({ report, onClose }) {
               </table>
             </div>
             <div style={{fontSize:13,color:PALETTE.dim,marginTop:6,lineHeight:1.6}}>
-              ★ = First revenue month — first lamb sales (Month {firstPositive?.m}, {firstPositive?.mo} Year {firstPositive?.yr})
+              ★ = First revenue month — first {RT.unit === "cow" ? "calf" : RT.unit === "hive" ? "honey" : "lamb"} sales (Month {firstPositive?.m}, {firstPositive?.mo} Year {firstPositive?.yr})
               · Costs include labour, overhead, feed, health, replacement reserve amortised monthly
             </div>
           </div>
@@ -1944,7 +2229,7 @@ function ReportViewer({ report, onClose }) {
                       <td style={{padding:"6px 8px",color:row.pp>=0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontFamily:"'Playfair Display',serif"}}>{SGN(row.pp)}{ZAR(Math.abs(row.pp))}</td>
                       <td style={{padding:"6px 8px",color:row.fp>=0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontFamily:"'Playfair Display',serif",fontWeight:700}}>{SGN(row.fp)}{ZAR(Math.abs(row.fp))}</td>
                       <td style={{padding:"6px 8px",color:row.roi>0.15?PALETTE.accent:row.roi>0?PALETTE.gold:PALETTE.danger,textAlign:"right",fontWeight:600}}>{PCT(row.roi)}</td>
-                      <td style={{padding:"6px 8px",color:row.vsB>0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontSize:14}}>{row.vsB>0?"+":""}{PCT(row.vsB)}</td>
+                      <td style={{padding:"6px 8px",color:row.vsB==null?PALETTE.dim:row.vsB>0?PALETTE.accent:PALETTE.danger,textAlign:"right",fontSize:14}}>{row.vsB==null?"—":`${row.vsB>0?"+":""}${PCT(row.vsB)}`}</td>
                       <td style={{padding:"6px 8px",color:PALETTE.muted,textAlign:"right",fontSize:14}}>{ZAR(row.cap)}</td>
                       <td style={{padding:"6px 8px",textAlign:"right"}}>
                         <span style={{fontSize:13,padding:"2px 7px",borderRadius:10,background:PALETTE.surface,border:`1px solid ${row.ok?PALETTE.accent:PALETTE.danger}66`,color:row.ok?PALETTE.accent:PALETTE.danger}}>
@@ -1966,7 +2251,7 @@ function ReportViewer({ report, onClose }) {
         {sec === 6 && (
           <div style={{marginTop:8}}>
             <div style={{fontSize:16,fontWeight:600,color:PALETTE.gold,marginBottom:10,fontFamily:"'Playfair Display',serif"}}>
-              Sensitivity Analysis — 9 Carcass Price Scenarios at {flock} {RT.units}
+              Sensitivity Analysis — 9 {RT.unit === "hive" ? "Honey" : "Carcass"} Price Scenarios at {flock} {RT.units}
             </div>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:15}}>
               <thead>
@@ -1990,7 +2275,7 @@ function ReportViewer({ report, onClose }) {
               </tbody>
             </table>
             <div style={{fontSize:13,color:PALETTE.dim,marginTop:6}}>
-              ★ = base scenario (R{carcass}/kg AgriOrbit A2 Apr 2025) · All scenarios at {flock} {RT.units} {lm === "owner" ? "owner-operated" : "hired worker"}
+              ★ = base scenario (R{carcass}/kg {RT.unit === "hive" ? "SA bulk honey market" : "AgriOrbit A2 Apr 2025"}) · All scenarios at {flock} {RT.units} {lm === "owner" ? "owner-operated" : "hired worker"}
             </div>
           </div>
         )}
@@ -2068,10 +2353,13 @@ function AdvisorWizard({
   bondMonthly, setBondMonthly, setBondTouched,
   productionSystem, setProductionSystem,
   marketChannel, setMarketChannel, feedSource, setFeedSource,
+  setAdvisorCompleted,
+  setSystemTouched, setMarketTouched, setFeedSrcTouched,
   terms, onClose,
+  initialStep = 0,
 }) {
   const T = terms ?? LIVESTOCK_MODULES.sheep.terms;
-  const [stepIdx,    setStepIdx]    = useState(0);
+  const [stepIdx,    setStepIdx]    = useState(initialStep);
   const [completed,  setCompleted]  = useState(false);
 
   const STEPS = [
@@ -2136,7 +2424,7 @@ function AdvisorWizard({
             {id:"semiIntensive", l:"Semi-intensive",  sub: T.unit==="hive" ? "Fixed apiaries + managed forage" : "Supplemented grazing"},
             {id:"intensive",     l:"Intensive",       sub: T.unit==="hive" ? "Commercial honey farm" : "Feedlot / irrigated pasture"},
           ].map(m => (
-            <button key={m.id} onClick={() => setProductionSystem(m.id)}
+            <button key={m.id} onClick={() => { setProductionSystem(m.id); setSystemTouched?.(true); }}
               style={{padding:"11px 14px",background:productionSystem===m.id?PALETTE.borderHover:PALETTE.bg,border:`1.5px solid ${productionSystem===m.id?PALETTE.accent:PALETTE.faint}`,borderRadius:9,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
               <div style={{fontSize:15,color:productionSystem===m.id?PALETTE.accent:PALETTE.text,fontWeight:productionSystem===m.id?700:400}}>{m.l}</div>
               <div style={{fontSize:13,color:PALETTE.dim,marginTop:1}}>{m.sub}</div>
@@ -2158,7 +2446,7 @@ function AdvisorWizard({
         abattoir: `Health stores and retailers: solid middle ground. Farm stalls and online channels add 30–50% margin above bulk wholesale prices.`,
         direct:   `Direct + pollination: the best margin model. Retail honey at R90–150/kg plus pollination at R700–1,200/hive/visit. ${result ? `At current yields ~${ZAR(Math.round(result.totalRevPerEwe * 0.30))}/hive above wholesale.` : ""}`,
       } : {
-        auction:  `Auction is convenient but the lowest-margin option. Direct relationships typically add R${result ? Math.round(result.totalRevPerEwe * 0.15) : 200}–${result ? Math.round(result.totalRevPerEwe * 0.25) : 350}/${T.unit} over auction prices.`,
+        auction:  `Auction is convenient but the lowest-margin option. Direct relationships typically add R${result ? Math.round(result.totalRevPerEwe * 0.10) : 150}–${result ? Math.round(result.totalRevPerEwe * 0.18) : 280}/${T.unit} over auction prices.`,
         abattoir: "Abattoir: solid commercial baseline. Consider joining a buying group or co-op — they negotiate as a block and consistently earn better rates.",
         direct:   `Direct: excellent. Building a buyer network takes effort but locks in the best long-term margins. ${result ? `That's ~${ZAR(Math.round(result.totalRevPerEwe * 0.20))}/${T.unit} above auction.` : ""}`,
       })[marketChannel] || "",
@@ -2174,7 +2462,7 @@ function AdvisorWizard({
             {id:"abattoir", l:"Abattoir",      sub:"Commercial standard"},
             {id:"direct",   l:"Direct sale",   sub:"+15–25% over auction prices"},
           ]).map(m => (
-            <button key={m.id} onClick={() => setMarketChannel(m.id)}
+            <button key={m.id} onClick={() => { setMarketChannel(m.id); setMarketTouched?.(true); }}
               style={{padding:"11px 14px",background:marketChannel===m.id?PALETTE.borderHover:PALETTE.bg,border:`1.5px solid ${marketChannel===m.id?PALETTE.accent:PALETTE.faint}`,borderRadius:9,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
               <div style={{fontSize:15,color:marketChannel===m.id?PALETTE.accent:PALETTE.text,fontWeight:marketChannel===m.id?700:400}}>{m.l}</div>
               <div style={{fontSize:13,color:PALETTE.dim,marginTop:1}}>{m.sub}</div>
@@ -2212,7 +2500,7 @@ function AdvisorWizard({
             {id:"mixed",     l:"Mixed",        sub:"Some home-grown forage"},
             {id:"homeGrown", l:"Home-grown",   sub:"Own forage / crop residue — best margin"},
           ]).map(m => (
-            <button key={m.id} onClick={() => setFeedSource(m.id)}
+            <button key={m.id} onClick={() => { setFeedSource(m.id); setFeedSrcTouched?.(true); }}
               style={{padding:"11px 14px",background:feedSource===m.id?PALETTE.borderHover:PALETTE.bg,border:`1.5px solid ${feedSource===m.id?PALETTE.accent:PALETTE.faint}`,borderRadius:9,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
               <div style={{fontSize:15,color:feedSource===m.id?PALETTE.accent:PALETTE.text,fontWeight:feedSource===m.id?700:400}}>{m.l}</div>
               <div style={{fontSize:13,color:PALETTE.dim,marginTop:1}}>{m.sub}</div>
@@ -2284,7 +2572,7 @@ function AdvisorWizard({
 
   const step   = STEPS[stepIdx];
   const isLast = stepIdx === STEPS.length - 1;
-  const next   = () => { if (isLast) { setBondTouched(true); setCompleted(true); } else setStepIdx(s => s + 1); };
+  const next   = () => { if (isLast) { setBondTouched(true); setAdvisorCompleted(true); setCompleted(true); } else setStepIdx(s => s + 1); };
 
   if (completed) return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
@@ -2405,13 +2693,17 @@ function AgrimodelPro() {
   const [hovered,   setHovered]   = useState(null);
   const [showPay,   setShowPay]   = useState(false);
   const [activeTab, setActiveTab] = useState(0); // 0=Overview 1=Breeds 2=Model
-  const [carcass,   setCarcass]   = useState(87);
+  const [carcass,   setCarcass]   = useState(LIVESTOCK_MODULES.sheep.carcassDefault);
   const [flockSize, setFlockSize] = useState(50);
   const [labour,    setLabour]    = useState(1500);
   const [labourMode,setLabourMode]= useState("owner"); // "owner" | "hired"
   // Extra input costs
   const [bondMonthly,     setBondMonthly]     = useState(0);
   const [bondTouched,     setBondTouched]     = useState(false);
+  const [advisorCompleted, setAdvisorCompleted] = useState(false);
+  const [systemTouched,    setSystemTouched]    = useState(false);
+  const [marketTouched,    setMarketTouched]    = useState(false);
+  const [feedSrcTouched,   setFeedSrcTouched]   = useState(false);
   const [feedOverride,    setFeedOverride]    = useState(null); // null = province default
   const [healthOverride,  setHealthOverride]  = useState(null);
   const [fencingMonthly,  setFencingMonthly]  = useState(0);
@@ -2428,7 +2720,9 @@ function AgrimodelPro() {
   const [showRestore,  setShowRestore]  = useState(false);
   const [accessCode,   setAccessCode]   = useState("");
   const [toast,        setToast]        = useState(null); // {msg,type}
-  const [showAdvisor,  setShowAdvisor]  = useState(false);
+  const [showAdvisor,        setShowAdvisor]        = useState(false);
+  const [advisorInitialStep, setAdvisorInitialStep] = useState(0);
+  const WIZARD_STEP_IDS = ["flock","land","system","market","feedSource","feedCost","healthCost","bond"];
   const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type });
     const t = setTimeout(() => setToast(null), 3200);
@@ -2524,6 +2818,7 @@ function AgrimodelPro() {
         weanerPrice:  weanerPriceOverride ?? effectiveProv?.weanerPrice,
         sellWeightKg: operationMode === "growout" ? goSellWeight : undefined,
         livePriceKg:  operationMode === "growout" ? goLivePrice  : undefined,
+        bondMonthly, fencingMonthly, miscMonthly,
       });
       const r  = generateProReport(rd, buyerName || "Valued Client", T);
       setReport({ ...r, buyerEmail, terms: T, livestockType });
@@ -2532,7 +2827,7 @@ function AgrimodelPro() {
       console.error("Report generation failed:", err);
       setReportStatus("error");
     }
-  }, [selected, flockSize, carcass, labourMode, labour, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride, goSellWeight, goLivePrice]);
+  }, [selected, flockSize, carcass, labourMode, labour, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride, goSellWeight, goLivePrice, bondMonthly, fencingMonthly, miscMonthly]);
 
   // Reset carcass price and flock size when livestock type changes
   useEffect(() => {
@@ -2573,7 +2868,13 @@ function AgrimodelPro() {
       const saved = localStorage.getItem("agri_session");
       if (saved) {
         const s = JSON.parse(saved);
-        if (s.province && PROVINCE_DATA[s.province]) {
+        const restoredType = s.livestockType && LIVESTOCK_MODULES[s.livestockType] ? s.livestockType : "sheep";
+        if (s.livestockType && LIVESTOCK_MODULES[s.livestockType]) {
+          setLivestockType(restoredType);
+          setCarcass(LIVESTOCK_MODULES[restoredType].carcassDefault);
+        }
+        const restoredProv = LIVESTOCK_MODULES[restoredType]?.provinceData ?? PROVINCE_DATA;
+        if (s.province && restoredProv[s.province]) {
           setSelected(s.province);
           // Delay input restore until after province reset runs
           setTimeout(() => {
@@ -2605,10 +2906,10 @@ function AgrimodelPro() {
     try {
       const existing = JSON.parse(localStorage.getItem("agri_session") || "{}");
       localStorage.setItem("agri_session", JSON.stringify({
-        ...existing, province: selected, flockSize, carcass, landHa
+        ...existing, province: selected, flockSize, carcass, landHa, livestockType
       }));
     } catch {}
-  }, [selected, flockSize, carcass, landHa]);
+  }, [selected, flockSize, carcass, landHa, livestockType]);
 
   // Escape — close topmost modal first, then clear province
   useEffect(() => {
@@ -2651,10 +2952,10 @@ function AgrimodelPro() {
   const auditResult = useMemo(() => {
     if (!result || !effectiveProv) return null;
     return runInefficiencyAudit(
-      { productionSystem, marketChannel, feedSource, flockSize, unit: T.unit },
+      { productionSystem, marketChannel, feedSource, flockSize, unit: T.unit, fencingMonthly },
       { healthCost: result.healthCost, feedCost: result.feedCost, flockRev: result.flockRev }
     );
-  }, [result, prov, productionSystem, marketChannel, feedSource, flockSize]);
+  }, [result, prov, productionSystem, marketChannel, feedSource, flockSize, fencingMonthly]);
 
   const carryingCapacity = useMemo(() => {
     if (!landHa || !selected) return null;
@@ -2666,20 +2967,22 @@ function AgrimodelPro() {
   const overstockPct  = isOverstocked ? Math.round(((flockSize - carryingCapacity) / carryingCapacity) * 100) : 0;
 
   const dataCompleteness = useMemo(() => {
+    const isGO_ = operationMode === "growout" && T.unit !== "hive";
+    // advisorCompleted (20 pts) replaces the three "always-true" default fields.
+    // This prevents a 44% starting confidence before any real user input.
     const fields = [
       { w:10, v: flockSize > 0 },
-      { w:10, v: !!landHa },
-      { w:5,  v: true }, // productionSystem always has a value
-      { w:5,  v: true }, // marketChannel always has a value
-      { w:5,  v: true }, // feedSource always has a value
-      { w:8,  v: feedOverride !== null },
-      { w:8,  v: healthOverride !== null },
-      { w:5,  v: bondTouched || bondMonthly > 0 }, // touched = user confirmed (even 0)
+      { w:15, v: !!landHa },
+      { w:15, v: feedOverride !== null },
+      { w:15, v: healthOverride !== null },
+      { w:10, v: bondTouched || bondMonthly > 0 },
+      { w:20, v: advisorCompleted || (systemTouched && marketTouched && feedSrcTouched) },
+      ...(isGO_ ? [{ w:5, v: weanerPriceOverride !== null }] : []),
     ];
     const total  = fields.reduce((s, f) => s + f.w, 0);
     const filled = fields.filter(f => f.v).reduce((s, f) => s + f.w, 0);
     return Math.round((filled / total) * 100);
-  }, [flockSize, landHa, feedOverride, healthOverride, bondMonthly, bondTouched]);
+  }, [flockSize, landHa, feedOverride, healthOverride, bondMonthly, bondTouched, advisorCompleted, systemTouched, marketTouched, feedSrcTouched, operationMode, T, weanerPriceOverride]);
 
   const pc   = result ? (result.profitPerEwe >= 0 ? PALETTE.accent : PALETTE.danger) : PALETTE.muted;
   const isGO = operationMode === "growout" && T.unit !== "hive";
@@ -2698,12 +3001,13 @@ function AgrimodelPro() {
         weanerPrice:  weanerPriceOverride ?? effectiveProv?.weanerPrice,
         sellWeightKg: operationMode === "growout" ? goSellWeight : undefined,
         livePriceKg:  operationMode === "growout" ? goLivePrice  : undefined,
+        bondMonthly, fencingMonthly, miscMonthly,
       });
       const r  = generateProReport(rd, storedName, T);
       setReport({ ...r, buyerEmail: storedEmail, terms: T, livestockType });
       setReportStatus("ready");
     } catch { setReportStatus("error"); }
-  }, [selected, flockSize, labourMode, labour, carcass, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride, goSellWeight, goLivePrice]);
+  }, [selected, flockSize, labourMode, labour, carcass, feedOverride, healthOverride, productionSystem, marketChannel, feedSource, mod, effectiveProv, operationMode, weanerPriceOverride, goSellWeight, goLivePrice, bondMonthly, fencingMonthly, miscMonthly]);
 
   return (
     <>
@@ -2717,10 +3021,12 @@ function AgrimodelPro() {
         } catch {}
         showToast("Access restored — welcome back!");
       }}/>}
-      {showTour && <OnboardingTour onDone={()=>setShowTour(false)} livestockType={livestockType} setLivestockType={(lt)=>{ setLivestockType(lt); setCarcass(LIVESTOCK_MODULES[lt]?.carcassDefault??87); setSelected(null); }}/>}
+      {showTour && <OnboardingTour onDone={()=>setShowTour(false)} livestockType={livestockType} setLivestockType={(lt)=>{ setLivestockType(lt); setCarcass(LIVESTOCK_MODULES[lt]?.carcassDefault ?? LIVESTOCK_MODULES.sheep.carcassDefault); setSelected(null); }}/>}
       {showPay && <PayModal region={selected} livestockType={livestockType} onClose={()=>setShowPay(false)} onSuccess={handlePaySuccess}/>}
       {showAdvisor && (
         <AdvisorWizard
+          key={advisorInitialStep}
+          initialStep={advisorInitialStep}
           prov={prov} result={result} carryingCapacity={carryingCapacity} dataCompleteness={dataCompleteness}
           flockSize={flockSize} setFlockSize={setFlockSize}
           landHa={landHa} setLandHa={setLandHa}
@@ -2730,6 +3036,10 @@ function AgrimodelPro() {
           productionSystem={productionSystem} setProductionSystem={setProductionSystem}
           marketChannel={marketChannel} setMarketChannel={setMarketChannel}
           feedSource={feedSource} setFeedSource={setFeedSource}
+          setAdvisorCompleted={setAdvisorCompleted}
+          setSystemTouched={setSystemTouched}
+          setMarketTouched={setMarketTouched}
+          setFeedSrcTouched={setFeedSrcTouched}
           terms={T}
           onClose={() => setShowAdvisor(false)}
         />
@@ -3221,6 +3531,9 @@ function AgrimodelPro() {
                                   style={{width:"100%",padding:"7px 9px",background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,color:PALETTE.text,fontSize:15,fontFamily:"'DM Mono',monospace"}}/>
                                 <span style={{fontSize:14,color:PALETTE.dim}}>kg</span>
                               </div>
+                              {goSellWeight < (T.unit==="cow" ? 250 : 35) && (
+                                <div style={{fontSize:11,color:PALETTE.danger,marginTop:2}}>⚠ Below minimum viable sell weight ({T.unit==="cow"?"250":"35"} kg)</div>
+                              )}
                               <div style={{fontSize:11,color:PALETTE.dim,marginTop:2}}>Target: {T.unit==="cow"?"450":"48"} kg live</div>
                             </div>
                             <div>
@@ -3270,7 +3583,7 @@ function AgrimodelPro() {
                           {id:"semiIntensive", l:"Semi-intensive",  sub: T.unit==="hive" ? "Fixed apiaries" : "Supplemented"},
                           {id:"intensive",     l:"Intensive",       sub: T.unit==="hive" ? "Commercial farm" : "Feedlot / irrigated"},
                         ].map(m=>(
-                          <button key={m.id} onClick={()=>setProductionSystem(m.id)}
+                          <button key={m.id} onClick={()=>{ setProductionSystem(m.id); setSystemTouched(true); }}
                             style={{flex:1,padding:"5px 6px",background:productionSystem===m.id?PALETTE.dim:"transparent",border:`1px solid ${productionSystem===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:13,color:productionSystem===m.id?PALETTE.accent:PALETTE.muted,fontWeight:productionSystem===m.id?600:400}}>{m.l}</div>
                             <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
@@ -3292,7 +3605,7 @@ function AgrimodelPro() {
                           {id:"abattoir", l:"Abattoir",   sub:"Standard"},
                           {id:"direct",   l:"Direct sale", sub:"+15–25% margin"},
                         ]).map(m=>(
-                          <button key={m.id} onClick={()=>setMarketChannel(m.id)}
+                          <button key={m.id} onClick={()=>{ setMarketChannel(m.id); setMarketTouched(true); }}
                             style={{flex:1,padding:"5px 6px",background:marketChannel===m.id?PALETTE.dim:"transparent",border:`1px solid ${marketChannel===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:13,color:marketChannel===m.id?PALETTE.accent:PALETTE.muted,fontWeight:marketChannel===m.id?600:400}}>{m.l}</div>
                             <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
@@ -3314,7 +3627,7 @@ function AgrimodelPro() {
                           {id:"mixed",      l:"Mixed",        sub:"Some home-grown"},
                           {id:"homeGrown",  l:"Home-grown",   sub:"Own forage / residue"},
                         ]).map(m=>(
-                          <button key={m.id} onClick={()=>setFeedSource(m.id)}
+                          <button key={m.id} onClick={()=>{ setFeedSource(m.id); setFeedSrcTouched(true); }}
                             style={{flex:1,padding:"5px 6px",background:feedSource===m.id?PALETTE.dim:"transparent",border:`1px solid ${feedSource===m.id?PALETTE.borderHover:PALETTE.faint}`,borderRadius:7,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
                             <div style={{fontSize:13,color:feedSource===m.id?PALETTE.accent:PALETTE.muted,fontWeight:feedSource===m.id?600:400}}>{m.l}</div>
                             <div style={{fontSize:13,color:PALETTE.dim}}>{m.sub}</div>
@@ -3366,9 +3679,9 @@ function AgrimodelPro() {
                         {/* Cost breakdown summary */}
                         <div style={{marginTop:10,background:PALETTE.bg,border:`1px solid ${PALETTE.faint}`,borderRadius:7,padding:"8px"}}>
                           <div style={{fontSize:13,color:PALETTE.dim,marginBottom:6,textTransform:"uppercase",letterSpacing:.7}}>Annual cost breakdown — {flockSize} {isGO?T.youngs:T.units}</div>
-                          {Object.values(result.costBreakdown).filter(c=>c.annual>0).map((c,i)=>(
+                          {Object.entries(result.costBreakdown).filter(([,c])=>c.annual>0).map(([key,c],i)=>(
                             <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:`1px solid ${PALETTE.faint}22`,fontSize:14}}>
-                              <span style={{color:PALETTE.muted}}>{c.label}</span>
+                              <span style={{color:PALETTE.muted}}>{getCostLabel(key, T.unit, isGO) ?? c.label}</span>
                               <span style={{color:PALETTE.text,fontFamily:"'Playfair Display',serif",fontWeight:600}}>{ZAR(Math.round(c.annual))}</span>
                             </div>
                           ))}
@@ -3388,7 +3701,7 @@ function AgrimodelPro() {
                         ⚠ OVERSTOCKED — {overstockPct}% above carrying capacity
                       </div>
                       <div style={{fontSize:14,color:"#c07060",lineHeight:1.6}}>
-                        {landHa} ha ({productionSystem}) supports ~{carryingCapacity} {T.units}. You have {flockSize} {T.units} — excess {flockSize - carryingCapacity} {T.units} will degrade veld and reduce long-term viability. Reduce {T.group} or add land.
+                        {landHa} ha ({productionSystem}) supports ~{carryingCapacity} {T.units}. You have {flockSize} {T.units} — excess {flockSize - carryingCapacity} {T.units} {T.unit === "hive" ? "will exceed forage radius, reducing per-hive yield and increasing absconding risk. Reduce hive count or migrate to additional apiary sites." : "will degrade veld and reduce long-term viability. Reduce " + T.group + " or add land."}
                       </div>
                     </div>
                   )}
@@ -3413,6 +3726,14 @@ function AgrimodelPro() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Pollination income note — only for bee provinces with pollination opportunity */}
+                  {T.unit === "hive" && prov?.type?.includes("Pollination") && (
+                    <div style={{background:"rgba(122,204,58,.06)",border:"1px solid rgba(122,204,58,.22)",borderRadius:7,padding:"7px 10px",marginBottom:10,fontSize:13,color:PALETTE.dim,lineHeight:1.6}}>
+                      <span style={{color:PALETTE.accent,fontWeight:700}}>Pollination income available · </span>
+                      {prov.tip ?? "Negotiate pollination contracts with local fruit farmers — R700–1,200/hive/visit. One week on citrus or deciduous fruit can match 3 months of honey production income."}
+                    </div>
+                  )}
 
                   {/* Free summary PDF export */}
                   <button onClick={() => printSummaryPDF({prov: effectiveProv ?? prov, result, T, mod, flockSize, carcass, productionSystem, auditResult, operationMode})}
@@ -3477,7 +3798,7 @@ function AgrimodelPro() {
                         {[
                           {l:"Start with",     v:`${result.breakeven} ${T.units}`, c:PALETTE.text},
                           {l:"Capital needed", v:ZAR(result.mvoCapital),        c:PALETTE.gold},
-                          {l:"First revenue",  v:T.unit==="hive"?`Month ${prov.woolMonth}`:"Month 13", c:PALETTE.accent},
+                          {l:"First revenue",  v:`Month ${result.firstPositive?.m ?? prov.woolMonth ?? 13}`, c:PALETTE.accent},
                         ].map((s,i)=>(
                           <div key={i} style={{background:PALETTE.bg,borderRadius:5,padding:"5px 4px",textAlign:"center",border:`1px solid ${PALETTE.faint}`}}>
                             <div style={{fontSize:16,fontWeight:700,color:s.c,fontFamily:"'Playfair Display',serif"}}>{s.v}</div>
@@ -3496,7 +3817,7 @@ function AgrimodelPro() {
                   <div style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderRadius:8,padding:"10px",marginBottom:10}}>
                     <div style={{fontSize:13,color:PALETTE.dim,textTransform:"uppercase",letterSpacing:.8,marginBottom:8}}>Capital structure — {flockSize} {T.units}</div>
                     {[
-                      {l:`${T.unit.charAt(0).toUpperCase()+T.unit.slice(1)} purchase (${flockSize} × ${ZAR(prov.ewePrice)})`, v:ZAR(result.ewePurchase), pct:result.ewePurchase/result.capital},
+                      {l: isGO ? `${T.young.charAt(0).toUpperCase()+T.young.slice(1)} purchase (${flockSize} × ${ZAR(result.weanerPrice)})` : `${T.unit.charAt(0).toUpperCase()+T.unit.slice(1)} purchase (${flockSize} × ${ZAR(prov.ewePrice)})`, v:ZAR(result.ewePurchase), pct:result.ewePurchase/result.capital},
                       {l:"12-month working capital buffer",                      v:ZAR(result.workingCapital), pct:result.workingCapital/result.capital},
                     ].map((row,i)=>(
                       <div key={i} style={{marginBottom:7}}>
@@ -3535,7 +3856,7 @@ function AgrimodelPro() {
                       ))}
                     </div>
                     <div style={{fontSize:13,color:PALETTE.dim,marginTop:6,lineHeight:1.5}}>
-                      Bars = monthly profit/loss · Gold line = cumulative balance from Day 0 · Dashed = {T.saleMonthLabel} ({T.unit==="hive"?`${prov.woolMonth}, ${prov.woolMonth+12}`:"13, 25"}) · Green dot = payback
+                      Bars = monthly profit/loss · Gold line = cumulative balance from Day 0 · Dashed = {T.saleMonthLabel} ({(result.cf36?.reduce((a,r)=>r.rev>0?[...a,r.m]:a,[])).join(", ")||"—"}) · Green dot = payback
                     </div>
                   </div>
 
@@ -3617,8 +3938,14 @@ function AgrimodelPro() {
                       {auditResult.findings.map((f, i) => {
                         const sevColor = f.severity === "CRITICAL" ? PALETTE.danger : f.severity === "HIGH" ? "#e0943a" : PALETTE.gold;
                         const sevBg    = f.severity === "CRITICAL" ? "rgba(224,104,72,.08)" : f.severity === "HIGH" ? "rgba(224,148,58,.08)" : "rgba(212,181,90,.08)";
+                        const wizardIdx = f.wizardStepId ? WIZARD_STEP_IDS.indexOf(f.wizardStepId) : -1;
+                        const openWizard = wizardIdx >= 0 ? () => { setAdvisorInitialStep(wizardIdx); setShowAdvisor(true); } : null;
                         return (
-                          <div key={i} style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderLeft:`3px solid ${sevColor}`,borderRadius:10,padding:"12px",marginBottom:10}}>
+                          <div key={i} onClick={openWizard ?? undefined}
+                            style={{background:PALETTE.card,border:`1px solid ${PALETTE.faint}`,borderLeft:`3px solid ${sevColor}`,borderRadius:10,padding:"12px",marginBottom:10,cursor:openWizard?"pointer":"default",transition:"border-color .15s"}}
+                            onMouseEnter={openWizard ? e => e.currentTarget.style.borderColor=PALETTE.accent : undefined}
+                            onMouseLeave={openWizard ? e => e.currentTarget.style.borderColor=PALETTE.faint : undefined}
+                          >
                             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                               <div>
                                 <span style={{fontSize:13,padding:"2px 7px",borderRadius:10,background:sevBg,color:sevColor,border:`1px solid ${sevColor}44`,letterSpacing:.5,fontWeight:600,marginRight:7}}>
@@ -3657,6 +3984,13 @@ function AgrimodelPro() {
                                   {f.component === "Fencing"
                                     ? `R${f.capitalSaving}/m of perimeter fencing (multiply by your perimeter length)`
                                     : `~${ZAR(f.capitalSaving)} infrastructure cost reduction`}
+                                </span>
+                              </div>
+                            )}
+                            {openWizard && (
+                              <div style={{marginTop:8,display:"flex",justifyContent:"flex-end"}}>
+                                <span style={{fontSize:13,color:PALETTE.accent,fontWeight:600,letterSpacing:.3}}>
+                                  Review in Farm Advisor →
                                 </span>
                               </div>
                             )}
@@ -3746,6 +4080,11 @@ function AgrimodelPro() {
             {Object.keys(mod.provinceData).map(key=>{
               const pd = mod.provinceData[key];
               const typeColor = pd.type==="Wool"?PALETTE.gold:pd.type==="Dual"?"#5a9adc":PALETTE.accent;
+              const _lpe = (pd.lambing/100)*(pd.survival/100)*0.85;
+              const _ck  = pd.liveKg*(pd.dressing/100);
+              const _vm  = _lpe*_ck*carcass+(pd.wool||0)-(pd.feed||0)-(pd.health||0)-pd.ewePrice*((pd.rep||15)/100);
+              const _fa  = ((pd.labour||1500)+(pd.oh||600))*12;
+              const liveBe = _vm > 0 ? Math.ceil(_fa/_vm) : pd.be;
               return (
                 <div key={key} role="button" tabIndex={0} aria-label={`Select ${pd.name} province`}
                   onClick={()=>setSelected(key)}
@@ -3762,7 +4101,7 @@ function AgrimodelPro() {
                     <div style={{fontSize:14,color:PALETTE.dim,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{pd.primary.join(" · ")}</div>
                   </div>
                   <div style={{textAlign:"right",flexShrink:0}}>
-                    <div style={{fontSize:14,color:PALETTE.muted,fontFamily:"'Playfair Display',serif",fontWeight:600}}>BE {pd.be}</div>
+                    <div style={{fontSize:14,color:PALETTE.muted,fontFamily:"'Playfair Display',serif",fontWeight:600}}>BE {liveBe}</div>
                     <div style={{fontSize:13,color:PALETTE.dim,marginTop:1}}>{pd.rainfall}</div>
                   </div>
                 </div>

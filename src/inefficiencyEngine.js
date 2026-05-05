@@ -1,17 +1,29 @@
 /**
- * Inefficiency Engine — adapted from brainstorm spec
- * Takes current app inputs + calcFull result, returns audit findings with
- * severity, Stupidity Index, and quantified annual savings in ZAR.
+ * Inefficiency Engine — benchmark-based audit
+ * Findings are only raised when the user's actual cost exceeds the SA efficient-operation
+ * benchmark for that livestock unit. Saving = (current − benchmark) × flockSize.
+ * This prevents the engine from recommending downward when the user is already efficient
+ * (or entered a trivially small number).
  */
 
 const SEVERITY_ORDER = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
 
+// Realistic SA production benchmarks per livestock unit (2025 prices)
+// These are the costs an efficient, well-run operation achieves — NOT the theoretical minimum.
+const BENCH = {
+  hive: { health: 25,  feed: 80  },  // R/hive/yr — oxalic acid protocol; forage-placed apiary
+  cow:  { health: 200, feed: 900 },  // R/cow/yr  — co-op generics + tick protocol; bulk roughage
+  ewe:  { health: 65,  feed: 300 },  // R/ewe/yr  — FAMACHA + co-op generics; bulk/part home-grown
+};
+
 export function runInefficiencyAudit(inputs, result) {
-  const { productionSystem, marketChannel, feedSource, flockSize, unit = "ewe" } = inputs;
-  const isBee = unit === "hive";
+  const { productionSystem, marketChannel, feedSource, flockSize, unit = "ewe", fencingMonthly = 0 } = inputs;
+  const isBee    = unit === "hive";
+  const isCattle = unit === "cow";
+  const bench    = BENCH[unit] ?? BENCH.ewe;
   const findings = [];
 
-  // 1. Infrastructure — land operations get water infrastructure; bees get hive placement advice
+  // 1. Infrastructure — land ops get water infrastructure; bees get hive placement advice
   if (productionSystem !== "intensive") {
     if (isBee) {
       findings.push({
@@ -44,51 +56,81 @@ export function runInefficiencyAudit(inputs, result) {
     }
   }
 
-  // 2. Health / treatment costs — universal high-impact saving, species-specific language
-  const healthAnnualSaving = Math.round((result.healthCost ?? 0) * flockSize * 0.60);
-  findings.push({
-    component: isBee ? "Varroa & Hive Treatment Costs" : "Veterinary Medicines",
-    severity: "CRITICAL",
-    si: 9.0,
-    currentLabel: `R${result.healthCost ?? "?"}/${unit}/yr (${isBee ? "proprietary treatments" : "retail price"})`,
-    optimizedLabel: `R${Math.round((result.healthCost ?? 0) * 0.40)}/${unit}/yr (${isBee ? "oxalic acid + organic" : "co-op + generic"})`,
-    annualSaving: healthAnnualSaving,
-    capitalSaving: 0,
-    action: isBee
-      ? "Switch to oxalic acid vaporisation (R0.80–R1.20/treatment vs R15–25/hive for synthetic miticides). " +
-        "Combine with drone-brood trapping during spring to reduce mite load without chemicals. " +
-        "Implement a monitoring-first protocol (sugar roll or alcohol wash) before every treatment cycle. " +
-        "Potential 60–70% cost reduction per hive — the largest single annual saving for most apiaries."
-      : "Join or form a buying cooperative to purchase generic animal health products from " +
-        "wholesalers (Pharmed, ANB Vet). Switch to generic equivalents where registered. " +
-        "Implement a preventive FAMACHA-based dosing protocol to reduce treatment frequency. " +
-        "Potential 60–70% cost reduction — biggest single annual saving for most operations.",
-  });
-
-  // 3. Fencing — relevant for land-based operations only, not beekeepers
-  if (!isBee) {
+  // 2. Health / treatment costs — only flag if current cost exceeds the SA benchmark
+  const currentHealth = result.healthCost ?? 0;
+  if (currentHealth > bench.health) {
+    const savingPerUnit   = currentHealth - bench.health;
+    const healthAnnualSaving = Math.round(savingPerUnit * flockSize);
     findings.push({
-      component: "Fencing",
-      severity: "HIGH",
-      si: 4.4,
-      currentLabel: "R200/m installed (contractor, fixed)",
-      optimizedLabel: "R130/m DIY electric (polywire + posts)",
-      annualSaving: null,
-      capitalSaving: 70, // rand per meter — multiply by perimeter for project saving
-      action:
-        "Use temporary electric fencing (polywire/polytape with lightweight step-in posts) " +
-        "for rotational grazing camps. DIY installation saves 35% upfront. " +
-        "Stone-pack base at corners adds predator deterrence at near-zero extra cost. " +
-        "Maintenance savings of 40% over a 10-year horizon vs conventional wire.",
+      component: isBee ? "Varroa & Hive Treatment Costs" : "Veterinary Medicines",
+      severity: "CRITICAL",
+      si: 9.0,
+      wizardStepId: "healthCost",
+      currentLabel: `R${currentHealth}/${unit}/yr (your current cost)`,
+      optimizedLabel: `R${bench.health}/${unit}/yr (SA ${isBee ? "organic-treatment" : "co-op generic"} benchmark)`,
+      annualSaving: healthAnnualSaving,
+      capitalSaving: 0,
+      action: isBee
+        ? `Switch to oxalic acid vaporisation (R0.80–R1.20/treatment vs R15–25/hive for synthetic miticides). ` +
+          `Combine with drone-brood trapping during spring to reduce mite load without chemicals. ` +
+          `Implement a monitoring-first protocol (sugar roll or alcohol wash) before every treatment cycle. ` +
+          `SA benchmark for an efficient apiary: R${bench.health}/hive/yr. ` +
+          `You can save R${savingPerUnit}/hive/yr — R${healthAnnualSaving.toLocaleString()} across your ${flockSize} hives.`
+        : `Join or form a buying cooperative to purchase generic animal health products from ` +
+          `wholesalers (Pharmed, ANB Vet). Switch to generic equivalents where registered. ` +
+          `Implement a preventive FAMACHA-based dosing protocol to reduce treatment frequency. ` +
+          `SA benchmark for an efficient operation: R${bench.health}/${unit}/yr. ` +
+          `You can save R${savingPerUnit}/${unit}/yr — R${healthAnnualSaving.toLocaleString()} across your ${flockSize} ${unit}s.`,
     });
   }
 
-  // 4. Transport / distribution — species-specific framing
+  // 3. Fencing — land-based operations only
+  if (!isBee) {
+    if (fencingMonthly > 0) {
+      // User has entered their actual monthly fencing cost — make the finding dynamic
+      const annualFencing  = fencingMonthly * 12;
+      const targetAnnual   = Math.round(annualFencing * 0.6); // 40% reduction via electric/DIY
+      const fenceAnnualSaving = annualFencing - targetAnnual;
+      findings.push({
+        component: "Fencing & Infrastructure",
+        severity: "HIGH",
+        si: 4.4,
+        currentLabel: `R${fencingMonthly}/month (R${annualFencing.toLocaleString()}/yr)`,
+        optimizedLabel: `~R${Math.round(fencingMonthly * 0.6)}/month with electric fencing`,
+        annualSaving: fenceAnnualSaving,
+        capitalSaving: 0,
+        action:
+          `Your fencing/infrastructure cost of R${fencingMonthly}/month (R${annualFencing.toLocaleString()}/yr) ` +
+          `can be cut by ~40% by switching rotational camp fencing to polywire/polytape with step-in posts. ` +
+          `DIY electric installation costs R130/m vs R200/m for conventional contractor — a 35% capital saving on new runs. ` +
+          `Stone-pack corners add predator deterrence at near-zero extra cost. ` +
+          `Estimated annual maintenance saving: R${fenceAnnualSaving.toLocaleString()}.`,
+      });
+    } else {
+      // No monthly cost entered — show generic capital recommendation
+      findings.push({
+        component: "Fencing",
+        severity: "HIGH",
+        si: 4.4,
+        currentLabel: "Conventional contractor: R200/m installed",
+        optimizedLabel: "DIY electric (polywire + posts): R130/m",
+        annualSaving: null,
+        capitalSaving: 70,
+        action:
+          "Use temporary electric fencing (polywire/polytape with lightweight step-in posts) " +
+          "for rotational grazing camps. DIY installation saves 35% upfront vs a contractor. " +
+          "Enter your monthly fencing/infra cost in the Model tab to see a quantified saving.",
+      });
+    }
+  }
+
+  // 4. Transport / distribution
   if (marketChannel !== "direct") {
     findings.push({
       component: isBee ? "Honey Distribution" : "Transport & Logistics",
       severity: "MEDIUM",
       si: 3.5,
+      wizardStepId: "market",
       currentLabel: isBee ? "Bulk to co-op / packer at R40–65/kg" : "R35/100km per load (solo trip)",
       optimizedLabel: isBee ? "Direct retail / farmers market at R90–150/kg" : "R26/100km (shared, route-optimised)",
       annualSaving: null,
@@ -104,35 +146,44 @@ export function runInefficiencyAudit(inputs, result) {
     });
   }
 
-  // 5. Feed / supplemental feeding — only flagged if purchasing
+  // 5. Feed — only flag if purchased AND current cost exceeds the SA benchmark
   if (feedSource === "purchased") {
-    const feedAnnualSaving = Math.round((result.feedCost ?? 0) * flockSize * 0.40);
-    findings.push({
-      component: isBee ? "Supplemental Feeding Costs" : "Animal Feed",
-      severity: "HIGH",
-      si: 1.76,
-      currentLabel: `R${result.feedCost ?? "?"}/${unit}/yr (${isBee ? "purchased sugar syrup" : "retail purchased feed"})`,
-      optimizedLabel: `R${Math.round((result.feedCost ?? 0) * 0.60)}/${unit}/yr (${isBee ? "forage placement + reduced syrup" : "bulk + home-grown"})`,
-      annualSaving: feedAnnualSaving,
-      capitalSaving: 0,
-      action: isBee
-        ? "Prioritise apiary placement near year-round forage (mixed bushveld, citrus orchards, wildflower zones) " +
-          "to reduce or eliminate off-season syrup feeding. Migratory placement during dearth periods eliminates " +
-          "syrup costs entirely. Bulk molasses-based supplement is 40% cheaper than commercial syrup."
-        : "Transition to home-grown forage: lucerne or sorghum on idle irrigable land. " +
-          "Utilise maize and soybean crop residues as cost-free winter supplement. " +
-          "Buy bulk commercial feed during summer months when prices are 15–25% lower. " +
-          "Combined approach achieves a 40–50% reduction in purchased feed costs.",
-    });
+    const currentFeed = result.feedCost ?? 0;
+    if (currentFeed > bench.feed) {
+      const savingPerUnit  = currentFeed - bench.feed;
+      const feedAnnualSaving = Math.round(savingPerUnit * flockSize);
+      findings.push({
+        component: isBee ? "Supplemental Feeding Costs" : "Animal Feed",
+        severity: "HIGH",
+        si: 1.76,
+        wizardStepId: "feedCost",
+        currentLabel: `R${currentFeed}/${unit}/yr (your current cost)`,
+        optimizedLabel: `R${bench.feed}/${unit}/yr (SA efficient-operation benchmark)`,
+        annualSaving: feedAnnualSaving,
+        capitalSaving: 0,
+        action: isBee
+          ? `Prioritise apiary placement near year-round forage (mixed bushveld, citrus orchards, wildflower zones) ` +
+            `to reduce or eliminate off-season syrup feeding. Migratory placement during dearth periods eliminates ` +
+            `syrup costs entirely. Bulk molasses-based supplement is 40% cheaper than commercial syrup. ` +
+            `SA benchmark: R${bench.feed}/hive/yr. You can save R${savingPerUnit}/hive/yr — ` +
+            `R${feedAnnualSaving.toLocaleString()} across your ${flockSize} hives.`
+          : `Transition to home-grown forage: lucerne or sorghum on idle irrigable land. ` +
+            `Utilise maize and soybean crop residues as cost-free winter supplement. ` +
+            `Buy bulk commercial feed during summer months when prices are 15–25% lower. ` +
+            `SA benchmark for an efficient operation: R${bench.feed}/${unit}/yr. ` +
+            `You can save R${savingPerUnit}/${unit}/yr — R${feedAnnualSaving.toLocaleString()} across your ${flockSize} ${unit}s.`,
+      });
+    }
   }
 
-  // 6. Market access — if selling at the lowest-margin channel
+  // 6. Market access — price premium vs auction (percentage of revenue is appropriate here)
   if (marketChannel === "auction") {
-    const marketRevGain = Math.round((result.flockRev ?? 0) * 0.20);
+    const marketRevGain = Math.round((result.flockRev ?? 0) * 0.12);
     findings.push({
       component: isBee ? "Honey Marketing Channel" : "Market Access",
       severity: "MEDIUM",
       si: null,
+      wizardStepId: "market",
       currentLabel: isBee ? "Wholesale / co-op — lowest margin" : "Auction — 3–5% commission + transport",
       optimizedLabel: isBee ? "Direct retail — full margin captured" : "Direct sale — full carcass price captured",
       annualSaving: marketRevGain,
@@ -143,15 +194,14 @@ export function runInefficiencyAudit(inputs, result) {
           "Pollination service contracts (R700–1,200/hive/visit) often earn more per hour than honey production."
         : "Add direct-to-consumer channels alongside auction sales. " +
           "Freezer-lamb sales (whole or half carcass), farmers' market stalls, " +
-          "and CSA-style monthly subscription boxes can add 20–30% to your net margin. " +
+          "and CSA-style monthly subscription boxes can add 12–20% to your net margin. " +
           "Start with 10% of the flock direct — minimal admin, immediate price discovery.",
     });
   }
 
-  // Sort by severity
   findings.sort((a, b) => (SEVERITY_ORDER[b.severity] ?? 0) - (SEVERITY_ORDER[a.severity] ?? 0));
 
-  const totalAnnualSaving = findings.reduce((s, f) => s + (f.annualSaving ?? 0), 0);
+  const totalAnnualSaving  = findings.reduce((s, f) => s + (f.annualSaving  ?? 0), 0);
   const totalCapitalSaving = findings.reduce((s, f) => s + (f.capitalSaving ?? 0), 0);
 
   return { findings, totalAnnualSaving, totalCapitalSaving };
