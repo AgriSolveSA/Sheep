@@ -30,7 +30,7 @@ const PROV_NAME_MAP = {
 const PROVINCE_DATA = {
   limpopo: {
     name:"Limpopo", short:"Limpopo",
-    fill:"#d4510e", stroke:"#8a3408", hoverFill:"#e86522",
+    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818",
     climate:"Bushveld · Semi-arid · 400–600mm summer rain · Hot",
     rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low",
     parasites:"Medium", drought:"Frequent", sheepDensity:"Medium",
@@ -45,7 +45,7 @@ const PROVINCE_DATA = {
   },
   north_west: {
     name:"North West", short:"N. West",
-    fill:"#c8900a", stroke:"#8a6006", hoverFill:"#daa812",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Semi-arid Bushveld · 300–500mm · Hot and dry",
     rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low",
     parasites:"Low", drought:"Very frequent", sheepDensity:"Medium",
@@ -60,7 +60,7 @@ const PROVINCE_DATA = {
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
-    fill:"#1a70b0", stroke:"#104678", hoverFill:"#2288cc",
+    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828",
     climate:"Highveld · 700mm summer rain · Moderate temps",
     rainfall:"700mm", season:"Summer", frost:"Moderate", humidity:"Medium",
     parasites:"Medium", drought:"Occasional", sheepDensity:"Low",
@@ -75,7 +75,7 @@ const PROVINCE_DATA = {
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
-    fill:"#1a7a3c", stroke:"#0e4a24", hoverFill:"#229850",
+    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818",
     climate:"Highveld + Lowveld · 600–800mm · Moderate–hot",
     rainfall:"600–800mm", season:"Summer", frost:"Moderate highland", humidity:"High lowveld",
     parasites:"Medium–high", drought:"Rare", sheepDensity:"Medium",
@@ -90,7 +90,7 @@ const PROVINCE_DATA = {
   },
   free_state: {
     name:"Free State", short:"Free State",
-    fill:"#c44a14", stroke:"#883008", hoverFill:"#d85e22",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Grassland · 400–600mm · Cold winters · Hard frost",
     rainfall:"400–600mm", season:"Summer", frost:"Heavy", humidity:"Low–medium",
     parasites:"Low", drought:"Moderate", sheepDensity:"High",
@@ -105,7 +105,7 @@ const PROVINCE_DATA = {
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
-    fill:"#0a7c64", stroke:"#065040", hoverFill:"#0e9878",
+    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828",
     climate:"Subtropical coast + Drakensberg · High rainfall · Humid",
     rainfall:"600–1200mm", season:"Summer", frost:"Highlands only", humidity:"High",
     parasites:"High", drought:"Rare coastal", sheepDensity:"Low–medium",
@@ -120,7 +120,7 @@ const PROVINCE_DATA = {
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
-    fill:"#a06410", stroke:"#6a4208", hoverFill:"#b87820",
+    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030",
     climate:"Karoo interior + Coastal · 200–700mm · Highly variable",
     rainfall:"200–700mm", season:"Mixed", frost:"Karoo interior", humidity:"Variable",
     parasites:"Low–medium", drought:"Karoo frequent", sheepDensity:"Very high",
@@ -135,7 +135,7 @@ const PROVINCE_DATA = {
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
-    fill:"#6a2a94", stroke:"#481a64", hoverFill:"#8038b0",
+    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228",
     climate:"Mediterranean · Winter rainfall · 200–800mm · Cool winters",
     rainfall:"200–800mm", season:"Winter (Cape)", frost:"Light–moderate", humidity:"Moderate",
     parasites:"Low–medium", drought:"Summer droughts common", sheepDensity:"High",
@@ -150,7 +150,7 @@ const PROVINCE_DATA = {
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
-    fill:"#a81818", stroke:"#700e0e", hoverFill:"#c02020",
+    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030",
     climate:"Karoo · Hyper-arid · 50–250mm · Extreme heat + cold",
     rainfall:"50–250mm", season:"Erratic", frost:"Heavy nights", humidity:"Very low",
     parasites:"Very low", drought:"Severe, frequent", sheepDensity:"Very low",
@@ -192,7 +192,7 @@ const PROVINCE_DEFAULTS = {
 const CATTLE_PROVINCE_DATA = {
   limpopo: {
     name:"Limpopo", short:"Limpopo",
-    fill:"#2a7a1a", stroke:"#1a5010", hoverFill:"#369424",
+    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228",
     climate:"Bushveld · Semi-arid · 400–600mm summer rain · Hot",
     rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low",
     parasites:"High", drought:"Frequent", cattleDensity:"High",
@@ -208,7 +208,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   north_west: {
     name:"North West", short:"N. West",
-    fill:"#b87a10", stroke:"#7a5008", hoverFill:"#d09020",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Semi-arid Bushveld · 300–500mm · Hot and dry",
     rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low",
     parasites:"Medium", drought:"Very frequent", cattleDensity:"Medium",
@@ -224,7 +224,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
-    fill:"#1a70b0", stroke:"#104678", hoverFill:"#2288cc",
+    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828",
     climate:"Highveld · 700mm summer rain · Moderate",
     rainfall:"700mm", season:"Summer", frost:"Moderate", humidity:"Medium",
     parasites:"Medium", drought:"Occasional", cattleDensity:"Very low",
@@ -240,7 +240,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
-    fill:"#228844", stroke:"#145228", hoverFill:"#2aa050",
+    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228",
     climate:"Highveld + Lowveld · 600–800mm · Moderate–hot",
     rainfall:"600–800mm", season:"Summer", frost:"Moderate highland", humidity:"High lowveld",
     parasites:"Medium–high", drought:"Rare", cattleDensity:"High",
@@ -256,7 +256,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   free_state: {
     name:"Free State", short:"Free State",
-    fill:"#9aaa1a", stroke:"#607010", hoverFill:"#b2c422",
+    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030",
     climate:"Grassland · 400–600mm · Cold winters · Hard frost",
     rainfall:"400–600mm", season:"Summer", frost:"Heavy", humidity:"Low–medium",
     parasites:"Low", drought:"Moderate", cattleDensity:"Very high",
@@ -272,7 +272,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
-    fill:"#127a54", stroke:"#0a5038", hoverFill:"#169868",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Subtropical coast + Drakensberg · High rainfall · Humid",
     rainfall:"600–1200mm", season:"Summer", frost:"Highlands only", humidity:"High",
     parasites:"Very high", drought:"Rare coastal", cattleDensity:"Medium",
@@ -288,7 +288,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
-    fill:"#8a6a10", stroke:"#5a4408", hoverFill:"#a07e18",
+    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228",
     climate:"Karoo interior + Coastal · 200–700mm · Highly variable",
     rainfall:"200–700mm", season:"Mixed", frost:"Karoo interior", humidity:"Variable",
     parasites:"Low–medium", drought:"Karoo frequent", cattleDensity:"High",
@@ -304,7 +304,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
-    fill:"#6a2a94", stroke:"#481a64", hoverFill:"#8038b0",
+    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818",
     climate:"Mediterranean · Winter rainfall · 200–800mm · Cool winters",
     rainfall:"200–800mm", season:"Winter (Cape)", frost:"Light–moderate", humidity:"Moderate",
     parasites:"Low–medium", drought:"Summer droughts common", cattleDensity:"Low",
@@ -320,7 +320,7 @@ const CATTLE_PROVINCE_DATA = {
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
-    fill:"#9a1818", stroke:"#680e0e", hoverFill:"#b82020",
+    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818",
     climate:"Karoo · Hyper-arid · 50–250mm · Extreme heat + cold",
     rainfall:"50–250mm", season:"Erratic", frost:"Heavy nights", humidity:"Very low",
     parasites:"Very low", drought:"Severe, frequent", cattleDensity:"Very low",
@@ -361,7 +361,7 @@ const CATTLE_PROVINCE_DEFAULTS = {
 const BEE_PROVINCE_DATA = {
   limpopo: {
     name:"Limpopo", short:"Limpopo",
-    fill:"#d4a500", stroke:"#9a7800", hoverFill:"#e8b800",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Bushveld · 400–600mm · Hot summers · Diverse flora",
     rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low",
     parasites:"Medium (Varroa)", drought:"Moderate", hiveDensity:"Medium",
@@ -376,7 +376,7 @@ const BEE_PROVINCE_DATA = {
   },
   north_west: {
     name:"North West", short:"N. West",
-    fill:"#c89000", stroke:"#8a6000", hoverFill:"#dca400",
+    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818",
     climate:"Semi-arid Bushveld · 300–500mm · Hot and dry",
     rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low",
     parasites:"Low–medium", drought:"High", hiveDensity:"Low",
@@ -391,7 +391,7 @@ const BEE_PROVINCE_DATA = {
   },
   gauteng: {
     name:"Gauteng", short:"Gauteng",
-    fill:"#e8b400", stroke:"#a07800", hoverFill:"#f0c600",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Highveld · 700mm · Year-round urban forage · Moderate",
     rainfall:"700mm", season:"Summer", frost:"Moderate", humidity:"Medium",
     parasites:"Medium", drought:"Low", hiveDensity:"Medium–high",
@@ -406,7 +406,7 @@ const BEE_PROVINCE_DATA = {
   },
   mpumalanga: {
     name:"Mpumalanga", short:"Mpuma-\nlanga",
-    fill:"#d46800", stroke:"#8a4200", hoverFill:"#e87c00",
+    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030",
     climate:"Highveld + Lowveld · 600–800mm · Excellent forage diversity",
     rainfall:"600–800mm", season:"Summer", frost:"Moderate highland", humidity:"High lowveld",
     parasites:"Medium", drought:"Low", hiveDensity:"High",
@@ -421,7 +421,7 @@ const BEE_PROVINCE_DATA = {
   },
   free_state: {
     name:"Free State", short:"Free State",
-    fill:"#c88000", stroke:"#885200", hoverFill:"#dc9400",
+    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818",
     climate:"Grassland · 400–600mm · Cold winters · Hard frost",
     rainfall:"400–600mm", season:"Summer", frost:"Heavy", humidity:"Low–medium",
     parasites:"Low", drought:"Moderate", hiveDensity:"Low",
@@ -436,7 +436,7 @@ const BEE_PROVINCE_DATA = {
   },
   kwazulu_natal: {
     name:"KwaZulu-Natal", short:"KZN",
-    fill:"#da9c00", stroke:"#946800", hoverFill:"#eeb000",
+    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228",
     climate:"Subtropical · High rainfall · Near year-round forage",
     rainfall:"600–1200mm", season:"Summer", frost:"Highlands only", humidity:"High",
     parasites:"Medium", drought:"Low", hiveDensity:"Medium",
@@ -451,7 +451,7 @@ const BEE_PROVINCE_DATA = {
   },
   eastern_cape: {
     name:"Eastern Cape", short:"E. Cape",
-    fill:"#c07800", stroke:"#7e4e00", hoverFill:"#d48c00",
+    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18",
     climate:"Karoo + Coastal · 200–700mm · Variable rainfall",
     rainfall:"200–700mm", season:"Mixed", frost:"Karoo interior", humidity:"Variable",
     parasites:"Low–medium", drought:"Karoo high", hiveDensity:"Low–medium",
@@ -466,7 +466,7 @@ const BEE_PROVINCE_DATA = {
   },
   western_cape: {
     name:"Western Cape", short:"W. Cape",
-    fill:"#d4a018", stroke:"#926c00", hoverFill:"#e8b42a",
+    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030",
     climate:"Mediterranean · Winter rainfall · Fynbos · SA's premier honey province",
     rainfall:"200–800mm", season:"Winter (Cape)", frost:"Light–moderate", humidity:"Moderate",
     parasites:"Low–medium", drought:"Summer", hiveDensity:"High",
@@ -481,7 +481,7 @@ const BEE_PROVINCE_DATA = {
   },
   northern_cape: {
     name:"Northern Cape", short:"N. Cape",
-    fill:"#b87000", stroke:"#7a4600", hoverFill:"#cc8400",
+    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828",
     climate:"Karoo · Hyper-arid · 50–250mm · Extreme heat + cold",
     rainfall:"50–250mm", season:"Erratic", frost:"Heavy nights", humidity:"Very low",
     parasites:"Very low", drought:"Very high", hiveDensity:"Very low",
@@ -549,15 +549,15 @@ const BREED_PARAMS = {
 // PLACEHOLDER — activate by changing status to "active" in LIVESTOCK_TYPES
 // Numbers based on SA Boer Goat industry benchmarks (2025). Flesh out per province when activating.
 const GOAT_PROVINCE_DATA = {
-  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#8B5E3C", stroke:"#5c3a20", hoverFill:"#a67248", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Medium", drought:"Frequent", goatDensity:"High", primary:["Boer Goat","Kalahari Red"], secondary:["Savanna","Tankwa"], avoid:["Angora"], why:"Limpopo bushveld suits Boer Goat perfectly. Browse-heavy diet, high heat tolerance. Predator control (jackal, caracal) is the primary management challenge.", tip:"5–8 does/ha on good bushveld. Plan jackal-proof fencing from the start.", breed:"Boer Goat", type:"Meat", market:"Polokwane auction · local abattoirs · Eid markets", rep:15, oh:500, labour:1400, hired:5000, woolMonth:0, lambing:160, survival:80, liveKg:38, dressing:48, wool:0, feed:400, health:150, ewePrice:2200, weanerPrice:850, be:35 },
-  north_west:   { name:"North West",   short:"N. West",    fill:"#7a4f2e", stroke:"#4e2e18", hoverFill:"#9a6840", climate:"Semi-arid Bushveld · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Marico and Vryburg Boer Goat country. Low parasite pressure, good browse, but water infrastructure is critical.", tip:"Budget 6–10 does/ha extensive. Drought destocking strategy is non-negotiable.", breed:"Boer Goat", type:"Meat", market:"Vryburg auction · Rustenburg abattoir · Eid markets", rep:15, oh:480, labour:1300, hired:4800, woolMonth:0, lambing:155, survival:82, liveKg:37, dressing:48, wool:0, feed:380, health:140, ewePrice:2100, weanerPrice:800, be:38 },
-  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#6b4a28", stroke:"#3e2810", hoverFill:"#8a6038", climate:"Highveld · 600–800mm · Mild · Summer rain", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", goatDensity:"Low", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Gauteng's market access is the advantage — close to abattoirs and Eid buyers. Small-scale peri-urban goat farming increasingly viable.", tip:"Peri-urban operations benefit from direct-to-consumer Eid pricing (R70–90/kg live weight).", breed:"Boer Goat", type:"Meat", market:"Joburg Eid markets · Irene abattoir · direct",  rep:15, oh:550, labour:1500, hired:5200, woolMonth:0, lambing:155, survival:83, liveKg:39, dressing:49, wool:0, feed:450, health:165, ewePrice:2400, weanerPrice:950, be:30 },
-  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#7d5632", stroke:"#4e3018", hoverFill:"#9e6e42", climate:"Highveld/Lowveld mix · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Light to moderate", humidity:"Medium", parasites:"Medium–High", drought:"Occasional", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Diverse terrain suits commercial Boer Goat on the highveld. Lowveld operations face higher parasite pressure — FAMACHA protocol essential.", tip:"Highveld Mpumalanga suits semi-intensive systems with rotational camps.", breed:"Boer Goat", type:"Meat", market:"Ermelo auction · Nelspruit abattoir · Eid markets", rep:15, oh:520, labour:1400, hired:5000, woolMonth:0, lambing:155, survival:81, liveKg:38, dressing:48, wool:0, feed:420, health:160, ewePrice:2200, weanerPrice:860, be:34 },
-  free_state:   { name:"Free State",   short:"Free State", fill:"#8a6035", stroke:"#5a3a18", hoverFill:"#aa7848", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red","Tankwa"], avoid:["Angora"], why:"Free State's harsh winters and low parasite pressure suit Boer Goat well. Cold tolerance is good — does kid effectively in cold conditions with shelter.", tip:"Budget for shelter/lambing structures. Winter kidding requires management investment.", breed:"Boer Goat", type:"Meat", market:"Bloemfontein auction · Free State abattoirs · Eid markets", rep:15, oh:490, labour:1400, hired:4900, woolMonth:0, lambing:158, survival:80, liveKg:38, dressing:48, wool:0, feed:400, health:140, ewePrice:2100, weanerPrice:820, be:37 },
-  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#9a6840", stroke:"#5e3e20", hoverFill:"#b88050", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None–Light", humidity:"High", parasites:"High", drought:"Rare", goatDensity:"Medium", primary:["Boer Goat","Indigenous Nguni goat"], secondary:["Savanna"], avoid:["Angora"], why:"KZN's humidity and parasite pressure makes FAMACHA essential. Indigenous crosses show better resistance. Strong Eid and informal market access.", tip:"Dosing protocol critical — Haemonchus is the primary production constraint.", breed:"Boer Goat", type:"Meat", market:"Tongaat · Newcastle auction · KZN Eid markets", rep:15, oh:550, labour:1500, hired:5200, woolMonth:0, lambing:158, survival:78, liveKg:37, dressing:47, wool:0, feed:430, health:190, ewePrice:2200, weanerPrice:860, be:36 },
-  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#7a5230", stroke:"#4a2e18", hoverFill:"#986840", climate:"Diverse · 250–700mm · Semi-arid to sub-humid", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", goatDensity:"High", primary:["Boer Goat","Savanna"], secondary:["Tankwa","Kalahari Red"], avoid:["Angora (Karoo only)"], why:"Eastern Cape is SA's largest goat province by numbers. Communal and commercial operations coexist. Strong Eid demand, proximity to Gauteng and coastal markets.", tip:"Graaff-Reinet area: 4–6 does/ha extensive. Cull aggressively — the market rewards quality over volume.", breed:"Boer Goat", type:"Meat", market:"Graaff-Reinet auction · East London abattoir · Eid markets", rep:15, oh:480, labour:1300, hired:4700, woolMonth:0, lambing:155, survival:80, liveKg:37, dressing:47, wool:0, feed:370, health:150, ewePrice:2000, weanerPrice:780, be:40 },
-  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#6e4828", stroke:"#3e2a14", hoverFill:"#8a5e36", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low–Medium", drought:"Seasonal", goatDensity:"Low", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Western Cape suits small-scale intensive Boer Goat with good direct-market access. Winter rainfall system means spring kidding aligns with Ramadan/Eid demand.", tip:"Direct-to-consumer Eid pricing (R80–100/kg live weight) makes small WC operations viable.", breed:"Boer Goat", type:"Meat", market:"Boland Agri auction · Cape Town Eid · Wellington abattoir", rep:15, oh:540, labour:1450, hired:5100, woolMonth:0, lambing:155, survival:82, liveKg:39, dressing:49, wool:0, feed:440, health:155, ewePrice:2300, weanerPrice:900, be:28 },
-  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#a07040", stroke:"#644428", hoverFill:"#be8c52", climate:"Arid · 150–300mm · Extreme heat and cold", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", goatDensity:"Very high", primary:["Boer Goat","Kalahari Red","Tankwa"], secondary:["Savanna"], avoid:["Angora (central Karoo excepted)"], why:"Northern Cape is SA's traditional Boer Goat heartland — the Kalahari Red was developed here. Ultra-low parasite pressure, excellent browse, extreme drought tolerance required.", tip:"Kalahari Red outperforms Boer Goat on very arid veld. Budget 10–20 ha/doe. Water infrastructure is everything.", breed:"Kalahari Red", type:"Meat", market:"Upington auction · De Aar abattoir · long-haul Eid markets", rep:15, oh:420, labour:1200, hired:4200, woolMonth:0, lambing:150, survival:83, liveKg:36, dressing:47, wool:0, feed:280, health:110, ewePrice:1900, weanerPrice:720, be:48 },
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Medium", drought:"Frequent", goatDensity:"High", primary:["Boer Goat","Kalahari Red"], secondary:["Savanna","Tankwa"], avoid:["Angora"], why:"Limpopo bushveld suits Boer Goat perfectly. Browse-heavy diet, high heat tolerance. Predator control (jackal, caracal) is the primary management challenge.", tip:"5–8 does/ha on good bushveld. Plan jackal-proof fencing from the start.", breed:"Boer Goat", type:"Meat", market:"Polokwane auction · local abattoirs · Eid markets", rep:15, oh:500, labour:1400, hired:5000, woolMonth:0, lambing:160, survival:80, liveKg:38, dressing:48, wool:0, feed:400, health:150, ewePrice:2200, weanerPrice:850, be:35 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Semi-arid Bushveld · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Marico and Vryburg Boer Goat country. Low parasite pressure, good browse, but water infrastructure is critical.", tip:"Budget 6–10 does/ha extensive. Drought destocking strategy is non-negotiable.", breed:"Boer Goat", type:"Meat", market:"Vryburg auction · Rustenburg abattoir · Eid markets", rep:15, oh:480, labour:1300, hired:4800, woolMonth:0, lambing:155, survival:82, liveKg:37, dressing:48, wool:0, feed:380, health:140, ewePrice:2100, weanerPrice:800, be:38 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Highveld · 600–800mm · Mild · Summer rain", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", goatDensity:"Low", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Gauteng's market access is the advantage — close to abattoirs and Eid buyers. Small-scale peri-urban goat farming increasingly viable.", tip:"Peri-urban operations benefit from direct-to-consumer Eid pricing (R70–90/kg live weight).", breed:"Boer Goat", type:"Meat", market:"Joburg Eid markets · Irene abattoir · direct",  rep:15, oh:550, labour:1500, hired:5200, woolMonth:0, lambing:155, survival:83, liveKg:39, dressing:49, wool:0, feed:450, health:165, ewePrice:2400, weanerPrice:950, be:30 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Highveld/Lowveld mix · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Light to moderate", humidity:"Medium", parasites:"Medium–High", drought:"Occasional", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Diverse terrain suits commercial Boer Goat on the highveld. Lowveld operations face higher parasite pressure — FAMACHA protocol essential.", tip:"Highveld Mpumalanga suits semi-intensive systems with rotational camps.", breed:"Boer Goat", type:"Meat", market:"Ermelo auction · Nelspruit abattoir · Eid markets", rep:15, oh:520, labour:1400, hired:5000, woolMonth:0, lambing:155, survival:81, liveKg:38, dressing:48, wool:0, feed:420, health:160, ewePrice:2200, weanerPrice:860, be:34 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", goatDensity:"Medium", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red","Tankwa"], avoid:["Angora"], why:"Free State's harsh winters and low parasite pressure suit Boer Goat well. Cold tolerance is good — does kid effectively in cold conditions with shelter.", tip:"Budget for shelter/lambing structures. Winter kidding requires management investment.", breed:"Boer Goat", type:"Meat", market:"Bloemfontein auction · Free State abattoirs · Eid markets", rep:15, oh:490, labour:1400, hired:4900, woolMonth:0, lambing:158, survival:80, liveKg:38, dressing:48, wool:0, feed:400, health:140, ewePrice:2100, weanerPrice:820, be:37 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None–Light", humidity:"High", parasites:"High", drought:"Rare", goatDensity:"Medium", primary:["Boer Goat","Indigenous Nguni goat"], secondary:["Savanna"], avoid:["Angora"], why:"KZN's humidity and parasite pressure makes FAMACHA essential. Indigenous crosses show better resistance. Strong Eid and informal market access.", tip:"Dosing protocol critical — Haemonchus is the primary production constraint.", breed:"Boer Goat", type:"Meat", market:"Tongaat · Newcastle auction · KZN Eid markets", rep:15, oh:550, labour:1500, hired:5200, woolMonth:0, lambing:158, survival:78, liveKg:37, dressing:47, wool:0, feed:430, health:190, ewePrice:2200, weanerPrice:860, be:36 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Diverse · 250–700mm · Semi-arid to sub-humid", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", goatDensity:"High", primary:["Boer Goat","Savanna"], secondary:["Tankwa","Kalahari Red"], avoid:["Angora (Karoo only)"], why:"Eastern Cape is SA's largest goat province by numbers. Communal and commercial operations coexist. Strong Eid demand, proximity to Gauteng and coastal markets.", tip:"Graaff-Reinet area: 4–6 does/ha extensive. Cull aggressively — the market rewards quality over volume.", breed:"Boer Goat", type:"Meat", market:"Graaff-Reinet auction · East London abattoir · Eid markets", rep:15, oh:480, labour:1300, hired:4700, woolMonth:0, lambing:155, survival:80, liveKg:37, dressing:47, wool:0, feed:370, health:150, ewePrice:2000, weanerPrice:780, be:40 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low–Medium", drought:"Seasonal", goatDensity:"Low", primary:["Boer Goat","Savanna"], secondary:["Kalahari Red"], avoid:["Angora"], why:"Western Cape suits small-scale intensive Boer Goat with good direct-market access. Winter rainfall system means spring kidding aligns with Ramadan/Eid demand.", tip:"Direct-to-consumer Eid pricing (R80–100/kg live weight) makes small WC operations viable.", breed:"Boer Goat", type:"Meat", market:"Boland Agri auction · Cape Town Eid · Wellington abattoir", rep:15, oh:540, labour:1450, hired:5100, woolMonth:0, lambing:155, survival:82, liveKg:39, dressing:49, wool:0, feed:440, health:155, ewePrice:2300, weanerPrice:900, be:28 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Arid · 150–300mm · Extreme heat and cold", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", goatDensity:"Very high", primary:["Boer Goat","Kalahari Red","Tankwa"], secondary:["Savanna"], avoid:["Angora (central Karoo excepted)"], why:"Northern Cape is SA's traditional Boer Goat heartland — the Kalahari Red was developed here. Ultra-low parasite pressure, excellent browse, extreme drought tolerance required.", tip:"Kalahari Red outperforms Boer Goat on very arid veld. Budget 10–20 ha/doe. Water infrastructure is everything.", breed:"Kalahari Red", type:"Meat", market:"Upington auction · De Aar abattoir · long-haul Eid markets", rep:15, oh:420, labour:1200, hired:4200, woolMonth:0, lambing:150, survival:83, liveKg:36, dressing:47, wool:0, feed:280, health:110, ewePrice:1900, weanerPrice:720, be:48 },
 };
 const GOAT_CARRYING_CAPACITY = {
   extensive:     { limpopo:6,  north_west:5,  gauteng:8,  mpumalanga:7,  free_state:5,  kwazulu_natal:6,  eastern_cape:4,  western_cape:6,  northern_cape:0.8 },
@@ -582,15 +582,15 @@ const GOAT_PROVINCE_DEFAULTS = {
 // Farrowing rate (lambing field) simplified to 200 = ~2 litters/yr baseline; real model should use
 // litters × piglets × survival for full accuracy. Flesh out when activating.
 const PIG_PROVINCE_DATA = {
-  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c04880", stroke:"#7a2850", hoverFill:"#d86898", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Medium", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:["Outdoor systems"], why:"Limpopo heat requires climate-controlled housing. Small-scale intensive piggeries viable near Polokwane. Feed costs elevated due to transport.", tip:"Closed, climate-controlled housing non-negotiable. Source feed locally where possible.", breed:"Large White", type:"Pork", market:"Polokwane processors · local butcheries", rep:30, oh:1800, labour:3500, hired:8000, woolMonth:0, lambing:200, survival:85, liveKg:110, dressing:75, wool:0, feed:2400, health:480, ewePrice:4500, weanerPrice:600, be:22 },
-  north_west:   { name:"North West",   short:"N. West",    fill:"#b03870", stroke:"#6e2044", hoverFill:"#c85888", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc","Pietrain"], avoid:["Outdoor systems"], why:"Commercial piggeries around Rustenburg supply Gauteng processors. Feed sourcing from North West maize belt reduces input costs.", tip:"Position near maize production areas to cut feed transport costs by 15–25%.", breed:"Large White × Landrace", type:"Pork", market:"Vryburg processors · Gauteng supply chains", rep:30, oh:1700, labour:3200, hired:7500, woolMonth:0, lambing:200, survival:86, liveKg:112, dressing:75, wool:0, feed:2300, health:460, ewePrice:4400, weanerPrice:580, be:20 },
-  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#d05090", stroke:"#8a3060", hoverFill:"#e870a8", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Gauteng has SA's largest pig processing capacity. Short supply chains, premium fresh pork market access. Space and zoning are the binding constraints.", tip:"Proximity to Rainbow Chicken and Pioneer Foods processing plants reduces logistics cost.", breed:"Large White × Landrace", type:"Pork", market:"Joburg fresh market · Eskort · Pioneer Foods", rep:30, oh:2200, labour:4000, hired:9500, woolMonth:0, lambing:210, survival:88, liveKg:115, dressing:76, wool:0, feed:2500, health:500, ewePrice:5000, weanerPrice:650, be:18 },
-  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#b84080", stroke:"#782858", hoverFill:"#d06098", climate:"Highveld/Lowveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Light", humidity:"Medium", parasites:"Medium", drought:"Occasional", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"Mpumalanga maize belt reduces feed costs. Proximity to Gauteng markets. Suitable climate for well-designed piggery facilities.", tip:"Maize sourcing from local cooperatives. Consider manure-to-biogas to offset energy costs.", breed:"Large White", type:"Pork", market:"Ermelo processors · Nelspruit butcheries · Gauteng supply", rep:30, oh:1750, labour:3300, hired:7800, woolMonth:0, lambing:200, survival:86, liveKg:112, dressing:75, wool:0, feed:2300, health:460, ewePrice:4400, weanerPrice:580, be:21 },
-  free_state:   { name:"Free State",   short:"Free State", fill:"#c04888", stroke:"#7a3058", hoverFill:"#d868a0", climate:"Semi-arid · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Free State maize belt makes it SA's lowest-feed-cost pig province. Bethlehem and Bloemfontein processors. Cold winters require heating investment in farrowing houses.", tip:"Free State producers enjoy SA's lowest maize prices — a 15–20% feed cost advantage over coastal provinces.", breed:"Large White × Duroc", type:"Pork", market:"Bloemfontein processors · Eskort · Boxer Superstores supply", rep:30, oh:1600, labour:3000, hired:7000, woolMonth:0, lambing:205, survival:87, liveKg:113, dressing:75, wool:0, feed:2100, health:440, ewePrice:4300, weanerPrice:560, be:19 },
-  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#c85090", stroke:"#803568", hoverFill:"#e070a8", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Medium", drought:"Rare", pigDensity:"Medium", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"KZN's coastal markets (Durban) offer premium pork pricing. Humidity requires ventilation investment but climate is otherwise favourable.", tip:"Ventilation system design is critical — heat stress above 28°C reduces sow productivity.", breed:"Large White", type:"Pork", market:"Durban fresh market · RCL Foods KZN · coastal butcheries", rep:30, oh:1900, labour:3600, hired:8200, woolMonth:0, lambing:200, survival:85, liveKg:112, dressing:75, wool:0, feed:2400, health:480, ewePrice:4600, weanerPrice:610, be:20 },
-  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#b04080", stroke:"#6e2850", hoverFill:"#c86098", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Low–Medium", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"Eastern Cape has limited commercial piggery infrastructure. Buffalo City and Gqeberha markets emerging. Feed cost elevated vs Free State.", tip:"Small-scale intensive units (50–200 sows) near East London or Gqeberha have the best market access.", breed:"Large White", type:"Pork", market:"Gqeberha butcheries · East London processors · local supply", rep:30, oh:1750, labour:3200, hired:7500, woolMonth:0, lambing:195, survival:84, liveKg:110, dressing:74, wool:0, feed:2350, health:470, ewePrice:4400, weanerPrice:570, be:24 },
-  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#d05898", stroke:"#8a3868", hoverFill:"#e878b0", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Western Cape produces SA's premium pork for retail and exports. Abattoir capacity (Boland) and cold chain infrastructure excellent. Land cost is the main barrier.", tip:"Organic and free-range premium adds 20–30% to carcass price — increasingly demanded by Cape retail.", breed:"Large White × Duroc", type:"Pork", market:"Boland Agri abattoir · Woolworths supply · premium Cape retail", rep:30, oh:2200, labour:4000, hired:9500, woolMonth:0, lambing:210, survival:88, liveKg:115, dressing:76, wool:0, feed:2500, health:500, ewePrice:5200, weanerPrice:680, be:17 },
-  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#a83870", stroke:"#6a2048", hoverFill:"#c05888", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", pigDensity:"Very low", primary:["Large White","Landrace"], secondary:[], avoid:["Outdoor systems"], why:"Very limited commercial piggery in Northern Cape. Upington and Kimberley have small operations. Feed transport cost is the major barrier. Only viable with strong local supply chain.", tip:"Only consider if you have local maize/soya supply and a committed offtake buyer. Market access is limited.", breed:"Large White", type:"Pork", market:"Kimberley local supply · Upington butcheries", rep:30, oh:1500, labour:2800, hired:6500, woolMonth:0, lambing:190, survival:83, liveKg:108, dressing:74, wool:0, feed:2600, health:440, ewePrice:4200, weanerPrice:540, be:30 },
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Medium", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:["Outdoor systems"], why:"Limpopo heat requires climate-controlled housing. Small-scale intensive piggeries viable near Polokwane. Feed costs elevated due to transport.", tip:"Closed, climate-controlled housing non-negotiable. Source feed locally where possible.", breed:"Large White", type:"Pork", market:"Polokwane processors · local butcheries", rep:33, oh:1800, labour:3500, hired:8000, woolMonth:0, lambing:1700, survival:100, liveKg:108, dressing:74, wool:0, feed:30000, health:1000, ewePrice:4700, weanerPrice:600, be:22 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc","Pietrain"], avoid:["Outdoor systems"], why:"Commercial piggeries around Rustenburg supply Gauteng processors. Feed sourcing from North West maize belt reduces input costs.", tip:"Position near maize production areas to cut feed transport costs by 15–25%.", breed:"Large White × Landrace", type:"Pork", market:"Vryburg processors · Gauteng supply chains", rep:33, oh:1700, labour:3200, hired:7500, woolMonth:0, lambing:2000, survival:100, liveKg:110, dressing:75, wool:0, feed:31000, health:800, ewePrice:4600, weanerPrice:580, be:20 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Gauteng has SA's largest pig processing capacity. Short supply chains, premium fresh pork market access. Space and zoning are the binding constraints.", tip:"Proximity to Rainbow Chicken and Pioneer Foods processing plants reduces logistics cost.", breed:"Large White × Landrace", type:"Pork", market:"Joburg fresh market · Eskort · Pioneer Foods", rep:33, oh:2200, labour:4000, hired:9500, woolMonth:0, lambing:2100, survival:100, liveKg:115, dressing:76, wool:0, feed:35000, health:700, ewePrice:5500, weanerPrice:650, be:18 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Highveld/Lowveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Light", humidity:"Medium", parasites:"Medium", drought:"Occasional", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"Mpumalanga maize belt reduces feed costs. Proximity to Gauteng markets. Suitable climate for well-designed piggery facilities.", tip:"Maize sourcing from local cooperatives. Consider manure-to-biogas to offset energy costs.", breed:"Large White", type:"Pork", market:"Ermelo processors · Nelspruit butcheries · Gauteng supply", rep:33, oh:1750, labour:3300, hired:7800, woolMonth:0, lambing:2100, survival:100, liveKg:112, dressing:75, wool:0, feed:32000, health:800, ewePrice:4800, weanerPrice:580, be:21 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Semi-arid · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Free State maize belt makes it SA's lowest-feed-cost pig province. Bethlehem and Bloemfontein processors. Cold winters require heating investment in farrowing houses.", tip:"Free State producers enjoy SA's lowest maize prices — a 15–20% feed cost advantage over coastal provinces.", breed:"Large White × Duroc", type:"Pork", market:"Bloemfontein processors · Eskort · Boxer Superstores supply", rep:33, oh:1600, labour:3000, hired:7000, woolMonth:0, lambing:2200, survival:100, liveKg:112, dressing:75, wool:0, feed:32000, health:700, ewePrice:4800, weanerPrice:560, be:19 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Medium", drought:"Rare", pigDensity:"Medium", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"KZN's coastal markets (Durban) offer premium pork pricing. Humidity requires ventilation investment but climate is otherwise favourable.", tip:"Ventilation system design is critical — heat stress above 28°C reduces sow productivity.", breed:"Large White", type:"Pork", market:"Durban fresh market · RCL Foods KZN · coastal butcheries", rep:33, oh:1900, labour:3600, hired:8200, woolMonth:0, lambing:1900, survival:100, liveKg:110, dressing:75, wool:0, feed:32000, health:900, ewePrice:4900, weanerPrice:610, be:20 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Low–Medium", drought:"Frequent", pigDensity:"Low", primary:["Large White","Landrace"], secondary:["Duroc"], avoid:[], why:"Eastern Cape has limited commercial piggery infrastructure. Buffalo City and Gqeberha markets emerging. Feed cost elevated vs Free State.", tip:"Small-scale intensive units (50–200 sows) near East London or Gqeberha have the best market access.", breed:"Large White", type:"Pork", market:"Gqeberha butcheries · East London processors · local supply", rep:33, oh:1750, labour:3200, hired:7500, woolMonth:0, lambing:1800, survival:100, liveKg:110, dressing:74, wool:0, feed:33000, health:800, ewePrice:4600, weanerPrice:570, be:24 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", pigDensity:"Medium", primary:["Large White","Landrace","Duroc"], secondary:["Pietrain"], avoid:[], why:"Western Cape produces SA's premium pork for retail and exports. Abattoir capacity (Boland) and cold chain infrastructure excellent. Land cost is the main barrier.", tip:"Organic and free-range premium adds 20–30% to carcass price — increasingly demanded by Cape retail.", breed:"Large White × Duroc", type:"Pork", market:"Boland Agri abattoir · Woolworths supply · premium Cape retail", rep:33, oh:2200, labour:4000, hired:9500, woolMonth:0, lambing:2200, survival:100, liveKg:115, dressing:76, wool:0, feed:41000, health:700, ewePrice:5500, weanerPrice:680, be:17 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", pigDensity:"Very low", primary:["Large White","Landrace"], secondary:[], avoid:["Outdoor systems"], why:"Very limited commercial piggery in Northern Cape. Upington and Kimberley have small operations. Feed transport cost is the major barrier. Only viable with strong local supply chain.", tip:"Only consider if you have local maize/soya supply and a committed offtake buyer. Market access is limited.", breed:"Large White", type:"Pork", market:"Kimberley local supply · Upington butcheries", rep:33, oh:1500, labour:2800, hired:6500, woolMonth:0, lambing:1400, survival:100, liveKg:106, dressing:74, wool:0, feed:31000, health:1000, ewePrice:4200, weanerPrice:540, be:30 },
 };
 const PIG_CARRYING_CAPACITY = {
   extensive:     { limpopo:0,  north_west:0,  gauteng:0,  mpumalanga:0,  free_state:0,  kwazulu_natal:0,  eastern_cape:0,  western_cape:0,  northern_cape:0 },
@@ -615,15 +615,15 @@ const PIG_PROVINCE_DEFAULTS = {
 // lambing=600 represents 6 batches; liveKg=2.5 is broiler slaughter weight.
 // A dedicated poultry model should replace calcFull with cycle-based economics. Flesh out when activating.
 const POULTRY_PROVINCE_DATA = {
-  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c8900a", stroke:"#7a5806", hoverFill:"#e0aa18", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown (layers)"], avoid:["Free-range in lowveld heat"], why:"Climate-controlled broiler houses viable near Polokwane. Heat management critical above 35°C. Limited local processing capacity.", tip:"Tunnel-ventilated houses essential. Source feed from Limpopo maize belt cooperatives.", breed:"Ross 308 Broiler", type:"Broiler", market:"Country Bird Polokwane · local fresh markets", rep:0, oh:2000, labour:4000, hired:9000, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:280, health:35, ewePrice:120, weanerPrice:12, be:1200 },
-  north_west:   { name:"North West",   short:"N. West",    fill:"#b87810", stroke:"#724806", hoverFill:"#d09020", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Commercial broiler operations near Rustenburg and Potchefstroom. Maize from local cooperatives reduces feed cost.", tip:"Water security planning critical — broilers consume 2× their body weight in water daily.", breed:"Ross 308 Broiler", type:"Broiler", market:"Vryburg processors · Gauteng broiler supply chains", rep:0, oh:1900, labour:3800, hired:8500, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:270, health:33, ewePrice:110, weanerPrice:12, be:1100 },
-  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#d4aa0e", stroke:"#847008", hoverFill:"#e8c420", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Low", drought:"Occasional", poultryDensity:"High", primary:["Ross 308","Cobb 500","Lohmann Brown"], secondary:["Arbor Acres"], avoid:[], why:"Gauteng is SA's poultry hub. Country Bird, Astral, RCL all operate here. Best processing infrastructure, largest fresh market, most integrators available for contract growing.", tip:"Contract growing (integrator-supplied chicks + feed) reduces input risk for new entrants.", breed:"Ross 308 Broiler", type:"Broiler", market:"Astral Foods · Country Bird · Joburg fresh market", rep:0, oh:2500, labour:4500, hired:10000, woolMonth:0, lambing:600, survival:96, liveKg:2.6, dressing:73, wool:0, feed:290, health:38, ewePrice:130, weanerPrice:13, be:900 },
-  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c89e12", stroke:"#7a600a", hoverFill:"#e0b828", climate:"Highveld/Lowveld · 600–900mm", rainfall:"600–900mm", season:"Summer", frost:"Light", humidity:"Medium", parasites:"Low", drought:"Occasional", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Mpumalanga maize belt and Highveld climate suit broiler production well. Astral Foods Mpumalanga operations. Moderate competition vs Gauteng.", tip:"Highveld climate is ideal — less heat stress, lower energy costs than bushveld provinces.", breed:"Ross 308 Broiler", type:"Broiler", market:"Astral Foods · Ermelo processors · regional fresh markets", rep:0, oh:2000, labour:4000, hired:9000, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:275, health:34, ewePrice:120, weanerPrice:12, be:1000 },
-  free_state:   { name:"Free State",   short:"Free State", fill:"#d09808", stroke:"#806006", hoverFill:"#e8b018", climate:"Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"SA's lowest maize prices give Free State broiler producers a 15–20% feed cost advantage. Cold winters require additional house heating but moderate summer heat is a benefit.", tip:"Heating cost in winter must be factored — offset with insulated tunnel houses.", breed:"Ross 308 Broiler", type:"Broiler", market:"Bloemfontein processors · Free State fresh supply · Gauteng exports", rep:0, oh:1900, labour:3800, hired:8500, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:255, health:32, ewePrice:110, weanerPrice:11, be:900 },
-  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#c08010", stroke:"#785008", hoverFill:"#d89820", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Medium", drought:"Rare", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"KZN coastline has high humidity — house design critical. Inland Midlands better suited. Strong Durban fresh market demand. Humidity promotes disease challenge.", tip:"Avoid coastal sites below 200m altitude. Midlands operations have lower disease pressure.", breed:"Ross 308 Broiler", type:"Broiler", market:"Durban fresh market · RCL Foods KZN · Tongaat processors", rep:0, oh:2200, labour:4200, hired:9500, woolMonth:0, lambing:590, survival:94, liveKg:2.5, dressing:72, wool:0, feed:285, health:40, ewePrice:125, weanerPrice:13, be:1100 },
-  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#b87800", stroke:"#704800", hoverFill:"#d09010", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Limited commercial poultry infrastructure in Eastern Cape. Growing market in Gqeberha and East London. High feed transport cost from Gauteng and Free State.", tip:"Explore farm-own maize production to offset feed transport premiums.", breed:"Ross 308 Broiler", type:"Broiler", market:"Gqeberha fresh market · East London processors · regional butcheries", rep:0, oh:2000, labour:3800, hired:8500, woolMonth:0, lambing:590, survival:94, liveKg:2.4, dressing:71, wool:0, feed:290, health:36, ewePrice:115, weanerPrice:12, be:1200 },
-  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#d4a010", stroke:"#846408", hoverFill:"#ecb828", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", poultryDensity:"Medium", primary:["Ross 308","Cobb 500","Lohmann Brown"], secondary:["Arbor Acres"], avoid:[], why:"Western Cape has strong premium poultry market (Woolworths, Pick n Pay). Free-range and organic certification commands 30–50% price premium. Excellent cold chain infrastructure.", tip:"Consider free-range certification — R10–15/kg premium over conventional for WC retail.", breed:"Ross 308 Broiler / Free-range", type:"Broiler", market:"Astral WC · Spar supply · Woolworths free-range · Cape fresh markets", rep:0, oh:2500, labour:4500, hired:10000, woolMonth:0, lambing:580, survival:94, liveKg:2.5, dressing:72, wool:0, feed:295, health:38, ewePrice:130, weanerPrice:14, be:950 },
-  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#a86800", stroke:"#664000", hoverFill:"#c07808", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", poultryDensity:"Very low", primary:["Ross 308"], secondary:[], avoid:["Outdoor systems"], why:"Very limited commercial poultry in Northern Cape. Extreme heat and cold require high energy input. Kimberley and Upington small operations only. Feed transport is prohibitive.", tip:"Only viable with committed offtake buyer and local feed sourcing. Market is very thin.", breed:"Ross 308 Broiler", type:"Broiler", market:"Kimberley local supply · Upington butcheries", rep:0, oh:1800, labour:3500, hired:7500, woolMonth:0, lambing:560, survival:92, liveKg:2.4, dressing:70, wool:0, feed:320, health:38, ewePrice:100, weanerPrice:11, be:1500 },
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown (layers)"], avoid:["Free-range in lowveld heat"], why:"Climate-controlled broiler houses viable near Polokwane. Heat management critical above 35°C. Limited local processing capacity.", tip:"Tunnel-ventilated houses essential. Source feed from Limpopo maize belt cooperatives.", breed:"Ross 308 Broiler", type:"Broiler", market:"Country Bird Polokwane · local fresh markets", rep:0, oh:2000, labour:4000, hired:9000, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:230, health:45, ewePrice:16, weanerPrice:12, be:1800 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Commercial broiler operations near Rustenburg and Potchefstroom. Maize from local cooperatives reduces feed cost.", tip:"Water security planning critical — broilers consume 2× their body weight in water daily.", breed:"Ross 308 Broiler", type:"Broiler", market:"Vryburg processors · Gauteng broiler supply chains", rep:0, oh:1900, labour:3800, hired:8500, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:215, health:35, ewePrice:14, weanerPrice:12, be:950 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Low", drought:"Occasional", poultryDensity:"High", primary:["Ross 308","Cobb 500","Lohmann Brown"], secondary:["Arbor Acres"], avoid:[], why:"Gauteng is SA's poultry hub. Country Bird, Astral, RCL all operate here. Best processing infrastructure, largest fresh market, most integrators available for contract growing.", tip:"Contract growing (integrator-supplied chicks + feed) reduces input risk for new entrants.", breed:"Ross 308 Broiler", type:"Broiler", market:"Astral Foods · Country Bird · Joburg fresh market", rep:0, oh:2500, labour:4500, hired:10000, woolMonth:0, lambing:600, survival:96, liveKg:2.6, dressing:73, wool:0, feed:235, health:40, ewePrice:16, weanerPrice:13, be:1150 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Highveld/Lowveld · 600–900mm", rainfall:"600–900mm", season:"Summer", frost:"Light", humidity:"Medium", parasites:"Low", drought:"Occasional", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Mpumalanga maize belt and Highveld climate suit broiler production well. Astral Foods Mpumalanga operations. Moderate competition vs Gauteng.", tip:"Highveld climate is ideal — less heat stress, lower energy costs than bushveld provinces.", breed:"Ross 308 Broiler", type:"Broiler", market:"Astral Foods · Ermelo processors · regional fresh markets", rep:0, oh:2000, labour:4000, hired:9000, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:210, health:35, ewePrice:14, weanerPrice:12, be:900 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"SA's lowest maize prices give Free State broiler producers a 15–20% feed cost advantage. Cold winters require additional house heating but moderate summer heat is a benefit.", tip:"Heating cost in winter must be factored — offset with insulated tunnel houses.", breed:"Ross 308 Broiler", type:"Broiler", market:"Bloemfontein processors · Free State fresh supply · Gauteng exports", rep:0, oh:1900, labour:3800, hired:8500, woolMonth:0, lambing:600, survival:95, liveKg:2.5, dressing:72, wool:0, feed:185, health:30, ewePrice:13, weanerPrice:11, be:700 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Medium", drought:"Rare", poultryDensity:"Medium", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"KZN coastline has high humidity — house design critical. Inland Midlands better suited. Strong Durban fresh market demand. Humidity promotes disease challenge.", tip:"Avoid coastal sites below 200m altitude. Midlands operations have lower disease pressure.", breed:"Ross 308 Broiler", type:"Broiler", market:"Durban fresh market · RCL Foods KZN · Tongaat processors", rep:0, oh:2200, labour:4200, hired:9500, woolMonth:0, lambing:590, survival:94, liveKg:2.5, dressing:72, wool:0, feed:235, health:45, ewePrice:15, weanerPrice:13, be:2600 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Low", drought:"Frequent", poultryDensity:"Low", primary:["Ross 308","Cobb 500"], secondary:["Lohmann Brown"], avoid:[], why:"Limited commercial poultry infrastructure in Eastern Cape. Growing market in Gqeberha and East London. High feed transport cost from Gauteng and Free State.", tip:"Explore farm-own maize production to offset feed transport premiums.", breed:"Ross 308 Broiler", type:"Broiler", market:"Gqeberha fresh market · East London processors · regional butcheries", rep:0, oh:2000, labour:3800, hired:8500, woolMonth:0, lambing:590, survival:94, liveKg:2.4, dressing:71, wool:0, feed:240, health:38, ewePrice:16, weanerPrice:12, be:4000 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", poultryDensity:"Medium", primary:["Ross 308","Cobb 500","Lohmann Brown"], secondary:["Arbor Acres"], avoid:[], why:"Western Cape has strong premium poultry market (Woolworths, Pick n Pay). Free-range and organic certification commands 30–50% price premium. Excellent cold chain infrastructure.", tip:"Consider free-range certification — R10–15/kg premium over conventional for WC retail.", breed:"Ross 308 Broiler / Free-range", type:"Broiler", market:"Astral WC · Spar supply · Woolworths free-range · Cape fresh markets", rep:0, oh:2500, labour:4500, hired:10000, woolMonth:0, lambing:580, survival:94, liveKg:2.5, dressing:72, wool:0, feed:240, health:42, ewePrice:16, weanerPrice:14, be:1700 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", poultryDensity:"Very low", primary:["Ross 308"], secondary:[], avoid:["Outdoor systems"], why:"Very limited commercial poultry in Northern Cape. Extreme heat and cold require high energy input. Kimberley and Upington small operations only. Feed transport is prohibitive.", tip:"Only viable with committed offtake buyer and local feed sourcing. Market is very thin.", breed:"Ross 308 Broiler", type:"Broiler", market:"Kimberley local supply · Upington butcheries", rep:0, oh:1800, labour:3500, hired:7500, woolMonth:0, lambing:560, survival:92, liveKg:2.4, dressing:70, wool:0, feed:285, health:30, ewePrice:18, weanerPrice:11, be:0 },
 };
 const POULTRY_CARRYING_CAPACITY = {
   extensive:     { limpopo:0,    north_west:0,    gauteng:0,    mpumalanga:0,    free_state:0,    kwazulu_natal:0,    eastern_cape:0,    western_cape:0,    northern_cape:0    },
@@ -649,15 +649,15 @@ const POULTRY_PROVINCE_DEFAULTS = {
 // milk litres. A dedicated dairy model (milk yield × litres × price) should replace calcFull
 // when activating. Flesh out fully before going live.
 const DAIRY_PROVINCE_DATA = {
-  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#1a5c9a", stroke:"#0e3860", hoverFill:"#2472b8", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"High", drought:"Frequent", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:["Holstein"], avoid:["Holstein in lowveld heat"], why:"Very limited commercial dairy in Limpopo. Highveld fringe (Tzaneen irrigation area) viable with Bos taurus-tolerant breeds and good feed supply. Heat stress significantly reduces Holstein production.", tip:"Tzaneen area only — irrigation for year-round fodder essential. Jersey more heat-tolerant than Holstein.", breed:"Jersey", type:"Dairy", market:"Parmalat Polokwane · local fresh milk supply", rep:25, oh:1800, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:220, dressing:45, wool:0, feed:8000, health:1400, ewePrice:22000, weanerPrice:6000, be:28 },
-  north_west:   { name:"North West",   short:"N. West",    fill:"#14508a", stroke:"#0a3055", hoverFill:"#1c68a8", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Medium", drought:"Frequent", dairyDensity:"Low", primary:["Holstein","Guernsey"], secondary:["Jersey"], avoid:[], why:"Marico and Potchefstroom irrigation schemes support small-scale dairy. Lucerne production for year-round feed. Supply to Gauteng processors.", tip:"Irrigation and fodder self-sufficiency are prerequisites. Without feed security, dairy is high risk.", breed:"Holstein", type:"Dairy", market:"Gauteng processors · Nestlé Mossel Bay · Parmalat supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:8500, health:1500, ewePrice:24000, weanerPrice:6500, be:25 },
-  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#1e6aaa", stroke:"#123e68", hoverFill:"#2880c8", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Gauteng peri-urban dairy faces land cost and zoning challenges. Strong milk demand. Proximity to Clover, Parmalat, and Nestlé processing. Few remaining commercial dairies.", tip:"Few large operations viable given land cost. Focus on value-add (artisanal cheese, pasteurised direct sales).", breed:"Holstein", type:"Dairy", market:"Clover Pretoria · Parmalat Johannesburg · premium fresh milk", rep:25, oh:2500, labour:6000, hired:12000, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:9000, health:1600, ewePrice:28000, weanerPrice:7500, be:22 },
-  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#1862a0", stroke:"#0e3c62", hoverFill:"#2278bc", climate:"Highveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey"], avoid:[], why:"Highveld Mpumalanga (Dullstroom, Lydenburg area) has excellent dairy climate. Good fodder production. Supply to Gauteng and Mozambique border markets.", tip:"Standerton and Lydenburg — good dairy potential with irrigation. Consider cheese/yoghurt value-add.", breed:"Holstein", type:"Dairy", market:"Parmalat Mpumalanga · Gauteng supply · regional processors", rep:25, oh:2000, labour:5400, hired:11000, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8500, health:1500, ewePrice:25000, weanerPrice:6800, be:24 },
-  free_state:   { name:"Free State",   short:"Free State", fill:"#1670b0", stroke:"#0e4268", hoverFill:"#2088cc", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Bloemfontein basin and Wepener area support commercial dairy. Low parasite pressure. Cold winters reduce mastitis pressure. Strong Clover and Parmalat procurement in province.", tip:"Winter fodder planning critical. Good maize silage production possible on centre pivots.", breed:"Holstein", type:"Dairy", market:"Clover Bloemfontein · Parmalat Free State · Nestlé supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8000, health:1400, ewePrice:24000, weanerPrice:6500, be:23 },
-  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#1a78b8", stroke:"#104870", hoverFill:"#2490d4", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Very high", drought:"Rare", dairyDensity:"Medium", primary:["Holstein","Guernsey"], secondary:["Jersey","Ayrshire"], avoid:["Holstein in hot coastal zones"], why:"KZN Midlands (Nottingham Road, Mooi River) is SA's most scenic dairy country. Excellent rainfall, year-round grazing possible. Mastitis management essential in high humidity.", tip:"Notties-Mooi River: the benchmark for SA pasture-based dairy. Excellent grass growth year-round.", breed:"Holstein × Guernsey", type:"Dairy", market:"Clover KZN · Nestlé Mossel Bay supply · Natal Fresh Produce", rep:25, oh:2200, labour:5600, hired:11500, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:7500, health:1600, ewePrice:26000, weanerPrice:7000, be:21 },
-  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#1468a8", stroke:"#0c3e66", hoverFill:"#1c80c4", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey","Ayrshire"], secondary:["Guernsey"], avoid:[], why:"Eastern Cape (Tsitsikamma, Humansdorp, Queenstown) has strong dairy heritage. Tsitsikamma pasture-based systems internationally renowned. Good milk processor access.", tip:"Tsitsikamma: SA's premium pasture-based dairy region. Jersey grass milk commands retail premiums.", breed:"Jersey", type:"Dairy", market:"Parmalat Eastern Cape · Woodlands Dairy · Keiskamma Trust", rep:25, oh:1900, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:7800, health:1400, ewePrice:23000, weanerPrice:6200, be:25 },
-  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#2080c0", stroke:"#144e78", hoverFill:"#2c98dc", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", dairyDensity:"Very high", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Western Cape (Overberg, Swartland, George) dominates SA dairy. SA's most productive dairy region. Year-round grass growth in coastal areas. Excellent cold chain, processor access and export potential.", tip:"Overberg is SA's dairy heartland — Caledon to Bredasdorp. Jersey pasture milk fetches R9–12/litre from premium processors.", breed:"Holstein / Jersey", type:"Dairy", market:"Clover WC · Danone South Africa · Parmalat WC · Woolworths milk supply", rep:25, oh:2500, labour:6000, hired:12500, woolMonth:0, lambing:93, survival:91, liveKg:250, dressing:47, wool:0, feed:8500, health:1500, ewePrice:30000, weanerPrice:8000, be:18 },
-  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#1258a0", stroke:"#0a3460", hoverFill:"#1a70bc", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:[], avoid:["Holstein without full TMR and cooling"], why:"Very limited dairy in Northern Cape. Upington and Springbok small operations on irrigation. High feed import cost. Only viable with irrigation water rights and committed processor contract.", tip:"Only consider with permanent irrigation and a signed processor contract. Heat stress cooling system mandatory.", breed:"Jersey", type:"Dairy", market:"Kimberley local supply · small-scale fresh milk", rep:25, oh:1700, labour:4800, hired:9500, woolMonth:0, lambing:87, survival:86, liveKg:200, dressing:44, wool:0, feed:9000, health:1600, ewePrice:20000, weanerPrice:5500, be:38 },
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"High", drought:"Frequent", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:["Holstein"], avoid:["Holstein in lowveld heat"], why:"Very limited commercial dairy in Limpopo. Highveld fringe (Tzaneen irrigation area) viable with Bos taurus-tolerant breeds and good feed supply. Heat stress significantly reduces Holstein production.", tip:"Tzaneen area only — irrigation for year-round fodder essential. Jersey more heat-tolerant than Holstein.", breed:"Jersey", type:"Dairy", market:"Parmalat Polokwane · local fresh milk supply", rep:25, oh:1800, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:220, dressing:45, wool:0, feed:8000, health:1400, ewePrice:22000, weanerPrice:6000, be:28 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Medium", drought:"Frequent", dairyDensity:"Low", primary:["Holstein","Guernsey"], secondary:["Jersey"], avoid:[], why:"Marico and Potchefstroom irrigation schemes support small-scale dairy. Lucerne production for year-round feed. Supply to Gauteng processors.", tip:"Irrigation and fodder self-sufficiency are prerequisites. Without feed security, dairy is high risk.", breed:"Holstein", type:"Dairy", market:"Gauteng processors · Nestlé Mossel Bay · Parmalat supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:8500, health:1500, ewePrice:24000, weanerPrice:6500, be:25 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Gauteng peri-urban dairy faces land cost and zoning challenges. Strong milk demand. Proximity to Clover, Parmalat, and Nestlé processing. Few remaining commercial dairies.", tip:"Few large operations viable given land cost. Focus on value-add (artisanal cheese, pasteurised direct sales).", breed:"Holstein", type:"Dairy", market:"Clover Pretoria · Parmalat Johannesburg · premium fresh milk", rep:25, oh:2500, labour:6000, hired:12000, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:9000, health:1600, ewePrice:28000, weanerPrice:7500, be:22 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Highveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey"], avoid:[], why:"Highveld Mpumalanga (Dullstroom, Lydenburg area) has excellent dairy climate. Good fodder production. Supply to Gauteng and Mozambique border markets.", tip:"Standerton and Lydenburg — good dairy potential with irrigation. Consider cheese/yoghurt value-add.", breed:"Holstein", type:"Dairy", market:"Parmalat Mpumalanga · Gauteng supply · regional processors", rep:25, oh:2000, labour:5400, hired:11000, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8500, health:1500, ewePrice:25000, weanerPrice:6800, be:24 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Bloemfontein basin and Wepener area support commercial dairy. Low parasite pressure. Cold winters reduce mastitis pressure. Strong Clover and Parmalat procurement in province.", tip:"Winter fodder planning critical. Good maize silage production possible on centre pivots.", breed:"Holstein", type:"Dairy", market:"Clover Bloemfontein · Parmalat Free State · Nestlé supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8000, health:1400, ewePrice:24000, weanerPrice:6500, be:23 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Very high", drought:"Rare", dairyDensity:"Medium", primary:["Holstein","Guernsey"], secondary:["Jersey","Ayrshire"], avoid:["Holstein in hot coastal zones"], why:"KZN Midlands (Nottingham Road, Mooi River) is SA's most scenic dairy country. Excellent rainfall, year-round grazing possible. Mastitis management essential in high humidity.", tip:"Notties-Mooi River: the benchmark for SA pasture-based dairy. Excellent grass growth year-round.", breed:"Holstein × Guernsey", type:"Dairy", market:"Clover KZN · Nestlé Mossel Bay supply · Natal Fresh Produce", rep:25, oh:2200, labour:5600, hired:11500, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:7500, health:1600, ewePrice:26000, weanerPrice:7000, be:21 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey","Ayrshire"], secondary:["Guernsey"], avoid:[], why:"Eastern Cape (Tsitsikamma, Humansdorp, Queenstown) has strong dairy heritage. Tsitsikamma pasture-based systems internationally renowned. Good milk processor access.", tip:"Tsitsikamma: SA's premium pasture-based dairy region. Jersey grass milk commands retail premiums.", breed:"Jersey", type:"Dairy", market:"Parmalat Eastern Cape · Woodlands Dairy · Keiskamma Trust", rep:25, oh:1900, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:7800, health:1400, ewePrice:23000, weanerPrice:6200, be:25 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", dairyDensity:"Very high", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Western Cape (Overberg, Swartland, George) dominates SA dairy. SA's most productive dairy region. Year-round grass growth in coastal areas. Excellent cold chain, processor access and export potential.", tip:"Overberg is SA's dairy heartland — Caledon to Bredasdorp. Jersey pasture milk fetches R9–12/litre from premium processors.", breed:"Holstein / Jersey", type:"Dairy", market:"Clover WC · Danone South Africa · Parmalat WC · Woolworths milk supply", rep:25, oh:2500, labour:6000, hired:12500, woolMonth:0, lambing:93, survival:91, liveKg:250, dressing:47, wool:0, feed:8500, health:1500, ewePrice:30000, weanerPrice:8000, be:18 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:[], avoid:["Holstein without full TMR and cooling"], why:"Very limited dairy in Northern Cape. Upington and Springbok small operations on irrigation. High feed import cost. Only viable with irrigation water rights and committed processor contract.", tip:"Only consider with permanent irrigation and a signed processor contract. Heat stress cooling system mandatory.", breed:"Jersey", type:"Dairy", market:"Kimberley local supply · small-scale fresh milk", rep:25, oh:1700, labour:4800, hired:9500, woolMonth:0, lambing:87, survival:86, liveKg:200, dressing:44, wool:0, feed:9000, health:1600, ewePrice:20000, weanerPrice:5500, be:38 },
 };
 const DAIRY_CARRYING_CAPACITY = {
   extensive:     { limpopo:0.5, north_west:0.4, gauteng:0.8, mpumalanga:0.7, free_state:0.5, kwazulu_natal:0.8, eastern_cape:0.5, western_cape:1.0, northern_cape:0.2 },
@@ -736,21 +736,21 @@ const LIVESTOCK_MODULES = {
     carryingCapacity: PIG_CARRYING_CAPACITY,
     provinceDefaults: PIG_PROVINCE_DEFAULTS,
     calcFn: (reg, carcass, size, labour, overhead, extra) =>
-      calcFull(reg, carcass, size, labour, overhead, extra, [10, 20, 50, 100, 200, 500]),
+      calcPigs(reg, carcass, size, labour, overhead, extra, [10, 20, 50, 100, 200, 500]),
     carcassDefault: 38,
     carcassLabel: "Pork R/kg",
   },
   poultry: {
     id:"poultry", emoji:"🐓", label:"Poultry", labelPlural:"SA Poultry",
     terms:{ unit:"bird", units:"birds", group:"flock", young:"chick", youngs:"chicks",
-            rateLabel:"Production", priceLabel:"Bird slot cost", saleMonthLabel:"Harvest months" },
+            rateLabel:"Batches/yr", priceLabel:"Carcass R/kg", saleMonthLabel:"Harvest cycle" },
     provinceData: POULTRY_PROVINCE_DATA,
     carryingCapacity: POULTRY_CARRYING_CAPACITY,
     provinceDefaults: POULTRY_PROVINCE_DEFAULTS,
     calcFn: (reg, carcass, size, labour, overhead, extra) =>
-      calcFull(reg, carcass, size, labour, overhead, extra, [500, 1000, 2000, 5000, 10000, 20000]),
-    carcassDefault: 28,
-    carcassLabel: "Chicken R/kg",
+      calcPoultry(reg, carcass, size, labour, overhead, extra, [500, 1000, 2000, 5000, 10000, 20000]),
+    carcassDefault: 40,
+    carcassLabel: "Carcass R/kg",
   },
   dairy: {
     id:"dairy", emoji:"🐮", label:"Dairy Cattle", labelPlural:"SA Dairy Cattle",
@@ -1082,6 +1082,245 @@ function getCostLabel(key, unit, isGO) {
   return map[unit]?.[key] ?? null;
 }
 
+// ── PIG CALC (farrowing-cycle model) ─────────────────────────────────────────
+// reg.lambing / 100 = annual marketed finisher pigs per sow (encodes litters × piglets × survival)
+// No 0.85 reproductive-efficiency factor — mortality is already baked into the lambing encoding.
+// Returns the same field-shape as calcFull so all existing UI slots work unchanged.
+function calcPigs(reg, carcass, sowCount, labour, overhead = reg.oh ?? 1800, extraCosts = {}, scalePoints = [10, 20, 50, 100, 200, 500]) {
+  const {
+    bond           = 0,
+    feedOverride   = null,
+    healthOverride = null,
+    fencing        = 0,
+    misc           = 0,
+  } = extraCosts;
+
+  const feedCost   = feedOverride   !== null ? feedOverride   : reg.feed;
+  const healthCost = healthOverride !== null ? healthOverride : reg.health;
+  const extraFixed = bond + fencing + misc;
+
+  const pigsPerSow = reg.lambing / 100;
+  const carcassKg  = reg.liveKg * (reg.dressing / 100);
+  const revPerSow  = pigsPerSow * carcassKg * carcass;
+
+  const labourShare   = (labour * 12) / sowCount;
+  const overheadShare = ((overhead + extraFixed) * 12) / sowCount;
+  const replaceCost   = reg.ewePrice * (reg.rep / 100);
+  const totalCostPerSow = feedCost + healthCost + labourShare + overheadShare + replaceCost;
+
+  const profitPerSow = revPerSow - totalCostPerSow;
+  const roi          = profitPerSow / reg.ewePrice;
+  const payback      = profitPerSow > 0 ? reg.ewePrice / profitPerSow : null;
+
+  const varMargin   = revPerSow - feedCost - healthCost - replaceCost;
+  const fixedAnnual = (labour + overhead + extraFixed) * 12;
+  const breakeven   = varMargin > 0 ? Math.ceil(fixedAnnual / varMargin) : null;
+
+  const sowPurchase    = sowCount * reg.ewePrice;
+  const monthlyOpex    = (feedCost / 12 + healthCost / 12) * sowCount
+                         + labour + overhead + extraFixed
+                         + reg.ewePrice * (reg.rep / 100) * sowCount / 12;
+  const workingCapital = Math.round(monthlyOpex * 5); // 5-month grow cycle buffer
+  const capital        = sowPurchase + workingCapital;
+
+  const costBreakdown = {
+    feed:     { label: "Feed (sow + finishers)", annual: feedCost * sowCount,    perEwe: feedCost },
+    health:   { label: "Meds / vet",             annual: healthCost * sowCount,  perEwe: healthCost },
+    labour:   { label: "Labour",                 annual: labour * 12,            perEwe: labourShare },
+    overhead: { label: "Overhead",               annual: (overhead * 12),        perEwe: (overhead * 12) / sowCount },
+    replace:  { label: "Sow replacement",        annual: replaceCost * sowCount, perEwe: replaceCost },
+    bond:     { label: "Bond repayment",         annual: bond * 12,              perEwe: (bond * 12) / sowCount },
+    fencing:  { label: "House / infra",          annual: fencing * 12,           perEwe: (fencing * 12) / sowCount },
+    misc:     { label: "Miscellaneous",          annual: misc * 12,              perEwe: (misc * 12) / sowCount },
+  };
+
+  const scaleRows = scalePoints.map(n => {
+    const ls   = (labour * 12) / n;
+    const os   = ((overhead + extraFixed) * 12) / n;
+    const cost = feedCost + healthCost + ls + os + replaceCost;
+    const p    = revPerSow - cost;
+    return { n, rev: revPerSow * n, profit: p * n, roi: p / reg.ewePrice };
+  });
+
+  // Rolling-batch cashflow: 5-month establishment then steady monthly pork revenue
+  const monthlyRev = (revPerSow * sowCount) / 12;
+  const cf36 = Array.from({ length: 36 }, (_, i) => {
+    const m   = i + 1;
+    const rev = m >= 6 ? monthlyRev : 0;
+    const ev  = [];
+    if (m === 1)                        ev.push("Gilts / sows introduced");
+    if (m === 5)                        ev.push("First batch to slaughter");
+    if (m >= 6 && m % 3 === 0)         ev.push("Batch to slaughter");
+    if ([3, 9, 15, 21, 27, 33].includes(m)) ev.push("Herd health protocol");
+    return {
+      m, rev, lambRev: rev, woolRev: 0, cost: monthlyOpex, profit: rev - monthlyOpex,
+      mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), events: ev.join(", "),
+    };
+  });
+  let cum = -sowPurchase;
+  cf36.forEach(r => { cum += r.profit; r.cum = Math.round(cum); });
+
+  const firstProfitMonth = cf36.find(r => r.profit > 0)?.m ?? null;
+  const paybackMonth     = cf36.find(r => r.cum >= 0)?.m ?? null;
+  const yr1 = cf36[11]?.cum ?? 0;
+  const yr2 = cf36[23]?.cum ?? 0;
+  const yr3 = cf36[35]?.cum ?? 0;
+
+  const annualFlockProfit = profitPerSow * sowCount;
+  const npv5 = [-sowPurchase, ...Array(5).fill(annualFlockProfit)]
+    .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+
+  let mvoCapital = null;
+  if (breakeven) {
+    const mvoOpex = (feedCost / 12 + healthCost / 12) * breakeven + labour + overhead + extraFixed
+                    + reg.ewePrice * (reg.rep / 100) * breakeven / 12;
+    mvoCapital = breakeven * reg.ewePrice + Math.round(mvoOpex * 5);
+  }
+
+  const sensRows = [-20, -15, -10, -5, 0, 5, 10, 15, 20].map(pct => {
+    const adj   = carcass * (1 + pct / 100);
+    const rAdj  = pigsPerSow * carcassKg * adj;
+    const vmAdj = rAdj - feedCost - healthCost - replaceCost;
+    const pAdj  = rAdj - feedCost - healthCost - replaceCost - fixedAnnual / sowCount;
+    const beAdj = vmAdj > 0 ? Math.ceil(fixedAnnual / vmAdj) : null;
+    return { pct, adj, pp: pAdj, fp: pAdj * sowCount, roi: pAdj / reg.ewePrice, be: beAdj };
+  });
+
+  return {
+    lambsPerEwe: pigsPerSow, carcassKg,
+    lambRevPerEwe: revPerSow, woolRevPerEwe: 0, totalRevPerEwe: revPerSow,
+    labourShare, overheadShare, replaceCost, totalCostPerEwe: totalCostPerSow,
+    profitPerEwe: profitPerSow, roi, payback, breakeven,
+    ewePurchase: sowPurchase, workingCapital, capital, mvoCapital,
+    flockRev: revPerSow * sowCount,
+    flockProfit: profitPerSow * sowCount,
+    varMargin, fixedAnnual,
+    costBreakdown, feedCost, healthCost, extraFixed,
+    scaleRows, yr1, yr2, yr3, cf36, npv5,
+    firstProfitMonth, paybackMonth,
+  };
+}
+
+function calcPoultry(reg, carcass, flockSize, labour, overhead = reg.oh ?? 2000, extraCosts = {}, scalePoints = [500, 1000, 2000, 5000, 10000, 20000]) {
+  const {
+    bond           = 0,
+    feedOverride   = null,
+    healthOverride = null,
+    fencing        = 0,
+    misc           = 0,
+  } = extraCosts;
+
+  const feedCost   = feedOverride   !== null ? feedOverride   : reg.feed;
+  const healthCost = healthOverride !== null ? healthOverride : reg.health;
+  const extraFixed = bond + fencing + misc;
+
+  const batchesPerYear   = reg.lambing / 100;           // 600 → 6.0 batches/yr
+  const survivalRate     = reg.survival / 100;           // 0.94-0.96
+  const carcassKg        = reg.liveKg * (reg.dressing / 100);
+  const chickCostPerYear = batchesPerYear * reg.ewePrice; // 6 × R16 = R96/slot/yr
+
+  const revPerSlot    = batchesPerYear * survivalRate * carcassKg * carcass;
+  const varCostPerSlot = feedCost + healthCost + chickCostPerYear;
+
+  const labourShare   = (labour * 12) / flockSize;
+  const overheadShare = ((overhead + extraFixed) * 12) / flockSize;
+  const totalCostPerSlot = varCostPerSlot + labourShare + overheadShare;
+  const profitPerSlot = revPerSlot - totalCostPerSlot;
+
+  const infraPerSlot = 300;                            // R300/bird slot (climate-controlled house)
+  const roi          = profitPerSlot / infraPerSlot;
+  const payback      = profitPerSlot > 0 ? infraPerSlot / profitPerSlot : null;
+
+  const varMargin   = revPerSlot - varCostPerSlot;
+  const fixedAnnual = (labour + overhead + extraFixed) * 12;
+  const breakeven   = varMargin > 0 ? Math.ceil(fixedAnnual / varMargin) : null;
+
+  const monthlyOpex = (varCostPerSlot / 12) * flockSize + labour + overhead + extraFixed;
+  const infraCost   = flockSize * infraPerSlot;
+  const workingCapital = Math.round(monthlyOpex * 2);  // 2-batch cycle buffer
+  const capital     = infraCost + workingCapital;
+
+  const costBreakdown = {
+    feed:     { label: "Feed (all batches)", annual: feedCost * flockSize,       perEwe: feedCost },
+    health:   { label: "Health & vaccines",  annual: healthCost * flockSize,     perEwe: healthCost },
+    labour:   { label: "Labour",             annual: labour * 12,                perEwe: labourShare },
+    overhead: { label: "Overhead",           annual: overhead * 12,              perEwe: (overhead * 12) / flockSize },
+    replace:  { label: "Chick cost (all)",   annual: chickCostPerYear * flockSize, perEwe: chickCostPerYear },
+    bond:     { label: "Bond repayment",     annual: bond * 12,                  perEwe: (bond * 12) / flockSize },
+    fencing:  { label: "Infra maintenance",  annual: fencing * 12,               perEwe: (fencing * 12) / flockSize },
+    misc:     { label: "Miscellaneous",      annual: misc * 12,                  perEwe: (misc * 12) / flockSize },
+  };
+
+  const scaleRows = scalePoints.map(n => {
+    const ls   = (labour * 12) / n;
+    const os   = ((overhead + extraFixed) * 12) / n;
+    const cost = varCostPerSlot + ls + os;
+    const p    = revPerSlot - cost;
+    return { n, rev: revPerSlot * n, profit: p * n, roi: p / infraPerSlot };
+  });
+
+  // Batch cashflow: month 1 = setup, month 2+ = steady revenue (6 batches/yr ≈ every 2 months)
+  const monthlyRev = (revPerSlot * flockSize) / 12;
+  const cf36 = Array.from({ length: 36 }, (_, i) => {
+    const m   = i + 1;
+    const rev = m >= 2 ? monthlyRev : 0;
+    const ev  = [];
+    if (m === 1)                        ev.push("House setup · Batch 1 placed");
+    if (m === 2)                        ev.push("Batch 1 harvested · Batch 2 placed");
+    if (m > 2 && m % 2 === 0)          ev.push(`Batch ${m / 2} harvested`);
+    if (m > 2 && m % 2 === 1)          ev.push(`Batch ${Math.ceil(m / 2)} placed`);
+    if ([6, 12, 18, 24, 30, 36].includes(m)) ev.push("Biosecurity audit");
+    return {
+      m, rev, lambRev: rev, woolRev: 0, cost: monthlyOpex, profit: rev - monthlyOpex,
+      mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), events: ev.join(", "),
+    };
+  });
+  let cum = -infraCost;
+  cf36.forEach(r => { cum += r.profit; r.cum = Math.round(cum); });
+
+  const firstProfitMonth = cf36.find(r => r.profit > 0)?.m ?? null;
+  const paybackMonth     = cf36.find(r => r.cum >= 0)?.m ?? null;
+  const yr1 = cf36[11]?.cum ?? 0;
+  const yr2 = cf36[23]?.cum ?? 0;
+  const yr3 = cf36[35]?.cum ?? 0;
+
+  const annualFlockProfit = profitPerSlot * flockSize;
+  const npv5 = [-infraCost, ...Array(5).fill(annualFlockProfit)]
+    .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+
+  let mvoCapital = null;
+  if (breakeven) {
+    const mvoOpex = (varCostPerSlot / 12) * breakeven + labour + overhead + extraFixed;
+    mvoCapital = breakeven * infraPerSlot + Math.round(mvoOpex * 2);
+  }
+
+  const sensRows = [-20, -15, -10, -5, 0, 5, 10, 15, 20].map(pct => {
+    const adj   = carcass * (1 + pct / 100);
+    const rAdj  = batchesPerYear * survivalRate * carcassKg * adj;
+    const vmAdj = rAdj - varCostPerSlot;
+    const pAdj  = rAdj - varCostPerSlot - fixedAnnual / flockSize;
+    const beAdj = vmAdj > 0 ? Math.ceil(fixedAnnual / vmAdj) : null;
+    return { pct, adj, pp: pAdj, fp: pAdj * flockSize, roi: pAdj / infraPerSlot, be: beAdj };
+  });
+
+  return {
+    lambsPerEwe: batchesPerYear * survivalRate, carcassKg,
+    lambRevPerEwe: revPerSlot, woolRevPerEwe: 0, totalRevPerEwe: revPerSlot,
+    labourShare, overheadShare,
+    replaceCost: chickCostPerYear,
+    totalCostPerEwe: totalCostPerSlot,
+    profitPerEwe: profitPerSlot, roi, payback, breakeven,
+    ewePurchase: infraCost, workingCapital, capital, mvoCapital,
+    flockRev: revPerSlot * flockSize,
+    flockProfit: profitPerSlot * flockSize,
+    varMargin, fixedAnnual,
+    costBreakdown, feedCost, healthCost, extraFixed,
+    scaleRows, yr1, yr2, yr3, cf36, npv5,
+    firstProfitMonth, paybackMonth,
+    chickCostPerYear, infraPerSlot,
+  };
+}
+
 const PALETTE = {
   bg:"#0a0c0a",       surface:"#131713",   card:"#1a201a",   border:"#2c3c2c",
   borderHover:"#4a6a34", accent:"#7acc3a", gold:"#d4b55a",   goldDim:"#9a7830",
@@ -1152,8 +1391,8 @@ const LIVESTOCK_TYPES = [
   { id:"cattle",  emoji:"🐄", label:"Beef Cattle",   sub:"Commercial & stud beef operations", status:"active" },
   { id:"bees",    emoji:"🐝", label:"Apiary / Bees", sub:"Honey production & pollination",    status:"active" },
   { id:"goats",   emoji:"🐐", label:"Goats",         sub:"Boer goat & dairy operations",      status:"active" },
-  { id:"pigs",    emoji:"🐖", label:"Pigs",          sub:"Commercial piggery models",          status:"soon"   },
-  { id:"poultry", emoji:"🐓", label:"Poultry",       sub:"Broiler & layer operations",         status:"soon"   },
+  { id:"pigs",    emoji:"🐖", label:"Pigs",          sub:"Commercial piggery models",          status:"active" },
+  { id:"poultry", emoji:"🐓", label:"Poultry",       sub:"Broiler & layer operations",         status:"active" },
   { id:"dairy",   emoji:"🐮", label:"Dairy Cattle",  sub:"Milk production feasibility",        status:"soon"   },
 ];
 const riskLabel = v => v === "Low" || v === "Very low" || v === "None" ? "risk-low" : v === "High" || v === "Very high" || v === "Severe, frequent" ? "risk-high" : "risk-med";

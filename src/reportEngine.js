@@ -134,8 +134,14 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
   const healthCost = healthOverride !== null ? healthOverride : r.health;
   const extraFixed = (bondMonthly || 0) + (fencingMonthly || 0) + (miscMonthly || 0);
 
-  const ck  = r.liveKg * (r.dressing / 100);
-  const lpe = (r.lambing / 100) * (r.survival / 100) * 0.85;
+  const ck        = r.liveKg * (r.dressing / 100);
+  const isPig     = r.lambing > 1000;
+  const isPoultry = !isPig && r.liveKg < 5 && r.dressing !== 100;
+  const lpe       = isPig
+    ? r.lambing / 100
+    : isPoultry
+    ? (r.lambing / 100) * (r.survival / 100)
+    : (r.lambing / 100) * (r.survival / 100) * 0.85;
   const fa  = (lab + r.oh + extraFixed) * 12;
   const revPE = lpe * ck * carcass + r.wool;
   const varPE = feedCost + healthCost + r.ewePrice * (r.rep / 100);
@@ -164,7 +170,7 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
   const lrm = Math.floor(flock * lpe * 0.5) * ck * carcass;
   const wrm = r.wool * flock;
   const isBee    = r.dressing === 100;
-  const isCattle = !isBee && r.liveKg >= 100;
+  const isCattle = !isBee && !isPig && !isPoultry && r.liveKg >= 100;
   let cum = -(flock * r.ewePrice);
   const cfRows = Array.from({ length: 36 }, (_, i) => {
     const m  = i + 1;
@@ -189,6 +195,111 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
     const beAdj = (rAdj - varPE) > 0 ? Math.ceil(fa / (rAdj - varPE)) : null;
     return { pct, adj, pp: pAdj, fp: pAdj * flock, roi: pAdj / r.ewePrice, be: beAdj };
   });
+  // ── Pig (farrowing-cycle) branch ─────────────────────────────────────────────
+  if (isPig) {
+    const sowPurchase  = flock * r.ewePrice;
+    const monthlyRev   = (lpe * ck * carcass * flock) / 12;
+    const pigMc        = mc;
+    let cumP = -sowPurchase;
+    const cfRowsPig = Array.from({ length: 36 }, (_, i) => {
+      const m   = i + 1;
+      const rev = m >= 6 ? monthlyRev : 0;
+      const profit = rev - pigMc;
+      cumP += profit;
+      const ev = [];
+      if (m === 1)                               ev.push("Gilts / sows introduced");
+      if (m === 5)                               ev.push("First batch to slaughter");
+      if (m >= 6 && m % 3 === 0)                ev.push("Batch to slaughter");
+      if ([3, 9, 15, 21, 27, 33].includes(m))   ev.push("Herd health protocol");
+      return { m, mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), rev, cost: pigMc, profit, cum: Math.round(cumP), events: ev.join(", ") };
+    });
+    const firstPositivePig = cfRowsPig.find(d => d.rev > 0);
+    const sensRowsPig = [-20, -15, -10, -5, 0, 5, 10, 15, 20].map(pct => {
+      const adj   = carcass * (1 + pct / 100);
+      const rAdj  = lpe * ck * adj;
+      const vmAdj = rAdj - feedCost - healthCost - r.ewePrice * (r.rep / 100);
+      const pAdj  = rAdj - varPE - fa / flock;
+      const beAdj = vmAdj > 0 ? Math.ceil(fa / vmAdj) : null;
+      return { pct, adj, pp: pAdj, fp: pAdj * flock, roi: pAdj / r.ewePrice, be: beAdj };
+    });
+    return {
+      r, flock, lm, carcass,
+      lab, ck, lpe, fa, revPE, varPE, vm, be, pp, capital, npv5,
+      scaleRows, cfRows: cfRowsPig, firstPositive: firstPositivePig,
+      sensRows: sensRowsPig, mc,
+      feedCost, healthCost, productionSystem, marketChannel, feedSource,
+      yr1: cfRowsPig[11]?.cum ?? 0,
+      yr2: cfRowsPig[23]?.cum ?? 0,
+      yr3: cfRowsPig[35]?.cum ?? 0,
+      isPig: true,
+    };
+  }
+
+  // ── Poultry (batch broiler) branch ───────────────────────────────────────────
+  if (isPoultry) {
+    const batchesPerYear   = r.lambing / 100;
+    const survivalRate     = r.survival / 100;
+    const carcassKg        = r.liveKg * (r.dressing / 100);
+    const chickCostPerYear = batchesPerYear * r.ewePrice;
+    const varPEPoultry     = feedCost + healthCost + chickCostPerYear;
+    const revPEPoultry     = batchesPerYear * survivalRate * carcassKg * carcass;
+    const vmPoultry        = revPEPoultry - varPEPoultry;
+    const ppPoultry        = revPEPoultry - varPEPoultry - fa / flock;
+    const bePoultry        = vmPoultry > 0 ? Math.ceil(fa / vmPoultry) : null;
+
+    const infraPerSlot      = 300;
+    const monthlyOpexPoultry = (varPEPoultry / 12) * flock + lab + r.oh + extraFixed;
+    const infraCostPoultry  = flock * infraPerSlot;
+    const capitalPoultry    = infraCostPoultry + Math.round(monthlyOpexPoultry * 2);
+    const npv5Poultry       = [-infraCostPoultry, ...Array(5).fill(ppPoultry * flock)]
+      .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+
+    const monthlyRevPoultry = (revPEPoultry * flock) / 12;
+    let cumP = -infraCostPoultry;
+    const cfRowsPoultry = Array.from({ length: 36 }, (_, i) => {
+      const m      = i + 1;
+      const rev    = m >= 2 ? monthlyRevPoultry : 0;
+      const profit = rev - monthlyOpexPoultry;
+      cumP += profit;
+      const ev = [];
+      if (m === 1)                             ev.push("House setup · Batch 1 placed");
+      if (m === 2)                             ev.push("Batch 1 harvested · Batch 2 placed");
+      if (m > 2 && m % 2 === 0)               ev.push(`Batch ${m / 2} harvested`);
+      if (m > 2 && m % 2 === 1)               ev.push(`Batch ${Math.ceil(m / 2)} placed`);
+      if ([6, 12, 18, 24, 30, 36].includes(m)) ev.push("Biosecurity audit");
+      return { m, mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), rev, cost: monthlyOpexPoultry, profit, cum: Math.round(cumP), events: ev.join(", ") };
+    });
+
+    const firstPositivePoultry = cfRowsPoultry.find(d => d.rev > 0);
+    const scaleRowsPoultry = [500, 1000, 2000, 5000, 10000, 20000].map(n => {
+      const ls = fa / n;
+      const p  = revPEPoultry - varPEPoultry - ls;
+      return { n, pp: p, fp: p * n, rev: revPEPoultry * n, roi: p / infraPerSlot, cap: n * infraPerSlot + Math.round(monthlyOpexPoultry * 2), ok: p > 0 };
+    });
+    const sensRowsPoultry = [-20, -15, -10, -5, 0, 5, 10, 15, 20].map(pct => {
+      const adj   = carcass * (1 + pct / 100);
+      const rAdj  = batchesPerYear * survivalRate * carcassKg * adj;
+      const vmAdj = rAdj - varPEPoultry;
+      const pAdj  = rAdj - varPEPoultry - fa / flock;
+      const beAdj = vmAdj > 0 ? Math.ceil(fa / vmAdj) : null;
+      return { pct, adj, pp: pAdj, fp: pAdj * flock, roi: pAdj / infraPerSlot, be: beAdj };
+    });
+
+    return {
+      r, flock, lm, carcass,
+      lab, ck: carcassKg, lpe: batchesPerYear * survivalRate, fa,
+      revPE: revPEPoultry, varPE: varPEPoultry, vm: vmPoultry,
+      be: bePoultry, pp: ppPoultry, capital: capitalPoultry, npv5: npv5Poultry,
+      scaleRows: scaleRowsPoultry, cfRows: cfRowsPoultry, firstPositive: firstPositivePoultry,
+      sensRows: sensRowsPoultry, mc: monthlyOpexPoultry,
+      feedCost, healthCost, productionSystem, marketChannel, feedSource,
+      yr1: cfRowsPoultry[11]?.cum ?? 0,
+      yr2: cfRowsPoultry[23]?.cum ?? 0,
+      yr3: cfRowsPoultry[35]?.cum ?? 0,
+      isPoultry: true, chickCostPerYear, infraPerSlot,
+    };
+  }
+
   // ── Grow-out (buy-and-finish) branch ─────────────────────────────────────────
   if (operationMode === "growout" && r.liveKg !== undefined) {
     const isCattle      = r.liveKg >= 200;
@@ -682,6 +793,9 @@ function generateBeesReport(reportData, buyerName, T) {
   const sensTable = sensRows.filter(s => [-20, -10, 0, 10, 20].includes(s.pct))
     .map(s => `  ${s.pct > 0 ? "+" : ""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/hive ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be || "∞"} hives`)
     .join("\n");
+  const cfTable = cfRows.filter(row => row.rev > 0 || row.m === 1 || row.m % 12 === 0)
+    .map(rw => `Mo ${rw.m} (${rw.mo} Yr${rw.yr}): Rev ${ZAR(rw.rev)} · Cost ${ZAR(rw.cost)} · P&L ${ZAR(rw.profit)} · Cum ${ZAR(rw.cum)}`)
+    .join("\n");
   const hasPollinationIncome = r.type && r.type.toLowerCase().includes("pollination");
   const primaryProducts = r.primary ?? [];
   const secondaryProducts = r.secondary ?? [];
@@ -710,7 +824,7 @@ Revenue per hive:
 • Fixed annual: ${ZAR(fa)} · Breakeven: ${be ?? "N/A"} hives · Profit/hive: ${ZAR(pp)} · Apiary profit: ${ZAR(pp * flock)}/yr
 • ROI on hive capital: ${PCT(pp / r.ewePrice)} · Capital required: ${ZAR(capital)} · 5-year NPV (10% discount): ${ZAR(npv5)}
 
-First harvest: Month ${harvestMo} (${harvestName}) — ${r.name}'s peak forage season. The ${harvestMo - 1} months before this require ${ZAR(Math.abs(Math.min(yr1, -fa)))} in working capital before a single rand of honey income is received.
+First honey harvest: Month ${harvestMo} (${harvestName}) — ${r.name}'s primary forage peak. Establishment phase: ${harvestMo - 1} months of outgoings before first harvest revenue. Working capital required before first harvest: ${ZAR(Math.round((harvestMo - 1) * mc * 1.15))}. First cash-positive month: Month ${firstPositive?.m ?? harvestMo}.
 
 Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} (establishment phase). Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. From Year 3: ${ZAR(pp * flock)}/year sustainable income from honey, wax, and by-products.
 
@@ -782,17 +896,20 @@ Most likely wrong assumption: Honey price. At R${carcass}/kg bulk, you capture t
 
     `The cashflow story for a ${r.name} apiary has three phases.
 
-Phase 1 — Establishment (Months 1–${harvestMo - 1}): Hives are building up — feed costs, health treatment, inspections, and equipment maintenance. No honey income. Monthly operating cost: ${ZAR(Math.round(mc))}. This phase is shorter than livestock farming: bees are producing within ${harvestMo} months of establishment, not 13. At Month ${harvestMo - 1} the cumulative position is approximately ${ZAR(yr1)} — a fraction of the working capital required for equivalent livestock operations.
+Phase 1 — Establishment (Months 1–${harvestMo - 1}): Hives build up strength — feed, health treatments, inspections, equipment maintenance. No honey income. Monthly operating cost: ${ZAR(Math.round(mc))}. This phase is shorter than any livestock breeding alternative: bees deliver first revenue in Month ${harvestMo}, versus 12–18+ months for a new breeding herd. Establishment outlay: ${ZAR(Math.round((harvestMo - 1) * mc))}.
 
-Phase 2 — First harvest (Month ${harvestMo}, ${harvestName} Year 1): The first honey extraction. With ${flock} hives averaging ${r.liveKg}kg each, the first harvest is approximately ${Math.round(flock * r.liveKg * 0.5)} kg (50% of annual yield — the balance harvested in the second flush). Packaged at R${carcass}/kg, this is a significant single cash event. Year 2 cumulative: ${ZAR(yr2)}.
+Phase 2 — First harvest (Month ${harvestMo}, ${harvestName} Year 1): First honey extraction. With ${flock} hives averaging ${r.liveKg}kg each, the first harvest yields approximately ${Math.round(flock * r.liveKg * 0.5)} kg (50% of annual yield — the balance in the second flush). At R${carcass}/kg, this is a significant single cash event. Year 2 cumulative: ${ZAR(yr2)}.
 
-Phase 3 — Normal production (Year 2+): ${flock} hives at ${r.liveKg}kg/hive = ${Math.round(flock * r.liveKg)} kg honey/yr. Annual revenue ${ZAR(Math.round(revPE * flock))}, annual costs ${ZAR(Math.round((varPE + fa / flock) * flock))}. Year 3 cumulative: ${ZAR(yr3)}.
+Phase 3 — Normal production (Year 2+): ${flock} hives × ${r.liveKg}kg/hive = ${Math.round(flock * r.liveKg)} kg honey/yr. Annual revenue ${ZAR(Math.round(revPE * flock))} · Annual costs ${ZAR(Math.round((varPE + fa / flock) * flock))}. Year 3 cumulative: ${ZAR(yr3)}.
+
+Month-by-month cashflow (harvest months and year-ends shown):
+${cfTable}
 
 ${pp < 0 ? `WARNING: At ${flock} hives, this apiary never achieves a cumulative-positive position in 36 months. Increase to at least ${be ?? flock + 10} hives before proceeding.` : `The apiary ${yr2 >= 0 ? "recovers all working capital by Year 2" : "requires the full 36-month period to recover working capital"}.`}
 
-Working capital requirement: ${ZAR(Math.round(Math.abs(Math.min(yr1, -fa)) * 1.15))} — significantly lower than cattle or sheep operations of equivalent revenue, making beekeeping accessible to self-funded entry.
+Working capital required before first harvest: ${ZAR(Math.round((harvestMo - 1) * mc * 1.15))} — lower than equivalent livestock operations of the same revenue scale, making beekeeping one of the most accessible farming enterprises to self-fund from startup.
 
-Revenue concentration: Like all seasonal farming, honey income arrives in 1–2 events per year. Budget monthly expenses from a revolving savings buffer between harvests. Many commercial beekeepers supplement cash flow with nuc and queen sales during the off-honey season — this is the primary mechanism for maintaining year-round positive cash flow.`,
+Revenue concentration: Honey income arrives in 1–2 events per year. Budget monthly expenses from a revolving savings buffer between harvests. Many commercial beekeepers smooth cash flow with nuc and queen sales during the off-honey season — the primary mechanism for year-round positive cash flow.`,
 
     `Breakeven: ${be ?? "N/A"} hives. The variable margin of ${ZAR(vm)}/hive covers fixed costs of ${ZAR(fa)}/yr exactly at this scale.
 
@@ -810,7 +927,7 @@ Operational thresholds in SA commercial beekeeping:
 
 Your current position: ${flock} hives · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 0)} hives above breakeven` : `${(be ?? flock) - flock} hives below breakeven`}.
 
-Critical point: unlike livestock, hive count can be grown rapidly through your own splits at near-zero cost. A ${flock}-hive apiary producing 6 nucs per spring doubles to ${flock * 2} hives in ${Math.ceil(Math.log2(Math.max((be ?? flock + 10) / flock, 1.01))) || 1} split-seasons without purchasing additional stock.`,
+Critical point: unlike livestock, hive count can be grown organically through your own splits at near-zero cost. A strong colony preparing swarm cells in spring (September–November) can be split to produce a saleable nucleus colony — the parent colony rebuilds queen-right within 4 weeks without losing a honey season. A ${flock}-hive apiary can realistically add ${Math.max(Math.round(flock * 0.25), 4)}–${Math.max(Math.round(flock * 0.40), 7)} hives per split-season at zero additional stock cost, reaching approximately ${Math.round(flock * 1.33)} hives by Year 2. Any nuc not needed for your own expansion sells for R800–R1,500 — a built-in off-season revenue stream.`,
 
     `1. VARROA MITE RISK (High — primary ongoing threat in ${r.name})
 Varroa destructor is present throughout SA. Pressure: ${r.parasites}. Uncontrolled Varroa collapses colonies within 18–24 months.
@@ -826,7 +943,11 @@ Neonicotinoids and organophosphates applied during flowering cause acute colony 
 ${r.drought === "High" || r.drought === "Frequent" || r.drought === "Very frequent" ? `Drought is a serious risk for beekeeping in ${r.name}. During dearth periods, colonies rapidly consume stores — starvation can occur within 2 weeks of forage failure. Maintain supplemental feeding readiness: sugar syrup at 1:1 (spring) or 2:1 (autumn). Migratory beekeeping is standard practice in ${r.name} — plan seasonal moves to ensure year-round forage availability. Budget ${ZAR(feedCost * flock)} in supplemental syrup for drought contingency.` : `Drought management in ${r.name} is important but manageable. Monitor hive weight or food stores monthly during the dry season. Maintain supplemental syrup stock as insurance — ${ZAR(feedCost * flock)} covers one season's supplemental feeding for your apiary.`}
 
 5. COLONY ABSCONDING RISK
-African honeybees (Apis mellifera scutellata) have a natural tendency to abscond under stress — drought, pesticide residue, overcrowding, or sustained disturbance. Mitigation: maintain consistent water supply, avoid excessive opening during heat, ensure adequate space (add supers before bees are overcrowded), and replace queen stock that shows absconding behaviour.
+${r.subspecies === "capensis"
+  ? `Apis mellifera capensis (Cape honey bee) absconds at a significantly lower rate than scutellata — capensis workers can initiate emergency queen rearing via thelytoky, giving the colony resilience under stress. Primary colony-loss risk for ${r.name} operations is spring swarming (September–November) rather than absconding. Manage with timely supering, regular swarm-cell inspections, and walk-away splits to capture and monetise swarm energy rather than losing it.`
+  : r.subspecies === "hybrid_zone"
+  ? `The Eastern Cape hybrid zone produces variable colony behaviour. Operations in the south and coastal strip (near-capensis genetics) experience gentler bees with lower absconding tendency; northern and inland operations trend toward scutellata — more defensive and quicker to abscond under heat, drought, or disturbance. Source local bees for your specific district and maintain water within 100m of every apiary site year-round.`
+  : `African honey bees (Apis mellifera scutellata) have a strong evolved tendency to abscond under stress — drought, pesticide exposure, forage failure, overcrowding, or repeated rough handling. This is a survival strategy, not a management failure, but it means permanent colony loss. Mitigation: maintain water within 100m of every site, avoid inspections during peak midday heat, add supers before overcrowding triggers swarm preparation, and replace queen stock from any colony that has absconded.`}
 
 6. HONEY PRICE SENSITIVITY
 ${sensTable}
@@ -1278,7 +1399,178 @@ const GOAT_BREED_SOURCES = {
 function generateGoatsReport(reportData, buyerName, T) {
   const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
           scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
-          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
+          feedCost, healthCost, productionSystem, marketChannel, feedSource,
+          isGrowOut, cyclesPerYear, weanerPrice: goWPrice } = reportData;
+
+  // ── Grow-out (kid-finishing) mode ─────────────────────────────────────────
+  if (isGrowOut) {
+    const lmNote      = lm === "owner" ? `owner-operated (${ZAR(lab)}/mo notional)` : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024)`;
+    const carcassKgGO = Math.round(r.liveKg * r.dressing / 100);
+    const intakeKg    = Math.round(r.liveKg * 0.35);
+    const verdict = pp > 0
+      ? `VIABLE — this ${flock}-slot buy-and-finish kid operation in ${r.name} generates ${ZAR(pp)}/slot/year net (${PCT(pp / goWPrice)} ROI on weaner kid capital).`
+      : `MARGINAL — at ${flock} slots, this operation falls below the ${be ?? "?"}-slot breakeven. Purchase cost and fixed overhead exceed current margin. Scale to at least ${be ?? flock + 10} slots or reduce weaner kid purchase price before committing capital.`;
+    const bankRatingGO = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+    const s20 = sensRows.find(s => s.pct === -20);
+    const scaleStr = scaleRows.filter((_,i) => i % 2 === 0)
+      .map(rw => `${rw.n} slots: profit/slot ${ZAR(rw.pp)} · batch profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? "VIABLE" : "BELOW BE"}`)
+      .join("\n");
+    const sensTable = sensRows.filter(s => [-20,-10,0,10,20].includes(s.pct))
+      .map(s => `  ${s.pct>0?"+":""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/slot ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be||"∞"} slots`)
+      .join("\n");
+    const cfTable = cfRows.filter(row => row.rev > 0 || row.m === 1 || row.m % 12 === 0)
+      .map(rw => `Mo ${rw.m} (${rw.mo} Yr${rw.yr}): Rev ${ZAR(rw.rev)} · Cost ${ZAR(rw.cost)} · P&L ${ZAR(rw.profit)} · Cum ${ZAR(rw.cum)}`)
+      .join("\n");
+    const TITLES = [
+      "Executive Summary", "Regional Analysis", "Breed Analysis",
+      "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+      "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+      "Capital Structure & Financing", "Implementation Roadmap",
+    ];
+    const bodies = [
+      `${verdict}
+
+Operation profile: ${flock} ${r.breed} kid slots — buy-and-finish in ${r.name}. ${cyclesPerYear.toFixed(1)} cycles/year (~${Math.round(365/cyclesPerYear)} days/cycle). System: ${productionSystem} · Market: ${marketChannel} · Labour: ${lmNote}. Carcass basis: R${carcass}/kg (SA fresh chevon/goat market).
+
+Key financials: Revenue ${ZAR(revPE)}/slot/yr · Variable cost (incl. weaner kids) ${ZAR(varPE)}/slot · Variable margin ${ZAR(vm)}/slot · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} slots · Profit/slot ${ZAR(pp)}/yr · Batch profit ${ZAR(pp * flock)}/yr · ROI on kid capital ${PCT(pp / goWPrice)} · Capital required ${ZAR(capital)} · 5-year NPV at 10%: ${ZAR(npv5)}.
+
+Weaner kid purchase price: ${ZAR(goWPrice)}/head. Slaughter weight: ${r.liveKg}kg live · Carcass: ${carcassKgGO}kg (${r.dressing}%). First revenue: Month ${firstPositive?.m ?? Math.round(12/cyclesPerYear + 1)}.
+
+Three-year trajectory: Year 1 cumulative ${ZAR(yr1)}. Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}. Sustainable annual batch profit from Year 2: ${ZAR(pp * flock)}/yr.
+
+Land Bank bankability: ${bankRatingGO}. ${bankRatingGO === "STRONG" ? "Strong cash-on-cash return with rapid capital turnover — kid-finishing cycles faster than sheep or cattle." : bankRatingGO === "MODERATE" ? "Viable but scale up — fixed cost dilution improves rapidly across more slots." : `Below the ${be}-slot breakeven — increase batch size or negotiate lower weaner kid price before committing capital.`}`,
+
+      `${r.name} — ${r.climate}.
+
+Buy-and-finish context: Kid finishing in ${r.name} is driven by the halaal sacrificial market (Eid al-Adha, June/July) and the fresh chevon retail market. Market-ready kids (22–28kg live weight) fetch R10–20/kg premium through certified halaal abattoirs relative to off-peak pricing. Aligning your grow cycle to deliver kids at ${r.liveKg}kg 4–6 weeks before Eid is the single most reliable way to improve per-slot returns.
+
+Market infrastructure: ${r.market}.
+
+Halaal premium opportunity: R10–20/kg above base carcass price for certified halaal animals — adds ${ZAR(Math.round(carcassKgGO * 15))}/animal at R15/kg premium. Confirm certification requirements with your target abattoir before purchasing the first batch.
+
+${r.tip ? `Provincial insight: ${r.tip}` : ""}`,
+
+      `${r.breed} — buy-and-finish parameters used in this model.
+
+Carcass: ${carcassKgGO}kg (${r.liveKg}kg live × ${r.dressing}% dressing).
+Revenue per kid at R${carcass}/kg: ${ZAR(carcassKgGO * carcass)}.
+Cycles per year: ${cyclesPerYear.toFixed(1)} (~${Math.round(365/cyclesPerYear)}-day grow period from ~${intakeKg}kg intake to ${r.liveKg}kg slaughter).
+Annual revenue per slot: ${ZAR(Math.round(revPE))}.
+
+${r.breed} finishing performance: Both Boer Goat and Kalahari Red lay down muscle rapidly on browse supplemented with concentrates. The wide, blocky hindquarters of commercial meat goat breeds translate directly to premium carcass classification at halaal abattoir. The primary risk in kid-finishing is internal parasite load — weaners have zero acquired immunity and wireworm burden accumulates faster in young animals than in adults. A rigorous FAMACHA-at-intake protocol is non-negotiable.
+
+Weaner kid sourcing: ${GOAT_BREED_SOURCES[r.breed] || GOAT_BREED_SOURCES["_default"]}`,
+
+      `Buy-and-finish model assumptions — conservative SA chevon market benchmark.
+
+Revenue assumptions:
+• Weaner kid purchase price: ${ZAR(goWPrice)}/head (intake weight ~${intakeKg}kg, typically 10–14 weeks old)
+• Slaughter weight: ${r.liveKg}kg live · Dressing: ${r.dressing}% · Carcass: ${carcassKgGO}kg
+• Carcass price: R${carcass}/kg fresh chevon (verify current SA goat market price before finalising)
+• Cycles/year: ${cyclesPerYear.toFixed(1)} (~${Math.round(365/cyclesPerYear)}-day grow-out period)
+• Halaal premium: R10–20/kg above base price for certified halaal slaughter
+
+Cost assumptions:
+• Feed (concentrate supplement for grow phase): ${ZAR(Math.round(feedCost))}/slot/yr — browse access reduces this; full feedlot diet increases by 30–50%
+• Health (FAMACHA-based parasite management): ${ZAR(Math.round(healthCost))}/slot/yr — dose at intake, mid-cycle, and pre-slaughter only
+• Labour: ${lmNote}
+• Overhead: ${ZAR(r.oh ?? 500)}/mo — water, fuel, handling, transport to abattoir
+
+Variable margin of ${ZAR(vm)}/slot/year is the critical number. Every slot above breakeven (${be ?? "N/A"}) adds ${ZAR(vm)} straight to profit. Internal parasite health cost is the most volatile input — a wet season with missed FAMACHA can double this cost and collapse the margin for that cycle.`,
+
+      `Buy-and-finish cashflow — ${flock} kid slots at ${cyclesPerYear.toFixed(1)} cycles/year.
+
+Revenue arrives at the end of each grow cycle (~month ${Math.round(12/cyclesPerYear)}).
+Monthly operating cost: ${ZAR(Math.round(mc))}.
+Initial weaner kid purchase: ${ZAR(flock * goWPrice)}.
+
+Key cashflow milestones:
+${cfTable}
+
+Year 1 cumulative: ${ZAR(yr1)}. Year 2: ${ZAR(yr2)}. Year 3: ${ZAR(yr3)}.
+Working capital requirement: ${ZAR(capital)} (weaner kid purchase + ${Math.round(365/cyclesPerYear)}-day operating costs + 15% contingency).
+
+Eid al-Adha timing: Structure your purchase-and-grow cycle so kids reach ${r.liveKg}kg 4–6 weeks before Eid (June/July). Book halaal abattoir slots 3–4 weeks in advance — they fill early for Eid. The premium adds ${ZAR(Math.round(flock * carcassKgGO * 15))} to a single Eid batch at R15/kg above base.`,
+
+      `Breakeven: ${be ?? "N/A"} batch slots. Variable margin ${ZAR(vm)}/slot/yr covers fixed overhead of ${ZAR(fa)}/yr at this scale.
+
+${scaleStr}
+
+Your position: ${flock} slots${be && flock < be ? ` — ${be - flock} slots below breakeven` : be ? ` — ${flock - be} slots above breakeven` : ""}.
+
+At what scale does this become a primary income? ${vm > 0 ? `${Math.round((fa + 180000) / vm)} slots generate approximately R180,000/year net.` : "Improve variable margin first."}
+
+Kid-finishing has a shorter capital cycle than a breeding herd — revenue every ${Math.round(12/cyclesPerYear)} months versus 12+ months for breeding. Faster feedback on profitability and faster scaling if the model works.`,
+
+      `1. PRICE RISK (Carcass price ±%)
+${sensTable}
+
+At a 20% carcass price drop (to R${s20?.adj.toFixed(0) ?? "?"}/kg): ${s20 && s20.pp < 0 ? `this operation falls below breakeven — ${flock} slots is insufficient scale to absorb the shock. Increase to at least ${be ?? flock + 10} slots.` : `profit/slot drops to ${ZAR(s20?.pp ?? 0)} — the operation remains viable.`}
+
+2. WEANER KID SOURCING RISK
+Weaner kid price volatility is the largest input cost variable. A 10% price increase reduces profit by ${ZAR(Math.round(goWPrice * cyclesPerYear * 0.1))}/slot/yr. Lock in supply agreements with 2–3 breeding operations in ${r.name}. Source kids at a fixed price per kilogram intake weight — not per head — to protect against underweight animals eroding your margin.
+
+3. INTERNAL PARASITE RISK (Critical — primary mortality and margin risk)
+Haemonchus contortus kills weaner kids faster than adults — weaners have zero acquired immunity. A single missed FAMACHA cycle in a high-rainfall period can lose 15–25% of a batch to anaemia without warning. Protocol: FAMACHA at intake (dose all score 4–5 animals), FAMACHA at day 45, FAMACHA pre-slaughter. Use combination drenches and rotate actives — anthelmintic resistance is already present in most SA goat populations. Budget: ${ZAR(Math.round(healthCost))}/slot/yr.
+
+4. WEIGHT RISK (Growth shortfall)
+Kids failing to hit target weight reduce revenue and extend cycle length, cutting cycles-per-year. Target average daily gain: ${((r.liveKg - intakeKg) / (365/cyclesPerYear)).toFixed(0)}g/day. Weigh every animal at intake and at day 30 — remove underperformers before they become a cash drain.
+
+5. PREDATION RISK (Lower than breeding, not zero)
+Caracal and jackal are less of a threat in a confined camp or feedlot setup but remain a risk at night. Night kraaling for the first 2 weeks post-intake is recommended — stressed new arrivals are most vulnerable. Ensure perimeter fencing is predator-proof around kid-finishing camps.`,
+
+      `Total capital required: ${ZAR(capital)}.
+
+Weaner kid purchase: ${ZAR(flock * goWPrice)} (${flock} × ${ZAR(goWPrice)}/head)
+Working capital (${Math.round(365/cyclesPerYear)}-day grow period): ${ZAR(capital - flock * goWPrice)}
+
+Financing options:
+• Short-term livestock finance (FNB Agri, ABSA Agri): 3–6 month revolving facility aligned to the grow cycle — the most appropriate instrument for kid-finishing.
+• Own capital preferred: ROI of ${PCT(pp / goWPrice)} on weaner kid cost makes this self-funding within 2–3 cycles if initial capital is available.
+• Land Bank production loan: applicable if integrated with an owned property where a breeding herd supplements kid supply.
+
+Cash-on-cash payback: ${pp > 0 ? `${(goWPrice / pp).toFixed(1)} years on weaner kid capital` : "not yet viable at current scale"}.
+
+Honest caution: The halaal premium is real but halaal abattoir slots are competitive during Eid. Do not build your base case on Eid premium pricing — use the standard chevon price as the floor and treat Eid premium as upside. Confirm halaal certification requirements with your target abattoir before committing the first batch.`,
+
+      `MONTHS 1–2 — Setup and sourcing:
+• Install kid-finishing camps: minimum 1.5m² per kid in a confined pen, or 50–100m² per kid in a browse camp
+• Confirm water supply — kids at grow weight need 2–3 litres/day
+• Source ${flock} ${r.breed} weaner kids at ${ZAR(goWPrice)}/head (target intake weight ~${intakeKg}kg, 10–14 weeks old)
+• Book halaal abattoir slot for target slaughter date (align to Eid if purchasing February–May)
+• Confirm FAMACHA protocol with your veterinarian before animals arrive
+
+MONTH 1 — Weaner kid intake:
+• Weigh every kid at intake — remove underweight animals before payment if possible
+• 7-day quarantine: FAMACHA score (dose all score 4–5), vitamin B12 injection, clostridial vaccination booster
+• Tag and record: intake weight, date, FAMACHA score, batch number
+• Night kraal for the first 2 weeks — new arrivals are stressed and predator-vulnerable
+
+MONTHS 2–${Math.round(12/cyclesPerYear)} — Grow phase:
+• Weigh fortnightly — target ${((r.liveKg - intakeKg) / (365/cyclesPerYear)).toFixed(0)}g/day average gain
+• FAMACHA mid-cycle (~day 45): dose only score 4–5 animals — never blanket-dose
+• Adjust browse access and concentrate supplement if growth falls below target
+• Confirm abattoir slot and halaal paperwork at month ${Math.max(1, Math.round(12/cyclesPerYear) - 1)}
+
+MONTH ${Math.round(12/cyclesPerYear)} — Harvest and restock:
+• Grade all animals — send only animals above ${Math.round(r.liveKg * 0.9)}kg to abattoir; hold underweight animals for one more cycle
+• FAMACHA pre-slaughter: observe anthelmintic withdrawal periods before slaughter
+• Calculate and record true cycle profit: sale revenue minus all costs including kid purchase
+• Immediately plan and book next batch restock
+
+FIVE ACTIONS THIS WEEK:
+1. Get 3 price quotes from ${r.breed} weaner kid suppliers in ${r.name} — compare price per kg intake weight, not per head
+2. Contact a certified halaal abattoir — confirm booking process, minimum batch size, and certification requirements
+3. Check pen and camp capacity: ${flock} kids need at least ${Math.round(flock * 1.5)}m² enclosed plus supplementary browse or feed access
+4. Open a dedicated batch account to track cash flow per cycle accurately
+5. Book a FAMACHA training session with your nearest veterinarian before the first batch arrives`,
+    ];
+    return {
+      sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+      raw: bodies.join("\n\n"),
+      reportData, buyerName, generatedAt: new Date().toISOString(), isSandbox: false,
+    };
+  }
 
   const kidsPerYear   = Math.round(flock * (r.lambing / 100) * (r.survival / 100) * 0.85);
   const carcassKg     = Math.round(r.liveKg * r.dressing / 100);
@@ -1303,8 +1595,8 @@ function generateGoatsReport(reportData, buyerName, T) {
   const ccGuide = GOAT_CC[r.name] || `3–6 ha/doe depending on veld type — obtain a professional veld assessment before stocking`;
   const breedSource = GOAT_BREED_SOURCES[r.breed] || GOAT_BREED_SOURCES["_default"];
   const droughtAdvice = (r.drought === "Severe, frequent" || r.drought === "Frequent" || r.drought === "Very frequent")
-    ? `Drought is the defining risk in ${r.name}. Boer goats are more drought-resilient than sheep — their browsing habit and fat reserves provide a buffer. However, internal parasite larvae concentrate on the remaining moist browse in dry spells: paradoxically, drought often increases worm burden. Carry a 90-day supplementary lick reserve (${ZAR(Math.round(feedCost / 12 * 3 * flock))} at current feed cost). Destocking trigger: when body condition drops below 2.5, sell before condition loss becomes irreversible. AgriSure CP coverage is recommended.`
-    : `Drought is a periodic risk but Boer goats in ${r.name} are well-adapted to browse on sparse veld. Maintain a 60-day feed and lick reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your herd). Key discipline: move does off depleted camps early — overgrazing removes the shrubs and forbs that goats rely on, and unlike grass, shrub regeneration takes 2–5 years.`;
+    ? `Drought is the defining risk in ${r.name}. ${r.breed} is more drought-resilient than sheep — their browsing habit and fat reserves provide a buffer. However, internal parasite larvae concentrate on the remaining moist browse in dry spells: paradoxically, drought often increases worm burden. Carry a 90-day supplementary lick reserve (${ZAR(Math.round(feedCost / 12 * 3 * flock))} at current feed cost). Destocking trigger: when body condition drops below 2.5, sell before condition loss becomes irreversible. AgriSure CP coverage is recommended.`
+    : `Drought is a periodic risk but ${r.breed} in ${r.name} are well-adapted to browse on sparse veld. Maintain a 60-day feed and lick reserve (${ZAR(Math.round(feedCost / 12 * 2 * flock))} for your herd). Key discipline: move does off depleted camps early — overgrazing removes the shrubs and forbs that goats rely on, and unlike grass, shrub regeneration takes 2–5 years.`;
   const scaleStr = scaleRows.filter((_, i) => i % 2 === 0)
     .map(rw => `${rw.n} does: profit/doe ${ZAR(rw.pp)} · herd profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)} · ${rw.ok ? (rw.roi > 0.14 ? "STRONG" : "VIABLE") : "BELOW BE"}`)
     .join("\n");
@@ -1354,26 +1646,26 @@ Predation risk in ${r.name}: Caracal and black-backed jackal are the primary pre
     `${r.breed} is the dominant commercial meat goat breed in ${r.name} and the most widely produced goat breed in South Africa.
 
 Production parameters in ${r.name}:
-• Kidding rate: ${r.lambing}% (Boer goat twins are common — over 50% of does in a well-managed herd produce twins annually)
+• Kidding rate: ${r.lambing}% (twin kids are common in ${r.breed} — over 50% of does in a well-managed herd produce twins annually)
 • Kid survival to 90 days: ${r.survival}% — primary losses are predation (night), hypothermia in frost areas, and scours in the first 72 hours
 • Slaughter weight: ${r.liveKg}kg live weight at 4–6 months
 • Carcass weight: ${carcassKg}kg (${r.dressing}% dressing percentage)
 • Revenue per kid at R${carcass}/kg: ${ZAR(revPerKid)}
 
 What the breed selection means for your operation in ${r.name}:
-Boer Goat produces a wide, blocky carcass with high muscle-to-bone ratio — the commercial standard for SA fresh goat and export chevon. The white body with red head is the registration standard, but commercial does show colour variation without affecting production. The Boer Goat's weakness is internal parasite susceptibility — it was selected for meat production, not parasite resistance. Any management system for Boer Goats in ${r.name} must have FAMACHA built into the monthly routine.
+${r.breed} produces a wide, blocky carcass with high muscle-to-bone ratio — the commercial standard for SA fresh goat and export chevon. ${r.breed === "Kalahari Red" ? "The Kalahari Red's pigmented red coat provides UV protection and heat resilience — a practical production advantage in arid conditions." : "The white body with red head is the Boer Goat registration standard, but commercial does show colour variation without affecting production."} ${r.breed}'s primary weakness is internal parasite susceptibility — selected for meat production, not parasite resistance. Any management system for ${r.breed} in ${r.name} must have FAMACHA built into the monthly routine.
 
 ${breedSource}
 
 HIDDEN INCOME STREAM — Stud buck leasing:
-A performance-tested Boer buck from a top-decile NSSIS stud sells for R8,000–R25,000. Rather than purchasing and depreciating a buck, lease a proven sire from a registered stud at R1,500–R3,000/season (6–8 weeks). This eliminates the capital cost and the genetic risk of a single poor sire inflating your replacement buck expense. Conversely, if you invest in a top buck and your own herd is performing well, leasing him to neighbouring commercial farmers at R2,000/season recovers 40–60% of his annual ownership cost.`,
+A performance-tested ${r.breed} buck from a top-decile NSSIS stud sells for R8,000–R25,000. Rather than purchasing and depreciating a buck, lease a proven sire from a registered stud at R1,500–R3,000/season (6–8 weeks). This eliminates the capital cost and the genetic risk of a single poor sire inflating your replacement buck expense. Conversely, if you invest in a top buck and your own herd is performing well, leasing him to neighbouring commercial farmers at R2,000/season recovers 40–60% of his annual ownership cost.`,
 
-    `This model applies a conservative commercial Boer Goat benchmark for ${r.name}.
+    `This model applies a conservative commercial ${r.breed} benchmark for ${r.name}.
 
 Revenue assumptions:
 • Kidding rate: ${r.lambing}% × survival ${r.survival}% × 85% marketing rate = ${(r.lambing / 100 * r.survival / 100 * 0.85).toFixed(2)} kids marketed/doe/yr
 • Carcass: ${carcassKg}kg × R${carcass}/kg = ${ZAR(revPerKid)}/kid
-• Revenue/doe/yr: ${ZAR(Math.round(revPE))} (no wool — Boer Goat is a pure meat breed)
+• Revenue/doe/yr: ${ZAR(Math.round(revPE))} (no wool — ${r.breed} is a pure meat breed)
 • Halaal premium opportunity: R10–20/kg above base price for certified halaal slaughter — adds ${ZAR(Math.round(kidsPerYear * carcassKg * 15))} annually on ${kidsPerYear} kids if marketed through halaal channels
 
 Cost assumptions:
@@ -1383,7 +1675,7 @@ Cost assumptions:
 • Overhead: ${ZAR(r.oh)}/mo — handling, transport, guard dogs, equipment maintenance
 • Labour: ${lmNote}
 
-The variable margin of ${ZAR(vm)}/doe is the key driver. At ${flock} does, fixed costs consume ${ZAR(Math.round(fa / flock))}/doe/yr. At 200 does, this drops to ${ZAR(Math.round(fa / 200))} — scale is the primary lever for profitability in extensive Boer Goat operations.
+The variable margin of ${ZAR(vm)}/doe is the key driver. At ${flock} does, fixed costs consume ${ZAR(Math.round(fa / flock))}/doe/yr. At 200 does, this drops to ${ZAR(Math.round(fa / 200))} — scale is the primary lever for profitability in extensive ${r.breed} operations.
 
 Most likely wrong assumption: Internal parasite cost. In high-rainfall or KZN coastal environments, health costs can run 1.5–2× the benchmark without a rigorous FAMACHA protocol. If ${r.name} has parasite pressure rated '${r.parasites}', budget an additional ${ZAR(Math.round(healthCost * 0.4))}/doe/yr as a contingency until you have two seasons of actual dosing records.`,
 
@@ -1397,7 +1689,7 @@ Phase 3 — Normal production (Year 2+): ${flock} does × ${(r.lambing / 100 * r
 
 ${pp < 0 ? `WARNING: At ${flock} does, this herd does not reach cumulative-positive in 36 months. Scale to at least ${be ?? flock + 20} does before committing capital.` : `The operation ${yr2 >= 0 ? "recovers working capital by Year 2" : "requires the full 36-month period to recover working capital — normal for first-time operations where establishment costs peak in Year 1"}.`}
 
-Working capital requirement: ${ZAR(Math.round(Math.abs(yr1) * 1.1))} — budget this before a single animal is purchased. The most common cause of Boer Goat operation failure is insufficient working capital in the 12-month establishment phase, not drought or disease.
+Working capital requirement: ${ZAR(Math.round(Math.abs(yr1) * 1.1))} — budget this before a single animal is purchased. The most common cause of goat operation failure is insufficient working capital in the 12-month establishment phase, not drought or disease.
 
 Seasonal cash flow pattern: Align mating with your target market. Kidding 5 months later should produce market-weight animals for the halaal peak (Eid), September Braai Day demand, or December/January Christmas retail — all of which pay 15–25% above off-peak prices.`,
 
@@ -1408,7 +1700,7 @@ ${scaleStr}
 
 ${scaleVi ? `First viable scale: ${scaleVi.n} does — herd profit ${ZAR(scaleVi.fp)}/yr, ROI ${PCT(scaleVi.roi)}.` : "No viable scale at current carcass price — consider increasing direct-market proportion or reducing fixed costs."}
 
-Commercial thresholds for SA Boer Goat operations:
+Commercial thresholds for SA commercial goat operations:
 • 1–30 does: hobby/smallholder — rarely covers all fixed and opportunity costs
 • 30–80 does: entry commercial, owner-managed — viable with good market access
 • 80–200 does: established commercial — full-time owner justified, buck leasing becomes viable
@@ -1420,7 +1712,7 @@ Your position: ${flock} does · ${flock >= (be ?? Infinity) ? `${flock - (be ?? 
 To reach primary income at R180,000/yr net: ${typeof primaryIncomeScale === "number" ? `${primaryIncomeScale} does required` : "improve variable margin first"}.`,
 
     `1. INTERNAL PARASITE RISK (Critical — primary ongoing cost and mortality driver)
-Haemonchus contortus (wireworm/bloodworm) is the number one killer of Boer goats in SA. Goats do not develop the acquired immunity that adult sheep build over time — a 4-year-old doe is almost as susceptible as a 4-month-old kid. Parasite pressure: ${r.parasites}.
+Haemonchus contortus (wireworm/bloodworm) is the number one killer of commercial goats in SA. Goats do not develop the acquired immunity that adult sheep build over time — a 4-year-old doe is almost as susceptible as a 4-month-old kid. Parasite pressure: ${r.parasites}.
 Protocol: FAMACHA score every 4–6 weeks. Dose only animals scoring 4–5 (pale/white conjunctiva). Never blanket-dose — resistance develops within 3–5 years of routine whole-herd treatment. Use combination drenches (benzimidazole + levamisole) and rotate with macrocyclic lactones. Record every dosing event with individual animal ID — this data is your resistance early-warning system.
 Cost of failure: A parasite outbreak in a ${flock}-doe herd can kill 20–30% of kids and 5–10% of does in a single season. The annual cost of FAMACHA monitoring (R${Math.round(flock * 5)}/yr in time and materials) is trivially small compared to the losses.
 
@@ -1452,7 +1744,7 @@ Lending instruments:
 
 Optimal capital structure at ${ZAR(capital)}: 40% own equity (${ZAR(Math.round(capital * 0.4))}), 60% debt (${ZAR(Math.round(capital * 0.6))}). Goat operations have faster capital recovery than cattle (shorter production cycle) — a 3-year loan term is achievable if kidding rates exceed ${r.lambing - 10}%.
 
-Insurance: Register with AgriSure CP for multi-peril livestock cover before the first animals arrive. Boer goat cover is available at 2.5–4% of livestock value — for ${ZAR(flock * r.ewePrice)} of does, annual premium is ${ZAR(Math.round(flock * r.ewePrice * 0.03))}. Non-negotiable in drought-prone areas.
+Insurance: Register with AgriSure CP for multi-peril livestock cover before the first animals arrive. Goat cover is available at 2.5–4% of livestock value — for ${ZAR(flock * r.ewePrice)} of does, annual premium is ${ZAR(Math.round(flock * r.ewePrice * 0.03))}. Non-negotiable in drought-prone areas.
 
 Honest caution: Buck quality is undervalued by most first-time goat producers. A poor-performance buck is the most expensive animal on the farm — every substandard kid he sires costs you at every sale for the next 5 years. Spend on buck genetics before any other optional capital item.`,
 
@@ -1503,11 +1795,465 @@ FIVE ACTIONS THIS WEEK:
   };
 }
 
+// ── PIG BREED SOURCES ─────────────────────────────────────────────────────────
+const PIG_BREED_SOURCES = {
+  "Large White":
+    "The SA Studbook (studbook.co.za) maintains the Large White register. Source gilts from SAPPO-registered studs with published EBV data — particularly Average Daily Gain (ADG), Feed Conversion Ratio (FCR), and Loin Eye Area (LEA). Top commercial Large White studs in Gauteng (Midvaal area) and Free State (Hoopstad, Jacobsdal) offer tested gilts with full health clearance. Insist on Mycoplasma hyopneumoniae-free herd certification before purchase.",
+  "Landrace":
+    "The SA Landrace is the dominant dam-line breed in SA commercial production. Source from SAPPO-registered studs with BLUP-indexed sows — Landrace maternal traits (litter size, milk production) are heritable and measurable. Landrace × Large White F1 gilts (the commercial dam line) are available from several contract multiplier herds in Gauteng and the Western Cape. Avoid herds without documented PRRS vaccination history.",
+  "Duroc":
+    "The Duroc is SA's primary terminal sire breed — strong growth, good FCR, and superior pork quality (intramuscular fat). Source terminal Duroc boars from performance-tested studs. The Duroc × (Landrace × Large White) three-way cross is the standard commercial pork model in SA. Consider AI with tested Duroc semen from SANSOR (sansor.co.za) to access elite genetics without housing a boar.",
+  "Pietrain":
+    "The Pietrain produces lean, heavily muscled carcasses and suits premium retail pork specifications. Not recommended for extensive or semi-intensive systems — Pietrain is stress-susceptible (PSS gene) and requires controlled housing and handling. Source from registered studs with documented PSE-free (pork quality) genetics.",
+  "Large White × Landrace":
+    "The Large White × Landrace F1 is the standard SA commercial dam line — combining Landrace maternal ability with Large White robustness. Source from SAPPO-registered F1 multiplier herds, typically in Gauteng and the Western Cape, where biosecurity and vaccination programs are documented. A good commercial F1 gilt should farrow 11+ live piglets per litter and wean 10+ under standard conditions.",
+  "_default":
+    "The SA Pork Producers' Organisation (SAPPO — pork.co.za) maintains a directory of registered stud breeders and commercial gilt multipliers. Contact SAPPO for your province's nearest recommended gilt supplier. Insist on health clearance documentation (Mycoplasma, PRRS, APP) before purchase — respiratory disease is the single largest productivity destroyer in SA commercial piggeries.",
+};
+
+// ── PIGS REPORT ───────────────────────────────────────────────────────────────
+function generatePigsReport(reportData, buyerName, T) {
+  const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource } = reportData;
+
+  const pigsPerSow  = r.lambing / 100;
+  const carcassKg   = Math.round(r.liveKg * r.dressing / 100);
+  const lmNote      = lm === "owner"
+    ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo for reference)`
+    : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL)`;
+  const feedNote    = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/sow/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/sow/yr — includes sow rations + creep feed + grower/finisher rations for ${pigsPerSow.toFixed(0)} finishers/sow/yr`;
+  const healthNote  = healthCost !== r.health
+    ? `${ZAR(healthCost)}/sow/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/sow/yr — vaccination programs, routine vet, farrowing support, and finisher treatments`;
+  const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
+  const s20 = sensRows.find(s => s.pct === -20);
+  const viabilityVerdict = pp > 0
+    ? `VIABLE — this ${flock}-sow ${r.breed} piggery in ${r.name} is profitable at current input prices, generating ${ZAR(pp)}/sow/year net (${PCT(pp / r.ewePrice)} ROI on gilt capital).`
+    : `MARGINAL — at ${flock} sows, this operation falls below the ${be ?? "?"}-sow breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered at current scale. Increasing to at least ${be ?? flock + 10} sows is the single most critical action before committing capital.`;
+  const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+  const breedSource = PIG_BREED_SOURCES[r.breed] || PIG_BREED_SOURCES["_default"];
+  const scaleStr = scaleRows.filter((_,i) => i % 2 === 0)
+    .map(rw => `${rw.n} sows: profit/sow ${ZAR(rw.profit / rw.n)} · herd profit ${ZAR(rw.profit)} · ROI ${PCT(rw.roi)}`)
+    .join("\n");
+  const sensTable = sensRows.filter(s => [-20,-10,0,10,20].includes(s.pct))
+    .map(s => `  ${s.pct>0?"+":""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/sow ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be||"∞"} sows`)
+    .join("\n");
+  const cfTable = cfRows.filter(row => row.rev > 0 || row.m === 1 || row.m % 12 === 0)
+    .map(rw => `Mo ${rw.m} (${rw.mo} Yr${rw.yr}): Rev ${ZAR(rw.rev)} · Cost ${ZAR(rw.cost)} · P&L ${ZAR(rw.profit)} · Cum ${ZAR(rw.cum)}`)
+    .join("\n");
+
+  const TITLES = [
+    "Executive Summary", "Regional Analysis", "Breed Analysis",
+    "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+    "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+    "Capital Structure & Financing", "Implementation Roadmap",
+  ];
+
+  const bodies = [
+    `${viabilityVerdict}
+
+Operation profile: ${flock}-sow commercial piggery in ${r.name}. Target: ${pigsPerSow.toFixed(0)} finisher pigs/sow/yr at ${r.liveKg}kg slaughter weight (${carcassKg}kg carcass, ${r.dressing}% dressing). System: ${productionSystem} · Market: ${marketChannel} · Labour: ${lmNote}.
+
+Key financials: Revenue ${ZAR(revPE)}/sow/yr · Variable cost ${ZAR(varPE)}/sow · Variable margin ${ZAR(vm)}/sow · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} sows · Profit/sow ${ZAR(pp)}/yr · Herd profit ${ZAR(pp * flock)}/yr · ROI ${PCT(pp / r.ewePrice)} on gilt capital · Capital required ${ZAR(capital)} · 5-year NPV at 10%: ${ZAR(npv5)}.
+
+Cashflow: First batch to slaughter Month 5. Monthly pork revenue steady from Month 6. Three-year trajectory: Year 1 cumulative ${ZAR(yr1)}. Year 2 cumulative ${ZAR(yr2)}. Year 3 cumulative ${ZAR(yr3)}.
+
+Land Bank bankability: ${bankRating}. ${bankRating === "STRONG" ? "Strong cash-on-cash return with continuous monthly revenue from Month 6 — pigs are the most cash-flow-positive of all SA livestock enterprises at scale." : bankRating === "MODERATE" ? "Viable margin but scale up — fixed cost dilution is rapid in piggeries, and breakeven requires only a few more sows." : `Below the ${be}-sow breakeven — this piggery cannot cover fixed costs at current scale. Scale to breakeven or improve variable margin before committing capital.`}`,
+
+    `${r.name} — ${r.climate}.
+
+Commercial pig farming in ${r.name}: ${r.why}
+
+Market infrastructure: ${r.market}.
+
+Provincial productivity context: ${r.name} commercial piggeries achieve approximately ${pigsPerSow.toFixed(0)} finisher pigs per sow per year — reflecting local feed access, climate, and management intensity. SA industry top-quartile: 22+ finishers/sow/yr. National commercial average: 18–20. Below-average operations: <16 finishers/sow/yr.
+
+Feed cost is the dominant input in ${r.name}: ${feedNote}. Feed represents 70–75% of total production cost in a well-run SA piggery. The feed efficiency of your finishers (FCR — kg feed per kg gain) is the single largest lever on profitability after selling price.
+
+${r.tip ? `Provincial insight: ${r.tip}` : ""}`,
+
+    `${r.breed} — the primary commercial breed for ${r.name}.
+
+Production parameters used in this model:
+• Finisher pigs per sow per year: ${pigsPerSow.toFixed(0)} (encodes litter size, litters/yr, and piglet survival)
+• Slaughter weight: ${r.liveKg}kg live · Carcass: ${carcassKg}kg (${r.dressing}% dressing yield)
+• Revenue per sow per year at R${carcass}/kg pork: ${ZAR(Math.round(revPE))}
+• Sow productive life: ~3 years (replacement rate ${r.rep}%/yr)
+
+${r.breed} performance in ${r.name}: ${r.breed.includes("Large White") || r.breed.includes("Landrace")
+  ? `The Large White × Landrace (or pure-line) combination delivers the best combination of litter size, milk production, and feed efficiency available in SA commercial production. On a correctly balanced diet (16% CP finisher ration with maize-soya base), these breeds consistently achieve FCR 2.8–3.2 and average daily gain 700–850g in SA tunnel-ventilated houses.`
+  : `This breed delivers consistent commercial pork production in ${r.name}'s conditions. Select for high Average Daily Gain (ADG) and Feed Conversion Ratio (FCR) — the two performance traits with the highest correlation to profitability.`}
+
+Sow replacement strategy: At ${r.rep}% annual replacement, ${Math.round(flock * r.rep / 100)} gilts per year are required for this ${flock}-sow unit. Source gilts from the same stud to maintain genetic consistency. Replacement cost: ${ZAR(Math.round(flock * r.ewePrice * r.rep / 100))}/yr (${flock} sows × ${ZAR(r.ewePrice)} gilt price × ${r.rep}%).
+
+Where to source stock: ${breedSource}`,
+
+    `Financial model assumptions — SA commercial pork benchmark.
+
+Revenue assumptions:
+• Pigs marketed per sow per year: ${pigsPerSow.toFixed(0)}
+• Slaughter weight: ${r.liveKg}kg live · Dressing: ${r.dressing}% · Carcass: ${carcassKg}kg
+• Pork price: R${carcass}/kg carcass (verify current SA producer price before finalising — SAPPO publishes weekly indicator prices at pork.co.za)
+• Revenue per sow per year: ${ZAR(Math.round(revPE))}
+
+Cost assumptions:
+• Feed: ${feedNote}
+• Health / vet: ${healthNote}
+• Labour: ${lmNote}
+• Overhead: ${ZAR(r.oh)}/mo — electricity (ventilation, heating), water, vehicle, admin
+• Sow replacement: ${ZAR(r.ewePrice)}/gilt × ${r.rep}%/yr = ${ZAR(Math.round(r.ewePrice * r.rep / 100))}/sow/yr
+• ${profileLine}
+
+Variable margin of ${ZAR(vm)}/sow/yr is the critical number. Every sow above breakeven (${be ?? "N/A"}) adds ${ZAR(vm)} straight to profit. Feed cost volatility is the most dangerous input — maize prices moved ±25% in 2022–2024. A 10% maize price increase increases feed cost by approximately ${ZAR(Math.round(feedCost * 0.07))}/sow/yr (assuming 70% of feed is maize-based).
+
+Note on pork price sensitivity: SA pork prices (producer level) follow the SA Pig Price Index published weekly by SAPPO. The R${carcass}/kg used here represents current market conditions — cross-check before locking in expansion decisions.`,
+
+    `Piggery cashflow — ${flock} sows, rolling batch production.
+
+Establishment phase (Months 1–5): Feed, labour, and overhead with no revenue as gilts are served, gestate (114 days), and farrow before first weaners reach slaughter weight. Monthly cost during establishment: ${ZAR(Math.round(mc))}.
+First batch to slaughter: Month 5.
+Steady-state monthly pork revenue: ${ZAR(Math.round((revPE * flock) / 12))}/month from Month 6.
+
+Month-by-month cashflow (revenue months and year-ends shown):
+${cfTable}
+
+Year 1 cumulative: ${ZAR(yr1)}. Year 2: ${ZAR(yr2)}. Year 3: ${ZAR(yr3)}.
+
+Working capital observation: The 5-month establishment phase before first revenue requires ${ZAR(Math.round(mc * 5))} operating capital on top of the sow purchase cost of ${ZAR(flock * r.ewePrice)}. This is non-negotiable — it is the minimum cash reserve before a single pig can be sold.
+
+Key advantage over other livestock: from Month 6, pigs generate monthly pork revenue — unlike sheep (annual) or cattle (18-month cycles). Cash-flow predictability is significantly better in a well-run piggery than in any pastoral enterprise.`,
+
+    `Breakeven: ${be ?? "N/A"} sows. Variable margin ${ZAR(vm)}/sow/yr covers fixed overhead of ${ZAR(fa)}/yr at this scale.
+
+${scaleStr}
+
+Your position: ${flock} sows${be && flock < be ? ` — ${be - flock} sows below breakeven` : be ? ` — ${flock - be} sows above breakeven` : ""}.
+
+At what scale does this become a primary income? ${vm > 0 ? `${Math.round((fa + 360000) / vm)} sows generate approximately R360,000/year net — a single full-time income.` : "Improve variable margin first."}
+
+Critical insight: unlike pastoral farming, piggery economics scale rapidly because feed and labour are volume-driven. The difference between a 50-sow and a 100-sow unit is not double the work — a single additional employee manages the extra 50 sows. This fixed-cost leverage is why piggery breakevens are typically low in sow count but the capital requirement (infrastructure) remains the real barrier to entry.`,
+
+    `1. PORK PRICE RISK (Revenue volatility)
+${sensTable}
+
+At a 20% pork price drop (to R${s20?.adj.toFixed(0) ?? "?"}/kg): ${s20 && s20.pp < 0 ? `this ${flock}-sow unit falls below breakeven. The SA pig industry experiences cyclical price troughs — budget for 2–3 months of thin or negative margin per year. A cash reserve of ${ZAR(Math.round(mc * 3))} is the minimum safety buffer.` : `profit/sow drops to ${ZAR(s20?.pp ?? 0)} — this operation remains viable even in a price trough.`}
+
+2. FEED COST RISK (Dominant input — 70–75% of total cost)
+Maize price is the single most volatile input. A 20% maize price increase (e.g., drought year) increases total feed cost by approximately ${ZAR(Math.round(feedCost * 0.14 * flock))}/yr for this ${flock}-sow unit (assuming 70% maize content). Mitigation: buy maize forward when possible; negotiate multi-month supply contracts with local cooperatives; consider on-farm grain storage if scale justifies it (breakeven on a 200-tonne silo at a ${flock}-sow scale: approximately 2–3 years).
+
+3. DISEASE RISK (Catastrophic — can collapse a piggery in weeks)
+African Swine Fever (ASF): SA does not currently have ASF but neighbouring countries do. ASF is a notifiable disease that results in mandatory culling — full operation loss with no compensation. Strict biosecurity (no live pig movement from unknown sources, no kitchen waste, rodent control, visitor control) is the only defense. Contact the DAFF Animal Health Directorate for the current provincial ASF risk level before siting a new operation.
+Porcine Reproductive and Respiratory Syndrome (PRRS): Not present in SA as of 2025 but is a major risk factor in any expansion. Source gilts from PRRS-free certified herds only.
+Routine risks: Foot and Mouth Disease vaccination is mandatory. Mycoplasma pneumonia is endemic in SA pig herds — vaccinate from weaning.
+
+4. ENERGY COST RISK (Ventilation and heating — 8–12% of operating cost)
+A ${flock}-sow tunnel-ventilated piggery uses approximately ${Math.round(flock * 180)} kWh/month (all fans, lights, farrowing heaters). At Eskom tariff R2.50/kWh = ${ZAR(Math.round(flock * 180 * 2.5))}/month electricity cost. Load-shedding above Stage 4 is operationally dangerous — farrowing houses without backup power lose piglets to cold stress within 2–3 hours. Budget for a generator sized to run all farrowing heaters as minimum backup.
+
+5. SOW PRODUCTIVITY RISK (Herd management is the key variable)
+The gap between 14 finishers/sow/yr and 22 finishers/sow/yr is pure management — it is not climate or feed. Key drivers: farrowing rate (% of sows that farrow on time), litter size (genetic + nutrition), pre-weaning mortality (farrowing house management, heater reliability), and weaning-to-service interval. Track these four KPIs daily — they are the leading indicators of your annual revenue before any pigs are sold.`,
+
+    `Total capital required: ${ZAR(capital)}.
+
+Sow/gilt purchase: ${ZAR(flock * r.ewePrice)} (${flock} sows × ${ZAR(r.ewePrice)}/gilt)
+5-month working capital (establishment phase): ${ZAR(capital - flock * r.ewePrice)}
+  (Monthly opex ${ZAR(Math.round(mc))} × 5 months before first revenue)
+
+Infrastructure capital (not included above — farmer-owned):
+• Tunnel-ventilated farrowing unit: R8,000–R15,000/sow space
+• Gestation barn: R4,000–R8,000/sow space
+• Finisher pens: R1,200–R2,000/pig space (need ${Math.round(pigsPerSow * flock / 4)} spaces for quarterly rolling batches)
+• Feed storage and mixing: R80,000–R200,000 depending on scale
+• Effluent management (lagoon or biodigester): R150,000–R500,000
+• Estimated total infrastructure for ${flock}-sow unit: ${ZAR(flock * 25000)}–${ZAR(flock * 40000)} (highly variable by spec)
+
+Financing options:
+• ABSA Agri Mortgage / FNB Agri Production Loan: piggeries qualify for agricultural lending at 1–3% above prime. The monthly pork revenue from Month 6 is a strong serviceable cashflow for a term loan.
+• Land Bank: eligible for production credit facilities aligned to the sow herd as collateral. Contact your nearest Land Bank branch with this feasibility report.
+• Own capital preferred for infrastructure: the 5-month establishment loan is short enough to self-fund with a cash reserve of ${ZAR(capital)}.
+• SAPPO levy fund and Agri-SA grants: contact SAPPO (pork.co.za) for current industry support programs for new entrants.
+
+Payback on gilt capital: ${pp > 0 ? `${(r.ewePrice / pp).toFixed(1)} years per sow at current margin` : "not yet viable at current scale"}.`,
+
+    `MONTHS 1–2 — Infrastructure and gilt sourcing:
+• Confirm house design with a pig production consultant — ventilation is not negotiable
+• Source ${flock} commercial gilts from a SAPPO-registered stud in ${r.name}: ${breedSource.split(".")[0]}.
+• Set up feed storage: minimum ${Math.round(flock * feedCost / 12 * 2 / 1000)} tonnes of initial feed inventory (2-month buffer)
+• Establish relationship with your nearest SAPPO-registered abattoir and confirm slaughter specs (weight, finish grade)
+• Register as a pig producer with your provincial DAFF office — mandatory for disease reporting
+
+MONTH 1 — Gilt introduction:
+• Introduce all ${flock} gilts simultaneously — staggered batches create farrowing chaos in small operations
+• Acclimatisation period: 3–4 weeks in quarantine pens before contact with the main herd
+• Day 1: blood test for PRRS (even if sourcing from a certified herd — confirm clean)
+• Vaccinate: FMD, Mycoplasma hyopneumoniae, Clostridium, E. coli (rotavirus if history)
+• Body condition score (BCS) target at first service: 3.0 out of 5
+
+MONTHS 2–4 — Gestation (114 days):
+• Gestation length: 3 months, 3 weeks, 3 days (114 days) — predictable and bookable
+• Preg check at 21–28 days post-service: ultrasound or Doppler device (R8,000–R20,000)
+• Return-to-oestrus protocol: gilts that don't conceive must be re-served within 21 days or culled
+• Move gilts to farrowing crates at day 110 — 4 days for acclimatisation before farrowing
+• Target average daily gain during gestation: 500–600g/day for gilts
+
+MONTH 5 — First farrowing and first slaughter:
+• Farrowing supervision 24/7 — highest piglet mortality is in the first 6 hours
+• Piglet targets: 11+ born alive, 10+ weaned per litter at 28 days
+• First finisher batch to slaughter: expect initial batch to be smaller — rolling production stabilises from Month 9
+• Confirm slaughter booking with abattoir 2 weeks ahead
+
+FIVE ACTIONS THIS WEEK:
+1. Contact SAPPO (pork.co.za) — request a list of registered gilt suppliers in ${r.name} and ask for their current weekly producer price indicator
+2. Get a quote from a pig production consultant for house design and ventilation spec — this is the highest-impact single decision in the project
+3. Open a dedicated piggery cash account — track feed costs, health costs, and pork revenue separately from day one
+4. Source your first 2-month feed supply: contact your nearest Feed SA member (feedsa.co.za) for a quote on a ${flock}-sow ration package
+5. Verify load-shedding backup power requirements — contact your nearest Eskom office and a generator supplier for farrowing house spec`,
+  ];
+
+  return {
+    sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+    raw: bodies.join("\n\n"),
+    reportData, buyerName, generatedAt: new Date().toISOString(), isSandbox: false,
+  };
+}
+
+// ── POULTRY BREED SOURCES ─────────────────────────────────────────────────────
+const POULTRY_BREED_SOURCES = {
+  "Ross 308 Broiler":
+    "Ross 308 is the dominant commercial broiler in SA, supplied by Aviagen through local integrators (Astral Foods, Country Bird Holdings, RCL Foods). Day-old Ross 308 chicks are available from hatcheries in Gauteng (Tsakane), Free State (Hennenman), and Western Cape (Paarl). Independent producers without an integrator contract source directly from the hatchery — contact Astral Foods (astral.co.za) or Country Bird (countrybird.co.za) for commercial chick supply agreements. Request the current Ross 308 performance objectives document to benchmark your FCR and mortality against breed standard.",
+  "Cobb 500":
+    "The Cobb 500 is the second most common commercial broiler in SA, known for slightly higher breast yield than the Ross 308. Cobb genetics are supplied through Cobb-Vantress (cobb-vantress.com) distributors in SA — contact the Cobb Africa technical team for local hatchery referrals. The Cobb 500 performs best under precision ventilation and high-density management. Confirm that your local abattoir or integrator accepts Cobb-line birds before committing to a supply agreement.",
+  "Ross 308 Broiler / Free-range":
+    "Free-range broiler production in the Western Cape uses the same Ross 308 or Cobb genetics as conventional systems but under slower grow-out (slower-growing strains increasingly available). Genuine free-range certification (SAPA free-range standards — sapa.org.za) adds 30–50% price premium but requires lower stocking density (≤25kg/m²), outdoor access, and third-party audit. Contact SAPA (sapa.org.za) for the free-range certification requirements and approved auditors in the Western Cape.",
+  "Lohmann Brown (layers)":
+    "The Lohmann Brown is the dominant commercial layer breed in SA. Lohmann genetics are available from Hendrix Genetics (hendrix-genetics.com) South African distributors. Layer pullets (17 weeks) can be sourced from commercial pullet rearers in Gauteng and Western Cape. Layer operations differ fundamentally from broiler economics — consult the layer section of this platform when it becomes available.",
+  "Arbor Acres":
+    "Arbor Acres is a Cobb-Vantress line used in some SA integrator operations. Performance is similar to Ross 308. Source only through established hatchery supply agreements — Arbor Acres is not widely available to independent producers.",
+  "_default":
+    "Contact the South African Poultry Association (SAPA — sapa.org.za) for a directory of approved hatcheries and integrators in your province. The SAPA broiler producer members include Country Bird Holdings, Astral Foods, RCL Foods Chicken, and Quantum Foods — all of whom offer contract-growing arrangements in appropriate provinces. For independent day-old chick purchases, request SAPA-registered hatchery referrals and always verify health status (Marek's, IB, ND vaccination at hatch) before accepting a consignment.",
+};
+
+// ── POULTRY REPORT ────────────────────────────────────────────────────────────
+function generatePoultryReport(reportData, buyerName, T) {
+  const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource,
+          chickCostPerYear, infraPerSlot } = reportData;
+
+  const batchesPerYear  = r.lambing / 100;
+  const survivalRate    = r.survival / 100;
+  const carcassKgNum    = r.liveKg * (r.dressing / 100);
+  const birdsPerSlotPY  = batchesPerYear * survivalRate;
+
+  const lmNote     = lm === "owner"
+    ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo)`
+    : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL)`;
+  const feedNote   = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/slot/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/slot/yr — ${batchesPerYear.toFixed(0)} batches × feed at FCR ~1.7–1.9 × ${r.liveKg}kg target weight`;
+  const healthNote = healthCost !== r.health
+    ? `${ZAR(healthCost)}/slot/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/slot/yr — Marek's, Newcastle, IB, Gumboro, IBD at placement + water-soluble vitamins`;
+  const chickNote  = `${ZAR(chickCostPerYear ?? batchesPerYear * r.ewePrice)}/slot/yr — ${batchesPerYear.toFixed(0)} batches × R${r.ewePrice}/day-old chick`;
+  const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
+
+  const s20 = sensRows.find(s => s.pct === -20);
+  const viabilityVerdict = pp > 0
+    ? `VIABLE — this ${flock}-bird-slot commercial broiler operation in ${r.name} is profitable at R${carcass}/kg carcass, generating ${ZAR(pp)}/slot/year net.`
+    : `MARGINAL — at ${flock} bird slots, this operation falls below the ${be ?? "?"}-slot breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered at current scale. Scale to at least ${be ?? flock + 500} slots to reach viability.`;
+  const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+  const breedSource = POULTRY_BREED_SOURCES[r.breed] || POULTRY_BREED_SOURCES["_default"];
+  const scaleStr = scaleRows.filter((_,i) => i % 2 === 0)
+    .map(rw => `${rw.n.toLocaleString()} slots: profit/slot ${ZAR(rw.fp / rw.n)} · total profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)}`)
+    .join("\n");
+  const sensTable = sensRows.filter(s => [-20,-10,0,10,20].includes(s.pct))
+    .map(s => `  ${s.pct>0?"+":""}${s.pct}% (R${s.adj.toFixed(0)}/kg): profit/slot ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be?.toLocaleString()||"∞"} slots`)
+    .join("\n");
+  const cfTable = cfRows.filter(row => row.rev > 0 || row.m === 1 || row.m % 12 === 0)
+    .map(rw => `Mo ${rw.m} (${rw.mo} Yr${rw.yr}): Rev ${ZAR(rw.rev)} · Cost ${ZAR(rw.cost)} · P&L ${ZAR(rw.profit)} · Cum ${ZAR(rw.cum)}`)
+    .join("\n");
+  const infraTotal = (infraPerSlot ?? 300) * flock;
+
+  const TITLES = [
+    "Executive Summary", "Regional Analysis", "Breed & Production System",
+    "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+    "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+    "Capital Structure & Financing", "Implementation Roadmap",
+  ];
+
+  const bodies = [
+    `${viabilityVerdict}
+
+Operation profile: ${flock.toLocaleString()}-slot commercial broiler operation in ${r.name}. ${batchesPerYear.toFixed(0)} batches/year · ${r.liveKg}kg target weight · ${r.dressing}% dressing · ${(survivalRate * 100).toFixed(0)}% flock survival. System: ${productionSystem} · Market: ${marketChannel} · Labour: ${lmNote}.
+
+Key financials: Revenue ${ZAR(revPE)}/slot/yr · Variable cost ${ZAR(varPE)}/slot · Variable margin ${ZAR(vm)}/slot · Fixed annual ${ZAR(fa)} · Breakeven ${be?.toLocaleString() ?? "N/A"} slots · Profit/slot ${ZAR(pp)}/yr · Total flock profit ${ZAR(pp * flock)}/yr · Capital required ${ZAR(capital)} · 5-year NPV at 10%: ${ZAR(npv5)}.
+
+Cashflow: First batch harvested Month 2. Steady monthly revenue from Month 2. Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} · Year 2 ${ZAR(yr2)} · Year 3 ${ZAR(yr3)}.
+
+Land Bank bankability: ${bankRating}. ${bankRating === "STRONG" ? "Strong continuous monthly revenue from Month 2 — commercial broilers generate the most predictable monthly cashflow of all SA livestock enterprises." : bankRating === "MODERATE" ? "Viable at current scale — fixed-cost dilution improves rapidly with additional bird slots." : `Below the ${be?.toLocaleString()}-slot breakeven. Scale up or improve variable margin before committing infrastructure capital.`}`,
+
+    `${r.name} — ${r.climate}.
+
+Commercial broiler production in ${r.name}: ${r.why}
+
+Market infrastructure: ${r.market}.
+
+${r.name} broiler productivity context: The model uses ${batchesPerYear.toFixed(0)} batches/year at ${r.liveKg}kg target weight and ${(survivalRate * 100).toFixed(0)}% flock survival — reflecting local climate, ventilation requirements, and market cycle. SA commercial benchmark: 6.0–6.5 batches/yr at FCR 1.60–1.75 in well-managed tunnel-ventilated houses. Below-average operations: >1.90 FCR, <94% survival.
+
+Feed cost is the largest input in ${r.name}: ${feedNote}. Feed (maize-soya ration) represents 60–65% of total production cost at commercial scale. Maize price is the single most volatile variable — SA producers experienced 35–40% maize price spikes during the 2022–2023 drought cycle.
+
+${r.tip ? `Provincial insight: ${r.tip}` : ""}`,
+
+    `${r.breed} — the primary commercial broiler for ${r.name}.
+
+Production parameters used in this model:
+• Batches per year: ${batchesPerYear.toFixed(0)} (38-day grow cycle + 7-day cleanout)
+• Birds marketed per slot per year: ${birdsPerSlotPY.toFixed(2)} (batches × survival rate)
+• Slaughter weight: ${r.liveKg}kg live · Carcass: ${carcassKgNum.toFixed(2)}kg (${r.dressing}% dressing)
+• Chick cost: R${r.ewePrice}/day-old chick · Annual chick spend: ${chickNote}
+• Revenue per slot per year at R${carcass}/kg carcass: ${ZAR(Math.round(revPE))}
+
+Breed note for ${r.name}: ${r.breed.includes("free-range") || r.breed.includes("Free-range")
+  ? `Free-range certification (SAPA standards) requires outdoor access, lower stocking density (≤25kg/m²), and slower grow-out to 56–63 days. Revenue premium: 30–50% above conventional — but capital cost per slot is 40–60% higher and throughput is lower (4–5 batches/yr vs 6). Confirm premium market access before committing to free-range spec.`
+  : `The Ross 308 / Cobb 500 commercial broiler delivers the best FCR (1.60–1.80) and growth rate available in SA commercial production. On a correctly balanced ration (18–20% CP starter / 17% grower / 16% finisher), these breeds consistently achieve 2.4–2.6kg live weight at 38 days in SA tunnel-ventilated houses.`}
+
+Contract growing vs independent:
+${r.name === "Gauteng" || r.name === "Free State" || r.name === "Western Cape"
+  ? `${r.name} has active integrator operations (Astral Foods, Country Bird, RCL Foods). Contract growing eliminates chick, feed, and medication procurement risk — the integrator supplies all inputs and pays a contract growing fee of approximately R1.80–2.50 per kg live weight produced. The trade-off: margin is lower but risk is dramatically reduced. For new entrants, contract growing is the recommended starting model.`
+  : `${r.name} has limited integrator coverage — most operations are independent. This means direct chick, feed, and medication procurement, and direct abattoir relationships. Independent operations have higher upside but require active supply chain management.`}
+
+Where to source stock: ${breedSource}`,
+
+    `Financial model assumptions — SA commercial broiler benchmark.
+
+Revenue assumptions:
+• Batches per year: ${batchesPerYear.toFixed(0)} · Survival: ${(survivalRate*100).toFixed(0)}%
+• Slaughter weight: ${r.liveKg}kg live · Dressing: ${r.dressing}% · Carcass: ${carcassKgNum.toFixed(2)}kg
+• Carcass price: R${carcass}/kg (verify current SAPA producer indicator — sapa.org.za)
+• Revenue per slot per year: ${ZAR(Math.round(revPE))}
+
+Cost assumptions:
+• Feed: ${feedNote}
+• Chick cost: ${chickNote}
+• Health / vaccines: ${healthNote}
+• Labour: ${lmNote}
+• Overhead: ${ZAR(r.oh)}/mo — electricity (ventilation, heating, lighting), water, vehicle, cleaning materials
+• ${profileLine}
+
+Variable margin of ${ZAR(vm)}/slot/yr is the key driver. Every slot above breakeven (${be?.toLocaleString() ?? "N/A"}) adds ${ZAR(vm)} directly to profit. Feed (60–65% of variable cost) and chick price (15–18%) are the two inputs to track weekly — they move together when maize prices spike.
+
+Note on carcass price: SA producer prices for whole broiler carcass track the SAPA weekly price indicator. The R${carcass}/kg used here represents current market conditions — recheck quarterly when reviewing expansion decisions.`,
+
+    `Broiler cashflow — ${flock.toLocaleString()} bird slots, continuous batch cycling.
+
+Month 1 — Setup: House preparation, biosecurity setup, first chick placement. No revenue. Monthly cost: ${ZAR(Math.round(mc))}.
+Month 2 onwards — Steady revenue: First batch harvested at ~38 days. Monthly carcass revenue: ${ZAR(Math.round((revPE * flock) / 12))}/month continuously.
+
+Month-by-month cashflow (harvest months and year-ends shown):
+${cfTable}
+
+Year 1 cumulative: ${ZAR(yr1)}. Year 2: ${ZAR(yr2)}. Year 3: ${ZAR(yr3)}.
+
+Cash-flow advantage: Commercial broilers generate monthly revenue from Month 2 — the fastest cash cycle of all SA livestock enterprises. At steady state, you receive payment every 38–45 days. This predictability makes broiler cashflow substantially more bankable than sheep (annual) or cattle (18-month cycles).
+
+Working capital: The 2-batch working capital buffer of ${ZAR(Math.round(mc * 2))} covers input costs for two batch cycles before revenue arrives. Do not start a broiler operation with less than this reserve — late payment from processors has caused multiple SA small-producer insolvencies.`,
+
+    `Breakeven: ${be?.toLocaleString() ?? "N/A"} bird slots. Variable margin of ${ZAR(vm)}/slot/yr covers fixed overhead of ${ZAR(fa)}/yr at this scale.
+
+${scaleStr}
+
+Your position: ${flock.toLocaleString()} slots${be && flock < be ? ` — ${(be - flock).toLocaleString()} slots below breakeven` : be ? ` — ${(flock - be).toLocaleString()} slots above breakeven (${PCT((flock - be) / be)} headroom)` : ""}.
+
+Scale insight: Broiler economics improve sharply between 1,000 and 10,000 bird slots because fixed costs (one worker, one overhead account) are spread over more slots. The difference between 2,000 and 5,000 slots does not require an additional worker — it requires a larger house. This fixed-cost leverage makes scaling up the single most powerful profitability lever in broiler production.
+
+At what scale does this become a primary income? ${vm > 0 ? `${Math.round((fa + 400000) / vm).toLocaleString()} slots generate approximately R400,000/year net — a single full-time income.` : "Improve variable margin first."}`,
+
+    `1. CHICKEN PRICE RISK (Revenue volatility)
+${sensTable}
+
+At a 20% price drop (to R${s20?.adj.toFixed(0) ?? "?"}/kg): ${s20 && s20.pp < 0 ? `this ${flock.toLocaleString()}-slot operation falls below breakeven. SA broiler prices track SAPA's weekly index — plan a 3-month cash buffer of ${ZAR(Math.round(mc * 3))} for sustained price troughs.` : `profit/slot drops to ${ZAR(s20?.pp ?? 0)} — this operation remains viable even in a price trough.`}
+
+Import competition note: SA chicken imports (primarily EU and US bone-in portions) are the primary price-depressing force in the local market. Anti-dumping duties help but are unpredictable in duration. Whole-bird fresh market (vs frozen portions) is less exposed to import competition.
+
+2. FEED / MAIZE PRICE RISK (Dominant input — 60–65% of variable cost)
+A 20% maize price increase in ${r.name} increases annual feed cost by approximately ${ZAR(Math.round(feedCost * 0.13 * flock))}/yr for this ${flock.toLocaleString()}-slot operation (assuming 65% maize content). Mitigation: negotiate fixed-price quarterly feed supply contracts; consider buying maize forward at cooperative grain stores; operations in maize-belt provinces (Free State, North West) have structural feed cost advantage.
+
+3. DISEASE RISK (Notifiable — can shut down an operation in 24 hours)
+Avian Influenza (H5N1): SA has experienced multiple H5N1 outbreaks since 2017. AI is a notifiable disease — all birds must be culled and the operation quarantined for 6–12 months. DAFF (daff.gov.za) compensates at regulated values, not market value. Biosecurity (footbaths, visitor log, separate clothing, rodent control) is mandatory.
+Newcastle Disease (ND): Endemic in SA. Compulsory vaccination program — never skip. Unvaccinated flocks can suffer 80–100% mortality in 3–5 days.
+Infectious Bronchitis (IB) and Gumboro (IBD): Standard vaccination at day 1 and 14. Ask your vet for a current vaccination schedule optimised for ${r.name} strains.
+
+4. ESKOM / LOAD-SHEDDING RISK (Ventilation is life-critical)
+A ${flock.toLocaleString()}-slot tunnel-ventilated broiler house uses approximately ${Math.round(flock * 0.025)} kW of ventilation capacity. Above Stage 4, temperatures inside an unventilated house can reach 40°C+ within 30 minutes — causing rapid heat-stress mortality. Budget for a diesel generator sized to run all fans (minimum ${Math.round(flock * 0.025)} kW) as a non-negotiable capital item. Monthly generator fuel allowance: approximately ${ZAR(Math.round(flock * 0.8))}/month for Stage 4+ load-shedding.
+
+5. WATER SUPPLY RISK
+Broilers consume approximately 1.8× their body weight in water daily — a ${flock.toLocaleString()}-slot house at peak consumes ${Math.round(flock * 2.5 * 0.0018 * 1000)} litres/day. A 3-day water failure will cause significant mortality and condemns birds at slaughter for dehydration. Install a minimum ${Math.round(flock * 0.003)} m³ reserve water tank and service nipple drinkers monthly.`,
+
+    `Total capital required: ${ZAR(capital)}.
+
+Infrastructure (bird house + equipment): ${ZAR(infraTotal)}
+  (${flock.toLocaleString()} bird slots × R${infraPerSlot ?? 300}/slot — tunnel-ventilated commercial house including curtains, feeders, drinkers, fans, and heaters)
+Working capital (2-batch cycle buffer): ${ZAR(Math.round(mc * 2))}
+  (Monthly opex ${ZAR(Math.round(mc))} × 2 months — covers inputs for the first two batches before first payment)
+
+Note: The R${infraPerSlot ?? 300}/slot figure represents a moderate-spec tunnel house. Actual infrastructure cost ranges:
+• Starter-spec (manual feeders, natural ventilation): R150–200/slot
+• Standard commercial (semi-automated, 6 tunnel fans): R250–400/slot
+• High-spec (fully automated, GPS evaporative cooling): R400–600/slot
+Obtain 3 contractor quotes before committing — poultry house costs vary significantly by region and spec.
+
+Generator capital (non-negotiable add-on): R${Math.round(flock * 0.025 * 4500).toLocaleString()} estimated — diesel generator rated ${Math.round(flock * 0.025)} kW.
+
+Financing options:
+• Land Bank Production Credit: broiler operations with confirmed integrator or abattoir contracts qualify for short-term seasonal credit. Contact your nearest Land Bank branch with this feasibility report and your supply contract.
+• ABSA Agri / FNB Agri Asset Finance: broiler houses qualify as agricultural assets. 60–84 month financing at 1–3% above prime. Monthly instalment: approximately ${ZAR(Math.round(infraTotal * 0.022))}/month (at 84 months, prime+2%).
+• SAPA financial support: SAPA (sapa.org.za) coordinates access to industry support programs and government CASP/MAFISA grants for smallholder and commercial entrants.
+• Own capital: strongly preferred for infrastructure — the 2-batch working capital requirement is short enough to self-fund if infrastructure is financed separately.`,
+
+    `PHASE 1 — Site preparation and approvals (Months 1–2):
+• Select a site with reliable water supply, 3-phase power (or generator access), good drainage, and prevailing wind aligned with house orientation (long axis perpendicular to wind)
+• Obtain municipal or rural council zoning approval — broiler houses require agricultural zoning and environmental impact (EIA) for operations above 10,000 birds in some provinces
+• Engage a poultry production consultant for house design spec — tunnel ventilation orientation, fan sizing, evaporative cooling, and litter management are not DIY decisions
+• Contact SAPA (sapa.org.za) — join as a producer member and request the Broiler Standards of Practice document
+
+PHASE 2 — Construction (Months 2–4):
+• House construction: ${Math.round(flock / 17)} m² floor area required (at 17 birds/m² commercial density)
+• Install generator backup for all fans and farrowing heaters before first chick placement
+• Litter preparation: 100mm pine shavings or rice husks; compost litter between batches
+• Register the operation with your provincial DAFF office — mandatory biosecurity registration for bird flocks above 250 in SA
+
+PHASE 3 — First batch and ramp-up (Month 1 of operation):
+• Source ${flock.toLocaleString()} day-old chicks from an approved SAPA-registered hatchery: ${breedSource.split(".")[0]}.
+• Chick placement: preheat house to 33°C and humidity 55–60% before chicks arrive — cold chicks in the first 24 hours cause irreversible production loss
+• Weeks 1–2 (Brooding): maintain temperature gradient 33°C→28°C; check nipple drinkers every 4 hours; cull non-starters on Day 2
+• Vaccinate at Day 1 (Marek's, ND, IB — done at hatchery), Day 7 (IB booster via drinking water), Day 14 (Gumboro via drinking water), Day 21 (ND booster)
+• Week 3–5 (Grow-out): maintain 25–28°C; ad-libitum feeding; adjust stocking density as birds grow; monitor FCR weekly
+• Day 38 (Harvest): book abattoir 2 weeks ahead; weigh test batch from 3 sections of house; catch and load at night to minimise stress
+
+FIVE ACTIONS THIS WEEK:
+1. Contact SAPA (sapa.org.za) — request the Broiler Producer Member directory and ask for the current weekly chicken price indicator in ${r.name}
+2. Get a quote from a poultry house contractor — request a ${flock.toLocaleString()}-slot tunnel-ventilated house spec with equipment (fans, feeders, drinkers, litter) included
+3. Contact your nearest integrator (Astral Foods, Country Bird, RCL Foods) or abattoir and confirm chick supply availability and current contract-grower terms in ${r.name}
+4. Apply for Land Bank or ABSA Agri pre-qualification — provide this feasibility report as supporting documentation
+5. Confirm power supply: test 3-phase availability (or quote generator cost) and check water pressure at the proposed house site`,
+  ];
+
+  return {
+    sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+    raw: bodies.join("\n\n"),
+    reportData, buyerName, generatedAt: new Date().toISOString(), isSandbox: false,
+  };
+}
+
 // ── DISPATCHER ────────────────────────────────────────────────────────────────
 export function generateProReport(reportData, buyerName, terms) {
   const T = terms ?? { unit:"ewe", units:"ewes", group:"flock", young:"lamb", youngs:"lambs", rateLabel:"Lambing" };
-  if (T.unit === "hive") return generateBeesReport(reportData, buyerName, T);
-  if (T.unit === "cow")  return generateCattleReport(reportData, buyerName, T);
-  if (T.unit === "doe")  return generateGoatsReport(reportData, buyerName, T);
+  if (T.unit === "hive")  return generateBeesReport(reportData, buyerName, T);
+  if (T.unit === "cow")   return generateCattleReport(reportData, buyerName, T);
+  if (T.unit === "doe")   return generateGoatsReport(reportData, buyerName, T);
+  if (T.unit === "sow")   return generatePigsReport(reportData, buyerName, T);
+  if (T.unit === "bird")  return generatePoultryReport(reportData, buyerName, T);
   return generateSheepReport(reportData, buyerName, T);
 }
