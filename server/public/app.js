@@ -36,9 +36,13 @@ const API = {
     downloadReport(id)                         { return `${this.base}/api/report/${id}/download?session=${this._session()}`; },
 
     // Payments
-    createOrder(inputs, results)               { return this._fetch('POST', '/api/create-order',      { inputs, results }); },
-    redeemVoucher(code, inputs, results)       { return this._fetch('POST', '/api/voucher/redeem',    { code, inputs, results }); },
+    createOrder(inputs, results)               { return this._fetch('POST', '/api/create-order',          { inputs, results }); },
+    redeemVoucher(code, inputs, results)       { return this._fetch('POST', '/api/voucher/redeem',        { code, inputs, results }); },
+    createSubscription()                       { return this._fetch('POST', '/api/create-subscription'); },
     upgradeMembership()                        { return this._fetch('POST', '/api/upgrade-membership'); },
+
+    // Leads
+    captureLead(email, data)                   { return this._fetch('POST', '/api/leads', { email, ...data }); },
 
     // Health
     health()                                   { return this._fetch('GET',  '/api/health'); }

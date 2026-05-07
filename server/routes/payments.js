@@ -6,6 +6,8 @@ const paymentService = require('../services/paymentService');
 const pdfService     = require('../services/pdfService');
 const emailService   = require('../services/emailService');
 
+const SUBSCRIPTION_PRICE_CENTS = 9900; // R99.00
+
 const router = express.Router();
 
 const REPORT_PRICE_CENTS = 19900; // R199.00
@@ -57,6 +59,26 @@ router.post('/payfast-itn', express.urlencoded({ extended: false }), async (req,
         const valid = await paymentService.validateITN(req.body, req.ip);
         if (!valid) {
             audit(db, null, 'payfast_itn_invalid', req, req.body);
+            return;
+        }
+
+        // Route: subscription vs one-time report
+        if (req.body.custom_str2 === 'subscription') {
+            const userId    = parseInt(req.body.custom_str1, 10);
+            const paymentId = parseInt(req.body.custom_str3, 10);
+
+            if (req.body.payment_status !== 'COMPLETE') return;
+
+            const payment = db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
+            if (!payment || payment.status === 'completed') return;
+
+            db.prepare('UPDATE payments SET status = ?, payfast_token = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+              .run('completed', req.body.pf_payment_id || '', paymentId);
+            db.prepare('UPDATE users SET ecosystem_member = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId);
+
+            const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+            await emailService.sendSubscriptionConfirm(user.email, user.full_name || 'Farmer');
+            audit(db, userId, 'subscription_payment', req, { paymentId });
             return;
         }
 
@@ -136,7 +158,26 @@ router.post('/voucher/redeem', requireAuth, async (req, res) => {
     res.json({ success: true, pdfPath });
 });
 
-// POST /api/upgrade-membership
+// POST /api/create-subscription  — start R99/month PayFast subscription
+router.post('/create-subscription', requireAuth, (req, res) => {
+    const db = getDb();
+
+    const paymentRow = db.prepare(
+        'INSERT INTO payments (user_id, amount, method, status) VALUES (?,?,?,?)'
+    ).run(req.user.id, SUBSCRIPTION_PRICE_CENTS, 'payfast_subscription', 'pending');
+
+    const pfForm = paymentService.buildSubscriptionForm({
+        paymentId: paymentRow.lastInsertRowid,
+        userId:    req.user.id,
+        email:     req.user.email,
+        fullName:  req.user.full_name || ''
+    });
+
+    audit(db, req.user.id, 'subscription_initiated', req, { paymentId: paymentRow.lastInsertRowid });
+    res.json({ paymentId: paymentRow.lastInsertRowid, pfForm });
+});
+
+// POST /api/upgrade-membership  — kept for backwards compat; real path is create-subscription
 router.post('/upgrade-membership', requireAuth, (req, res) => {
     const db = getDb();
     db.prepare('UPDATE users SET ecosystem_member = 1 WHERE id = ?').run(req.user.id);

@@ -18,8 +18,8 @@ function buildPayFastForm({ paymentId, reportId, userId, email, fullName, amount
     const params = {
         merchant_id:    process.env.PAYFAST_MERCHANT_ID,
         merchant_key:   process.env.PAYFAST_MERCHANT_KEY,
-        return_url:     `${baseUrl}/payment/success`,
-        cancel_url:     `${baseUrl}/payment/cancel`,
+        return_url:     `${baseUrl}/dashboard.html?payment=success`,
+        cancel_url:     `${baseUrl}/dashboard.html?payment=cancelled`,
         notify_url:     `${baseUrl}/webhook/payfast`,
         name_first:     (fullName || '').split(' ')[0] || 'Farmer',
         name_last:      (fullName || '').split(' ').slice(1).join(' ') || '-',
@@ -114,4 +114,54 @@ function _remoteValidate(host, body) {
     });
 }
 
-module.exports = { buildPayFastForm, validateITN };
+function buildSubscriptionForm({ paymentId, userId, email, fullName }) {
+    const sandbox  = process.env.PAYFAST_SANDBOX !== 'false';
+    const host     = sandbox ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
+    const baseUrl  = process.env.BASE_URL || 'https://shepherdai.co.za';
+    const amount   = '99.00';
+
+    const params = {
+        merchant_id:      process.env.PAYFAST_MERCHANT_ID,
+        merchant_key:     process.env.PAYFAST_MERCHANT_KEY,
+        return_url:       `${baseUrl}/dashboard.html?payment=subscribed`,
+        cancel_url:       `${baseUrl}/dashboard.html?payment=cancelled`,
+        notify_url:       `${baseUrl}/webhook/payfast`,
+        name_first:       (fullName || '').split(' ')[0] || 'Farmer',
+        name_last:        (fullName || '').split(' ').slice(1).join(' ') || '-',
+        email_address:    email,
+        m_payment_id:     paymentId.toString(),
+        amount,
+        item_name:        'ShepherdAI Ecosystem Membership',
+        item_description: 'Monthly R99 subscription — unlimited reports, quarterly updates',
+        custom_str1:      userId.toString(),
+        custom_str2:      'subscription',
+        custom_str3:      paymentId.toString(),
+        subscription_type: '1',
+        recurring_amount:  amount,
+        frequency:         '3',   // monthly
+        cycles:            '0'    // indefinite
+    };
+
+    if (process.env.PAYFAST_PASSPHRASE) {
+        const sigStr = Object.entries(params)
+            .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
+            .join('&') + `&passphrase=${encodeURIComponent(process.env.PAYFAST_PASSPHRASE)}`;
+        params.signature = crypto.createHash('md5').update(sigStr).digest('hex');
+    } else {
+        const sigStr = Object.entries(params)
+            .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
+            .join('&');
+        params.signature = crypto.createHash('md5').update(sigStr).digest('hex');
+    }
+
+    const fields = Object.entries(params)
+        .map(([k, v]) => `<input type="hidden" name="${k}" value="${String(v).replace(/"/g, '&quot;')}" />`)
+        .join('\n');
+
+    return {
+        action: `https://${host}/eng/process`,
+        html:   `<form id="pf-form" action="https://${host}/eng/process" method="POST">${fields}<button type="submit">Subscribe R99/month via PayFast</button></form><script>document.getElementById('pf-form').submit();</script>`
+    };
+}
+
+module.exports = { buildPayFastForm, buildSubscriptionForm, validateITN };

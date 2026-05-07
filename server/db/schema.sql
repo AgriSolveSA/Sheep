@@ -132,7 +132,21 @@ CREATE TABLE IF NOT EXISTS audit_log (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Email leads (free estimator captures)
+CREATE TABLE IF NOT EXISTS leads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    livestock_type TEXT,
+    province TEXT,
+    herd_size INTEGER,
+    savings_low INTEGER,
+    savings_high INTEGER,
+    status TEXT DEFAULT 'new',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes
+CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);
 CREATE INDEX IF NOT EXISTS idx_reports_user_id ON reports(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);

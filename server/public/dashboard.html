@@ -82,9 +82,12 @@
                     <strong>Upgrade to Ecosystem membership — R99/month</strong>
                     <p class="text-muted mt-1" style="font-size:.9rem;">Unlimited reports, quarterly price updates, community access, and priority support.</p>
                 </div>
-                <button id="upgrade-btn" class="btn" style="background:#c8b400;color:#000;border:none;white-space:nowrap;">Upgrade now</button>
+                <button id="upgrade-btn" class="btn" style="background:#c8b400;color:#000;border:none;white-space:nowrap;">Subscribe R99/month</button>
             </div>
         </div>
+
+        <!-- PayFast subscription form injection point -->
+        <div id="pf-container" style="display:none;"></div>
 
         <!-- EFT payment fallback -->
         <div class="card mt-4" style="background:#f0f7f1;border:1px solid #dde8dd;">
@@ -168,20 +171,31 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     window.location.href = '/';
 });
 
-// Upgrade membership
+// Subscribe to Ecosystem membership via PayFast
 document.getElementById('upgrade-btn')?.addEventListener('click', async () => {
     const btn = document.getElementById('upgrade-btn');
     setLoading(btn, true);
     try {
-        await API.upgradeMembership();
-        showAlert('alert-box', 'Welcome to the Ecosystem! Refresh to see your membership status.', 'success');
-        document.getElementById('upgrade-prompt').classList.add('hidden');
-        document.getElementById('stat-member-card').style.display = '';
+        const res = await API.createSubscription();
+        // Inject the PayFast auto-submit form and let it redirect
+        const container = document.getElementById('pf-container');
+        container.style.display = 'block';
+        container.innerHTML = res.pfForm.html;
     } catch (err) {
-        showAlert('alert-box', err.message || 'Upgrade failed. Please try again.', 'error');
+        showAlert('alert-box', err.message || 'Could not start subscription. Please try again.', 'error');
         setLoading(btn, false);
     }
 });
+
+// Show alerts for PayFast return URLs
+const payParam = new URLSearchParams(window.location.search).get('payment');
+if (payParam === 'success') {
+    showAlert('alert-box', 'Payment received! Your report is being generated and will be emailed to you shortly.', 'success');
+} else if (payParam === 'subscribed') {
+    showAlert('alert-box', 'Subscription activated! Refresh the page in a moment to see your Ecosystem membership.', 'success');
+} else if (payParam === 'cancelled') {
+    showAlert('alert-box', 'Payment was cancelled. No charge was made.', 'info');
+}
 
 loadDashboard();
 </script>

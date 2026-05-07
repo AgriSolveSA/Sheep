@@ -4,6 +4,7 @@ const bcrypt   = require('bcrypt');
 const { getDb } = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const limits   = require('../middleware/rateLimiter');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 const BCRYPT_ROUNDS  = 10;
@@ -77,6 +78,36 @@ router.get('/user', requireAuth, (req, res) => {
     const db   = getDb();
     const user = db.prepare('SELECT id, email, full_name, mobile, ecosystem_member, verified, created_at FROM users WHERE id = ?').get(req.user.id);
     res.json(user);
+});
+
+// POST /api/leads  — capture email from free estimator (no auth required)
+router.post('/leads', limits.signup, async (req, res) => {
+    const { email, livestock_type, province, herd_size, savings_low, savings_high } = req.body;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        return res.status(400).json({ error: true, code: 'VALIDATION_ERROR', message: 'Valid email address is required.' });
+
+    const db = getDb();
+    db.prepare(
+        'INSERT INTO leads (email, livestock_type, province, herd_size, savings_low, savings_high) VALUES (?,?,?,?,?,?)'
+    ).run(
+        email.toLowerCase().trim(),
+        livestock_type || null,
+        province || null,
+        herd_size ? parseInt(herd_size, 10) : null,
+        savings_low  ? parseInt(savings_low, 10)  : null,
+        savings_high ? parseInt(savings_high, 10) : null
+    );
+
+    // Fire-and-forget follow-up email
+    emailService.sendLeadFollowUp(email, {
+        livestockType: livestock_type,
+        province,
+        savingsLow:  savings_low,
+        savingsHigh: savings_high
+    }).catch(err => console.error('Lead email error:', err));
+
+    res.json({ success: true });
 });
 
 module.exports = router;

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Farm Savings Estimator — ShepherdAI</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .estimator-hero {
+            background: linear-gradient(135deg, #1a5c2a 0%, #2d7a42 100%);
+            color: #fff;
+            padding: 3rem 1rem 2rem;
+            text-align: center;
+        }
+        .estimator-hero h1 { font-size: clamp(1.5rem, 4vw, 2.4rem); margin-bottom: .75rem; }
+        .estimator-hero p  { font-size: 1.05rem; opacity: .88; max-width: 520px; margin: 0 auto; }
+        .savings-card {
+            background: linear-gradient(135deg, #1a5c2a, #2d7a42);
+            color: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .savings-card__label { font-size: .85rem; opacity: .8; text-transform: uppercase; letter-spacing: .05em; }
+        .savings-card__amount { font-size: clamp(2rem, 8vw, 3.2rem); font-weight: 800; margin: .25rem 0; }
+        .savings-card__sub { font-size: .85rem; opacity: .75; }
+        .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .breakdown-item {
+            background: #fff;
+            border: 1px solid #dde8dd;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .breakdown-item__value { font-size: 1.5rem; font-weight: 700; color: #1a5c2a; }
+        .breakdown-item__label { font-size: .82rem; color: #555; margin-top: .25rem; }
+        .capture-card {
+            background: #fff8e1;
+            border: 2px solid #c8b400;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .step { max-width: 560px; margin: 0 auto; }
+        @media (max-width: 480px) {
+            .breakdown-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+        <a href="/" style="color:#fff;font-size:1.15rem;font-weight:700;">Shepherd<span style="color:#c8b400;">AI</span></a>
+        <div style="display:flex;gap:1rem;align-items:center;">
+            <a href="/login.html" style="color:rgba(255,255,255,.85);font-size:.9rem;">Log in</a>
+            <a href="/signup.html" class="btn" style="background:#c8b400;color:#000;border:none;padding:.4rem 1rem;font-size:.9rem;">Get started</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="estimator-hero">
+    <h1>Find out where your farm is losing money</h1>
+    <p>Free 60-second savings estimate — no sign-in required. See your efficiency gaps and what they're costing you.</p>
+</div>
+
+<!-- Content -->
+<div class="section" style="background:#f0f7f1;padding-top:2.5rem;padding-bottom:3rem;">
+    <div class="container">
+
+        <!-- STEP 1: Form -->
+        <div id="step-form" class="step">
+            <div class="card" style="padding:2rem;">
+                <h2 style="color:#1a5c2a;margin-bottom:1.5rem;font-size:1.3rem;">Enter your farm details</h2>
+
+                <form id="estimator-form" novalidate>
+                    <div class="form-group">
+                        <label for="province">Province</label>
+                        <select id="province" required>
+                            <option value="">— Select province —</option>
+                            <option>Western Cape</option>
+                            <option>Northern Cape</option>
+                            <option>Eastern Cape</option>
+                            <option>KwaZulu-Natal</option>
+                            <option>Free State</option>
+                            <option>Limpopo</option>
+                            <option>Mpumalanga</option>
+                            <option>North West</option>
+                            <option>Gauteng</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="livestock_type">Livestock type</label>
+                        <select id="livestock_type" required>
+                            <option value="">— Select livestock —</option>
+                            <option value="sheep">Sheep</option>
+                            <option value="cattle">Beef cattle</option>
+                            <option value="goats">Goats</option>
+                            <option value="dairy">Dairy cows</option>
+                            <option value="pigs">Pigs</option>
+                            <option value="poultry">Poultry (broilers)</option>
+                            <option value="bees">Bees</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="herd_size" id="size-label">Number of animals</label>
+                        <input type="number" id="herd_size" min="1" max="100000" placeholder="e.g. 150" required>
+                        <p class="form-hint" id="size-hint">Enter your current total herd / flock size</p>
+                    </div>
+
+                    <div id="form-alert" class="mt-2"></div>
+
+                    <button type="submit" class="btn btn-primary btn-full" id="calc-btn" style="margin-top:1rem;">
+                        Calculate my savings →
+                    </button>
+                </form>
+
+                <p class="text-muted" style="font-size:.8rem;text-align:center;margin-top:1rem;">
+                    Based on 2025–2026 provincial benchmarks across 9 South African provinces.
+                </p>
+            </div>
+        </div>
+
+        <!-- STEP 2: Results (hidden until calculation) -->
+        <div id="step-results" class="hidden step">
+
+            <!-- Big number -->
+            <div class="savings-card">
+                <div class="savings-card__label">Your potential annual savings</div>
+                <div class="savings-card__amount" id="savings-amount">R 0</div>
+                <div class="savings-card__sub" id="savings-sub"></div>
+            </div>
+
+            <!-- Breakdown -->
+            <div class="breakdown-grid">
+                <div class="breakdown-item">
+                    <div class="breakdown-item__value" id="br-feed">R0</div>
+                    <div class="breakdown-item__label">Feed efficiency</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-item__value" id="br-market">R0</div>
+                    <div class="breakdown-item__label">Market access</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-item__value" id="br-vet">R0</div>
+                    <div class="breakdown-item__label">Vet &amp; health costs</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-item__value" id="br-infra">R0</div>
+                    <div class="breakdown-item__label">Infrastructure</div>
+                </div>
+            </div>
+
+            <!-- What this means -->
+            <div class="card" style="background:#fff;margin-bottom:1.5rem;">
+                <h3 style="color:#1a5c2a;margin-bottom:.75rem;">What this means for your farm</h3>
+                <p id="insight-text" style="color:#333;line-height:1.7;"></p>
+            </div>
+
+            <!-- Email capture -->
+            <div class="capture-card" id="capture-section">
+                <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Get the full breakdown by email</h3>
+                <p class="text-muted" style="font-size:.9rem;margin-bottom:1rem;">
+                    We'll send you your results + 3 quick wins you can implement this week. Free.
+                </p>
+                <div id="capture-alert"></div>
+                <form id="lead-form" novalidate>
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                        <input type="email" id="lead-email" placeholder="your@email.com"
+                               style="flex:1;min-width:0;" required>
+                        <button type="submit" class="btn btn-primary" id="lead-btn"
+                                style="white-space:nowrap;">Send free tips →</button>
+                    </div>
+                    <p class="text-muted" style="font-size:.75rem;margin-top:.5rem;">
+                        No spam. Unsubscribe any time. We never sell your data.
+                    </p>
+                </form>
+                <div id="lead-success" class="hidden" style="text-align:center;padding:1rem 0;">
+                    <div style="font-size:2.5rem;margin-bottom:.5rem;">✓</div>
+                    <p><strong>Check your inbox!</strong> We've emailed your results and free tips.</p>
+                </div>
+            </div>
+
+            <!-- CTA to full report -->
+            <div style="text-align:center;padding:1.5rem 0 1rem;">
+                <p style="color:#444;margin-bottom:1rem;max-width:440px;margin-left:auto;margin-right:auto;">
+                    The full report includes a 36-month cashflow model, province-level benchmarks, your Inefficiency Score, and a prioritised action plan.
+                </p>
+                <a href="/signup.html" class="btn btn-primary btn-lg">Get full report — R199</a>
+                <p class="text-muted" style="font-size:.8rem;margin-top:.75rem;">
+                    🛡️ 30-day money-back guarantee. Delivered by email within 60 seconds of payment.
+                </p>
+            </div>
+
+            <div style="text-align:center;margin-top:.5rem;margin-bottom:1rem;">
+                <button id="restart-btn" class="btn btn-outline" style="font-size:.85rem;">
+                    ← Try different inputs
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p>ShepherdAI &copy; 2026 &mdash; Built for South African farmers</p>
+        <p style="font-size:.8rem;margin-top:.5rem;">
+            <a href="/">Home</a> &middot;
+            <a href="/login.html">Log in</a> &middot;
+            <a href="/signup.html">Sign up</a>
+        </p>
+    </div>
+</footer>
+
+<script src="/app.js"></script>
+<script>
+'use strict';
+
+// ─── Lookup tables ────────────────────────────────────────────────────────────
+const LIVESTOCK = {
+    sheep:   { label: 'Sheep',       unit: 'animals', low: 180, high: 420 },
+    cattle:  { label: 'Beef cattle', unit: 'head',    low: 480, high: 1100 },
+    goats:   { label: 'Goats',       unit: 'head',    low: 130, high: 320 },
+    dairy:   { label: 'Dairy cows',  unit: 'cows',    low: 700, high: 1800 },
+    pigs:    { label: 'Pigs',        unit: 'pigs',    low: 70,  high: 190 },
+    poultry: { label: 'Poultry',     unit: 'birds',   low: 6,   high: 22 },
+    bees:    { label: 'Bees',        unit: 'hives',   low: 180, high: 480 }
+};
+
+const PROVINCE_MOD = {
+    'Western Cape': 1.15, 'Northern Cape': 0.90, 'Eastern Cape': 0.95,
+    'KwaZulu-Natal': 1.05, 'Free State': 1.00, 'Limpopo': 0.88,
+    'Mpumalanga': 0.98, 'North West': 0.95, 'Gauteng': 1.10
+};
+
+// Breakdown split by category
+const SPLIT = { feed: 0.35, market: 0.25, vet: 0.20, infra: 0.20 };
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let _lastCalc = {};
+
+// ─── Label updates based on livestock type ────────────────────────────────────
+document.getElementById('livestock_type').addEventListener('change', function () {
+    const cfg = LIVESTOCK[this.value];
+    if (!cfg) return;
+    document.getElementById('size-label').textContent = `Number of ${cfg.unit}`;
+    document.getElementById('size-hint').textContent =
+        `Enter your current total ${cfg.label.toLowerCase()} count`;
+});
+
+// ─── Calculation ──────────────────────────────────────────────────────────────
+function calcSavings(type, size, province) {
+    const cfg = LIVESTOCK[type];
+    const mod = PROVINCE_MOD[province] || 1.0;
+    const low  = Math.round(cfg.low  * size * mod / 100) * 100;
+    const high = Math.round(cfg.high * size * mod / 100) * 100;
+    return { low, high, cfg };
+}
+
+function R(n) { return 'R ' + Number(n).toLocaleString('en-ZA'); }
+
+function showResults(type, size, province) {
+    const { low, high, cfg } = calcSavings(type, size, province);
+    const mid = Math.round((low + high) / 2);
+
+    _lastCalc = { type, size, province, low, high };
+
+    document.getElementById('savings-amount').textContent = `${R(low)} – ${R(high)}`;
+    document.getElementById('savings-sub').textContent =
+        `per year across your ${size.toLocaleString('en-ZA')} ${cfg.unit} in ${province}`;
+
+    document.getElementById('br-feed').textContent   = R(Math.round(mid * SPLIT.feed   / 100) * 100);
+    document.getElementById('br-market').textContent = R(Math.round(mid * SPLIT.market / 100) * 100);
+    document.getElementById('br-vet').textContent    = R(Math.round(mid * SPLIT.vet    / 100) * 100);
+    document.getElementById('br-infra').textContent  = R(Math.round(mid * SPLIT.infra  / 100) * 100);
+
+    document.getElementById('insight-text').textContent =
+        `Based on 2025–2026 benchmarks for ${cfg.label.toLowerCase()} farming in ${province}, ` +
+        `the average farmer loses ${R(low)} to ${R(high)} annually to preventable inefficiencies. ` +
+        `The biggest leak is typically feed — most operations overspend by 20–35% due to poor timing, ` +
+        `quality mismatches, or excess supplementation. The full report identifies your specific gaps ` +
+        `and ranks them by rand-value impact so you fix the biggest problem first.`;
+
+    document.getElementById('step-form').classList.add('hidden');
+    document.getElementById('step-results').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Form submit ──────────────────────────────────────────────────────────────
+document.getElementById('estimator-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearAlert('form-alert');
+
+    const province = document.getElementById('province').value;
+    const type     = document.getElementById('livestock_type').value;
+    const size     = parseInt(document.getElementById('herd_size').value, 10);
+
+    if (!province) return showAlert('form-alert', 'Please select your province.', 'error');
+    if (!type)     return showAlert('form-alert', 'Please select your livestock type.', 'error');
+    if (!size || size < 1) return showAlert('form-alert', 'Please enter a valid herd / flock size.', 'error');
+
+    showResults(type, size, province);
+});
+
+// ─── Lead capture ─────────────────────────────────────────────────────────────
+document.getElementById('lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAlert('capture-alert');
+
+    const email = document.getElementById('lead-email').value.trim();
+    if (!email) return showAlert('capture-alert', 'Please enter your email address.', 'error');
+
+    const btn = document.getElementById('lead-btn');
+    setLoading(btn, true);
+    try {
+        await API.captureLead(email, {
+            livestock_type: _lastCalc.type,
+            province:       _lastCalc.province,
+            herd_size:      _lastCalc.size,
+            savings_low:    _lastCalc.low,
+            savings_high:   _lastCalc.high
+        });
+        document.getElementById('lead-form').classList.add('hidden');
+        document.getElementById('lead-success').classList.remove('hidden');
+    } catch (err) {
+        showAlert('capture-alert', err.message || 'Could not send. Please try again.', 'error');
+        setLoading(btn, false);
+    }
+});
+
+// ─── Restart ──────────────────────────────────────────────────────────────────
+document.getElementById('restart-btn').addEventListener('click', () => {
+    document.getElementById('step-results').classList.add('hidden');
+    document.getElementById('step-form').classList.remove('hidden');
+    document.getElementById('lead-form').classList.remove('hidden');
+    document.getElementById('lead-success').classList.add('hidden');
+    document.getElementById('lead-email').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
