@@ -144,4 +144,62 @@ router.post('/upgrade-membership', requireAuth, (req, res) => {
     res.json({ success: true });
 });
 
+// POST /api/eft-notify  — farmer submits proof-of-payment email reference
+// Creates a pending payment record so admin can manually verify and trigger dispatch
+router.post('/eft-notify', requireAuth, (req, res) => {
+    const { reference, amount_zar, inputs, results } = req.body;
+    if (!reference)
+        return res.status(400).json({ error: true, code: 'VALIDATION_ERROR', message: 'Bank reference is required.' });
+
+    const db = getDb();
+
+    const reportRow = db.prepare(
+        'INSERT INTO reports (user_id, inputs_json, results_json, status) VALUES (?,?,?,?)'
+    ).run(req.user.id, JSON.stringify(inputs || {}), JSON.stringify(results || {}), 'pending');
+
+    const paymentRow = db.prepare(
+        'INSERT INTO payments (user_id, amount, method, status) VALUES (?,?,?,?)'
+    ).run(req.user.id, Math.round((amount_zar || 199) * 100), 'manual_eft', 'pending');
+
+    db.prepare('UPDATE reports SET payment_id = ? WHERE id = ?').run(paymentRow.lastInsertRowid, reportRow.lastInsertRowid);
+
+    audit(db, req.user.id, 'eft_notify', req, { reference, reportId: reportRow.lastInsertRowid, paymentId: paymentRow.lastInsertRowid });
+
+    res.json({
+        success:  true,
+        reportId: reportRow.lastInsertRowid,
+        message:  'EFT notification received. Your report will be emailed within 2 hours of payment verification.'
+    });
+});
+
+// POST /api/admin/eft-confirm  — admin confirms EFT received and triggers PDF + email
+// Protected by admin check (user_id === 1 for now — replace with role field later)
+router.post('/admin/eft-confirm', requireAuth, async (req, res) => {
+    if (req.user.id !== 1)
+        return res.status(403).json({ error: true, code: 'FORBIDDEN', message: 'Admin only.' });
+
+    const { payment_id } = req.body;
+    if (!payment_id)
+        return res.status(400).json({ error: true, code: 'VALIDATION_ERROR', message: 'payment_id required.' });
+
+    const db      = getDb();
+    const payment = db.prepare('SELECT * FROM payments WHERE id = ? AND method = ? AND status = ?').get(payment_id, 'manual_eft', 'pending');
+    if (!payment)
+        return res.status(404).json({ error: true, code: 'NOT_FOUND', message: 'Pending EFT payment not found.' });
+
+    db.prepare('UPDATE payments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('completed', payment_id);
+
+    const report = db.prepare('SELECT * FROM reports WHERE payment_id = ? AND user_id = ?').get(payment_id, payment.user_id);
+    const user   = db.prepare('SELECT * FROM users WHERE id = ?').get(payment.user_id);
+
+    const pdfPath = await pdfService.generate(report.id, JSON.parse(report.inputs_json), JSON.parse(report.results_json));
+    db.prepare('UPDATE reports SET status = ?, pdf_path = ? WHERE id = ?').run('paid', pdfPath, report.id);
+
+    await emailService.sendReport(user.email, user.full_name || 'Farmer', pdfPath);
+    db.prepare('UPDATE reports SET status = ? WHERE id = ?').run('delivered', report.id);
+
+    audit(db, req.user.id, 'eft_confirmed', req, { payment_id, reportId: report.id });
+    res.json({ success: true, reportId: report.id });
+});
+
 module.exports = router;

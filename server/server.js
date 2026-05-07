@@ -31,10 +31,17 @@ app.use(express.json({ limit: '1mb' }));
 // ─── Request logging ─────────────────────────────────────────────────────────
 app.use(logger);
 
-// ─── Static frontend (Vite build) ────────────────────────────────────────────
+// ─── Static: public HTML pages (landing, login, signup, dashboard) ───────────
+const publicDir = path.join(__dirname, 'public');
+if (fs.existsSync(publicDir)) {
+    app.use(express.static(publicDir));
+}
+
+// ─── Static: React SPA (Vite build — calculator + report UI) ─────────────────
 const distDir = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(distDir)) {
-    app.use(express.static(distDir));
+    // Serve React app under /calculator so it doesn't conflict with public pages
+    app.use('/calculator', express.static(distDir));
 }
 
 // ─── Health check ─────────────────────────────────────────────────────────────
@@ -57,12 +64,25 @@ app.use('/api/report',      repRoutes);
 // PayFast ITN endpoint (outside /api prefix)
 app.use('/webhook',         payRoutes);
 
-// ─── SPA fallback (serve React app for unknown routes) ───────────────────────
+// ─── SPA fallback: React app handles all /calculator/* routes ────────────────
 if (fs.existsSync(distDir)) {
-    app.get('*', (req, res) => {
+    app.get('/calculator*', (req, res) => {
         res.sendFile(path.join(distDir, 'index.html'));
     });
 }
+
+// ─── 404 fallback for unknown routes ─────────────────────────────────────────
+app.use((req, res) => {
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: true, code: 'NOT_FOUND', message: 'Endpoint not found.' });
+    }
+    // For HTML routes, send the landing page
+    if (fs.existsSync(publicDir)) {
+        res.sendFile(path.join(publicDir, 'index.html'));
+    } else {
+        res.status(404).send('Not found');
+    }
+});
 
 // ─── Global error handler ─────────────────────────────────────────────────────
 app.use((err, req, res, _next) => {

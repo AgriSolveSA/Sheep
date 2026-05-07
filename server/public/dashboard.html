@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — ShepherdAI</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="dashboard">
+
+<!-- Header -->
+<div class="dashboard__header">
+    <div class="container">
+        <a href="/" style="color:#fff;font-size:1.2rem;font-weight:700;">Shepherd<span style="color:#c8b400;">AI</span></a>
+        <div style="display:flex;align-items:center;gap:1.25rem;">
+            <span id="user-greeting" style="font-size:.9rem;opacity:.85;"></span>
+            <a href="/calculator" class="btn" style="background:#c8b400;color:#000;border:none;padding:.4rem 1rem;font-size:.9rem;">New report</a>
+            <button id="logout-btn" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff;padding:.4rem 1rem;font-size:.9rem;">Log out</button>
+        </div>
+    </div>
+</div>
+
+<!-- Body -->
+<div class="dashboard__body">
+    <div class="container">
+
+        <!-- Stats -->
+        <div class="stats" id="stats-strip">
+            <div class="stat-card">
+                <div class="stat-card__value" id="stat-reports">—</div>
+                <div class="stat-card__label">Total reports</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__value" id="stat-delivered">—</div>
+                <div class="stat-card__label">Delivered</div>
+            </div>
+            <div class="stat-card" id="stat-member-card" style="display:none;">
+                <div class="stat-card__value" style="color:#c8b400;">✓</div>
+                <div class="stat-card__label">Ecosystem member</div>
+            </div>
+        </div>
+
+        <!-- Alert area -->
+        <div id="alert-box"></div>
+
+        <!-- Reports table -->
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #dde8dd;display:flex;align-items:center;justify-content:space-between;">
+                <h2 style="font-size:1.1rem;color:#1a5c2a;">Your reports</h2>
+                <a href="/calculator" class="btn btn-outline" style="font-size:.85rem;padding:.35rem .9rem;">+ New report</a>
+            </div>
+
+            <div id="reports-loading" style="padding:2rem;text-align:center;color:#555;">
+                <span class="spinner" style="border-top-color:#1a5c2a;border-color:rgba(26,92,42,.2);width:20px;height:20px;"></span> Loading…
+            </div>
+
+            <div id="reports-empty" class="hidden" style="padding:3rem;text-align:center;color:#555;">
+                <div style="font-size:3rem;margin-bottom:1rem;">📄</div>
+                <p><strong>No reports yet.</strong></p>
+                <p class="mt-1">Run your first farm profitability analysis to get started.</p>
+                <a href="/calculator" class="btn btn-primary mt-3">Run a report — R199</a>
+            </div>
+
+            <table class="report-table hidden" id="reports-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reports-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Upgrade prompt (shown for non-members) -->
+        <div id="upgrade-prompt" class="card mt-4 hidden" style="background:#fff8e1;border:2px solid #c8b400;">
+            <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
+                <div style="font-size:2rem;">⭐</div>
+                <div style="flex:1;">
+                    <strong>Upgrade to Ecosystem membership — R99/month</strong>
+                    <p class="text-muted mt-1" style="font-size:.9rem;">Unlimited reports, quarterly price updates, community access, and priority support.</p>
+                </div>
+                <button id="upgrade-btn" class="btn" style="background:#c8b400;color:#000;border:none;white-space:nowrap;">Upgrade now</button>
+            </div>
+        </div>
+
+        <!-- EFT payment fallback -->
+        <div class="card mt-4" style="background:#f0f7f1;border:1px solid #dde8dd;">
+            <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Paying by EFT?</h3>
+            <p class="text-muted" style="font-size:.9rem;">Transfer R199 to <strong>FNB cheque 62XXXXXXXX, branch 250655</strong>. Use your email address as reference, then email <strong>pay@shepherdai.co.za</strong> with your proof of payment. Your report will be emailed within 2 hours during business hours.</p>
+        </div>
+
+    </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+'use strict';
+Auth.requireAuth();
+
+const BADGE = {
+    delivered: '<span class="badge badge-delivered">Delivered</span>',
+    paid:      '<span class="badge badge-paid">Paid</span>',
+    pending:   '<span class="badge badge-pending">Pending</span>',
+    refunded:  '<span class="badge badge-pending">Refunded</span>'
+};
+
+async function loadDashboard() {
+    try {
+        // Load user info
+        const user = await API.getUser();
+        document.getElementById('user-greeting').textContent = user.full_name
+            ? `Hi, ${user.full_name.split(' ')[0]}`
+            : user.email;
+
+        if (user.ecosystem_member) {
+            document.getElementById('stat-member-card').style.display = '';
+        } else {
+            document.getElementById('upgrade-prompt').classList.remove('hidden');
+        }
+
+        // Load reports
+        const reports = await API.getReports();
+        document.getElementById('reports-loading').classList.add('hidden');
+
+        document.getElementById('stat-reports').textContent = reports.length;
+        document.getElementById('stat-delivered').textContent = reports.filter(r => r.status === 'delivered' || r.status === 'paid').length;
+
+        if (reports.length === 0) {
+            document.getElementById('reports-empty').classList.remove('hidden');
+            return;
+        }
+
+        const table = document.getElementById('reports-table');
+        const tbody = document.getElementById('reports-body');
+        table.classList.remove('hidden');
+
+        tbody.innerHTML = reports.map(r => {
+            const canDownload = (r.status === 'delivered' || r.status === 'paid') && r.pdf_path;
+            const dlBtn = canDownload
+                ? `<a href="/api/report/${r.id}/download" class="btn btn-outline" style="font-size:.8rem;padding:.25rem .7rem;" target="_blank">Download PDF</a>`
+                : `<span class="text-muted" style="font-size:.85rem;">—</span>`;
+            return `<tr>
+                <td>#${r.id}</td>
+                <td>${fmtDate(r.created_at)}</td>
+                <td>${BADGE[r.status] || r.status}</td>
+                <td>${dlBtn}</td>
+            </tr>`;
+        }).join('');
+
+    } catch (err) {
+        document.getElementById('reports-loading').classList.add('hidden');
+        if (err.status === 401) {
+            Auth.clear();
+            window.location.href = '/login.html';
+        } else {
+            showAlert('alert-box', 'Failed to load your dashboard. Please refresh.', 'error');
+        }
+    }
+}
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    try { await API.logout(); } catch (_) {}
+    Auth.clear();
+    window.location.href = '/';
+});
+
+// Upgrade membership
+document.getElementById('upgrade-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('upgrade-btn');
+    setLoading(btn, true);
+    try {
+        await API.upgradeMembership();
+        showAlert('alert-box', 'Welcome to the Ecosystem! Refresh to see your membership status.', 'success');
+        document.getElementById('upgrade-prompt').classList.add('hidden');
+        document.getElementById('stat-member-card').style.display = '';
+    } catch (err) {
+        showAlert('alert-box', err.message || 'Upgrade failed. Please try again.', 'error');
+        setLoading(btn, false);
+    }
+});
+
+loadDashboard();
+</script>
+</body>
+</html>
