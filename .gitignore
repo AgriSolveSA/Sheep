@@ -30,3 +30,9 @@ lerna-debug.log*
 *.sw?
 .DS_Store
 Thumbs.db
+server/db/farm.db
+server/reports/
+server/backups/
+server/logs/
+server/.env
+server/node_modules/
