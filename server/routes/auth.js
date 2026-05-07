@@ -18,7 +18,7 @@ function audit(db, userId, action, req, details = null) {
 
 // POST /api/signup
 router.post('/signup', limits.signup, async (req, res) => {
-    const { email, password, full_name, mobile } = req.body;
+    const { email, password, full_name, mobile, referrer_code } = req.body;
 
     if (!email || !password)
         return res.status(400).json({ error: true, code: 'VALIDATION_ERROR', message: 'Email and password are required.' });
@@ -32,10 +32,19 @@ router.post('/signup', limits.signup, async (req, res) => {
     if (existing)
         return res.status(409).json({ error: true, code: 'EMAIL_EXISTS', message: 'An account with this email already exists.' });
 
-    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const result = db.prepare(
-        'INSERT INTO users (email, password_hash, full_name, mobile) VALUES (?,?,?,?)'
-    ).run(email.toLowerCase().trim(), hash, full_name || null, mobile || null);
+    const hash    = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const refCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+    const result  = db.prepare(
+        'INSERT INTO users (email, password_hash, full_name, mobile, referral_code) VALUES (?,?,?,?,?)'
+    ).run(email.toLowerCase().trim(), hash, full_name || null, mobile || null, refCode);
+
+    // Apply referral code if provided
+    if (referrer_code) {
+        const referrer = db.prepare('SELECT id FROM users WHERE referral_code = ?').get(referrer_code.toUpperCase().trim());
+        if (referrer && referrer.id !== result.lastInsertRowid) {
+            db.prepare('INSERT INTO referrals (referrer_id, referred_id) VALUES (?,?)').run(referrer.id, result.lastInsertRowid);
+        }
+    }
 
     audit(db, result.lastInsertRowid, 'signup', req);
     res.status(201).json({ success: true, userId: result.lastInsertRowid });

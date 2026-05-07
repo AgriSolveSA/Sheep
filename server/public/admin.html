@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — ShepherdAI</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .metric { background: #fff; border: 1px solid #dde8dd; border-radius: 8px; padding: 1.25rem; }
+        .metric__value { font-size: 2rem; font-weight: 800; color: #1a5c2a; }
+        .metric__label { font-size: .82rem; color: #555; margin-top: .25rem; }
+        .metric--alert .metric__value { color: #b71c1c; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+        .data-table th { background: #f0f7f1; padding: .6rem .75rem; text-align: left; font-size: .8rem; color: #1a5c2a; text-transform: uppercase; letter-spacing: .04em; }
+        .data-table td { padding: .6rem .75rem; border-bottom: 1px solid #f0f0f0; }
+        .section-card { background: #fff; border: 1px solid #dde8dd; border-radius: 10px; padding: 0; overflow: hidden; margin-bottom: 1.5rem; }
+        .section-card__header { padding: 1rem 1.25rem; border-bottom: 1px solid #dde8dd; display: flex; align-items: center; justify-content: space-between; }
+        .section-card__title { font-weight: 700; color: #1a5c2a; font-size: 1rem; }
+    </style>
+</head>
+<body class="dashboard">
+
+<div class="dashboard__header">
+    <div class="container">
+        <a href="/" style="color:#fff;font-size:1.2rem;font-weight:700;">Shepherd<span style="color:#c8b400;">AI</span> Admin</a>
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <a href="/dashboard.html" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff;padding:.4rem 1rem;font-size:.85rem;">My dashboard</a>
+            <button id="logout-btn" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff;padding:.4rem 1rem;font-size:.85rem;">Log out</button>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard__body">
+    <div class="container">
+
+        <div id="alert-box" class="mb-3"></div>
+
+        <!-- Stats overview -->
+        <h2 style="color:#1a5c2a;margin-bottom:1rem;">Overview</h2>
+        <div class="admin-grid" id="metrics-grid">
+            <div class="metric"><div class="metric__value" id="m-users">—</div><div class="metric__label">Total users</div></div>
+            <div class="metric"><div class="metric__value" id="m-new">—</div><div class="metric__label">New users (7 days)</div></div>
+            <div class="metric"><div class="metric__value" id="m-members">—</div><div class="metric__label">Ecosystem members</div></div>
+            <div class="metric"><div class="metric__value" id="m-revenue">—</div><div class="metric__label">Total revenue</div></div>
+            <div class="metric"><div class="metric__value" id="m-reports">—</div><div class="metric__label">Reports delivered</div></div>
+            <div class="metric"><div class="metric__value" id="m-leads">—</div><div class="metric__label">Email leads</div></div>
+            <div class="metric metric--alert" id="m-eft-card"><div class="metric__value" id="m-eft">—</div><div class="metric__label">EFT pending</div></div>
+            <div class="metric metric--alert" id="m-kyc-card"><div class="metric__value" id="m-kyc">—</div><div class="metric__label">KYC pending</div></div>
+            <div class="metric metric--alert" id="m-listings-card"><div class="metric__value" id="m-listings">—</div><div class="metric__label">Listings pending</div></div>
+            <div class="metric"><div class="metric__value" id="m-referrals">—</div><div class="metric__label">Referrals rewarded</div></div>
+        </div>
+
+        <!-- Pending EFT payments -->
+        <div class="section-card" id="eft-section">
+            <div class="section-card__header">
+                <div class="section-card__title">Pending EFT payments</div>
+                <button id="refresh-eft" class="btn btn-outline" style="font-size:.8rem;padding:.3rem .7rem;">Refresh</button>
+            </div>
+            <div id="eft-content" style="padding:1rem;">
+                <div style="text-align:center;color:#555;">Loading…</div>
+            </div>
+        </div>
+
+        <!-- Pending KYC -->
+        <div class="section-card" id="kyc-section">
+            <div class="section-card__header">
+                <div class="section-card__title">Pending KYC verification</div>
+                <button id="refresh-kyc" class="btn btn-outline" style="font-size:.8rem;padding:.3rem .7rem;">Refresh</button>
+            </div>
+            <div id="kyc-content" style="padding:1rem;">
+                <div style="text-align:center;color:#555;">Loading…</div>
+            </div>
+        </div>
+
+        <!-- Pending listings -->
+        <div class="section-card" id="listings-section">
+            <div class="section-card__header">
+                <div class="section-card__title">Listings awaiting approval</div>
+                <button id="refresh-listings" class="btn btn-outline" style="font-size:.8rem;padding:.3rem .7rem;">Refresh</button>
+            </div>
+            <div id="listings-content" style="padding:1rem;">
+                <div style="text-align:center;color:#555;">Loading…</div>
+            </div>
+        </div>
+
+        <!-- Recent audit log -->
+        <div class="section-card">
+            <div class="section-card__header">
+                <div class="section-card__title">Recent activity (audit log)</div>
+            </div>
+            <div id="audit-content" style="overflow-x:auto;">
+                <div style="padding:1rem;text-align:center;color:#555;">Loading…</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+'use strict';
+Auth.requireAuth();
+
+function fmtZar(cents) { return 'R ' + ((cents||0)/100).toLocaleString('en-ZA', {minimumFractionDigits:2}); }
+
+async function loadStats() {
+    try {
+        const s = await API.getAdminStats();
+
+        document.getElementById('m-users').textContent     = s.users.total || 0;
+        document.getElementById('m-new').textContent       = s.users.new_7d || 0;
+        document.getElementById('m-members').textContent   = s.users.members || 0;
+        document.getElementById('m-revenue').textContent   = 'R ' + Number(s.revenue.total_zar || 0).toLocaleString('en-ZA');
+        document.getElementById('m-reports').textContent   = s.reports.delivered || 0;
+        document.getElementById('m-leads').textContent     = s.leads.total || 0;
+        document.getElementById('m-eft').textContent       = s.eft_pending || 0;
+        document.getElementById('m-kyc').textContent       = s.kyc_pending || 0;
+        document.getElementById('m-listings').textContent  = s.listings.pending || 0;
+        document.getElementById('m-referrals').textContent = s.referrals.rewarded || 0;
+
+        // Audit log
+        const auditDiv = document.getElementById('audit-content');
+        if (!s.recent_audit.length) {
+            auditDiv.innerHTML = '<div style="padding:1rem;text-align:center;color:#555;">No activity yet.</div>';
+        } else {
+            auditDiv.innerHTML = `<table class="data-table">
+                <thead><tr><th>Time</th><th>Action</th><th>User</th><th>IP</th></tr></thead>
+                <tbody>${s.recent_audit.map(a => `<tr>
+                    <td>${fmtDate(a.created_at)}</td>
+                    <td><code>${escHtml(a.action)}</code></td>
+                    <td>${escHtml(a.email || '—')}</td>
+                    <td>${escHtml(a.ip_address || '—')}</td>
+                </tr>`).join('')}</tbody>
+            </table>`;
+        }
+    } catch (err) {
+        if (err.status === 403 || err.status === 401) {
+            showAlert('alert-box', 'Admin access required. Redirecting…', 'error');
+            setTimeout(() => window.location.href = '/dashboard.html', 2000);
+        } else {
+            showAlert('alert-box', 'Failed to load admin stats.', 'error');
+        }
+    }
+}
+
+async function loadEft() {
+    try {
+        const payments = await API.getAdminEftPending();
+        const div = document.getElementById('eft-content');
+        if (!payments.length) {
+            div.innerHTML = '<div style="text-align:center;color:#555;padding:.5rem;">No pending EFT payments.</div>';
+            return;
+        }
+        div.innerHTML = `<table class="data-table">
+            <thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Farmer</th><th>Report</th><th></th></tr></thead>
+            <tbody>${payments.map(p => `<tr>
+                <td>#${p.id}</td>
+                <td>${fmtDate(p.created_at)}</td>
+                <td>${fmtZar(p.amount)}</td>
+                <td>${escHtml(p.full_name || p.email)}</td>
+                <td>#${p.report_id || '—'}</td>
+                <td><button class="btn btn-primary confirm-eft" style="font-size:.78rem;padding:.25rem .6rem;" data-id="${p.id}">Confirm &amp; send PDF</button></td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+        div.querySelectorAll('.confirm-eft').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('Confirm EFT payment and trigger PDF delivery?')) return;
+                setLoading(btn, true);
+                try {
+                    await API.confirmEft(parseInt(btn.dataset.id, 10));
+                    showAlert('alert-box', 'EFT confirmed and PDF dispatched.', 'success');
+                    loadEft(); loadStats();
+                } catch (err) {
+                    showAlert('alert-box', err.message || 'Confirm failed.', 'error');
+                    setLoading(btn, false);
+                }
+            });
+        });
+    } catch (err) {
+        document.getElementById('eft-content').innerHTML = '<div style="padding:1rem;color:#b71c1c;">Failed to load.</div>';
+    }
+}
+
+async function loadKyc() {
+    try {
+        const docs = await API.getAdminKyc();
+        const div  = document.getElementById('kyc-content');
+        if (!docs.length) {
+            div.innerHTML = '<div style="text-align:center;color:#555;padding:.5rem;">No pending KYC documents.</div>';
+            return;
+        }
+        div.innerHTML = `<table class="data-table">
+            <thead><tr><th>Date</th><th>Farmer</th><th>Document type</th><th></th></tr></thead>
+            <tbody>${docs.map(d => `<tr>
+                <td>${fmtDate(d.created_at)}</td>
+                <td>${escHtml(d.full_name || d.email)}</td>
+                <td>${escHtml(d.document_type)}</td>
+                <td style="display:flex;gap:.5rem;">
+                    <button class="btn btn-primary kyc-approve" style="font-size:.78rem;padding:.25rem .6rem;" data-id="${d.id}">Approve</button>
+                    <button class="btn btn-outline kyc-reject" style="font-size:.78rem;padding:.25rem .6rem;border-color:#b71c1c;color:#b71c1c;" data-id="${d.id}">Reject</button>
+                </td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+        div.querySelectorAll('.kyc-approve').forEach(btn => btn.addEventListener('click', async () => {
+            setLoading(btn, true);
+            await API.verifyKyc(parseInt(btn.dataset.id, 10), true).catch(() => {});
+            loadKyc(); loadStats();
+        }));
+        div.querySelectorAll('.kyc-reject').forEach(btn => btn.addEventListener('click', async () => {
+            setLoading(btn, true);
+            await API.verifyKyc(parseInt(btn.dataset.id, 10), false).catch(() => {});
+            loadKyc(); loadStats();
+        }));
+    } catch (err) {
+        document.getElementById('kyc-content').innerHTML = '<div style="padding:1rem;color:#b71c1c;">Failed to load.</div>';
+    }
+}
+
+async function loadListings() {
+    try {
+        const items = await API.getAdminListings();
+        const div   = document.getElementById('listings-content');
+        if (!items.length) {
+            div.innerHTML = '<div style="text-align:center;color:#555;padding:.5rem;">No listings pending approval.</div>';
+            return;
+        }
+        div.innerHTML = `<table class="data-table">
+            <thead><tr><th>Date</th><th>Title</th><th>Province</th><th>Plan</th><th>Seller</th><th></th></tr></thead>
+            <tbody>${items.map(l => `<tr>
+                <td>${fmtDate(l.created_at)}</td>
+                <td>${escHtml(l.title)}</td>
+                <td>${escHtml(l.province)}</td>
+                <td>${escHtml(l.plan_type)}</td>
+                <td>${escHtml(l.seller_name || l.seller_email)}</td>
+                <td style="display:flex;gap:.5rem;">
+                    <button class="btn btn-primary lst-approve" style="font-size:.78rem;padding:.25rem .6rem;" data-id="${l.id}">Approve</button>
+                    <button class="btn btn-outline lst-reject" style="font-size:.78rem;padding:.25rem .6rem;border-color:#b71c1c;color:#b71c1c;" data-id="${l.id}">Reject</button>
+                </td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+        div.querySelectorAll('.lst-approve').forEach(btn => btn.addEventListener('click', async () => {
+            setLoading(btn, true);
+            await API.approveListing(parseInt(btn.dataset.id, 10)).catch(() => {});
+            loadListings(); loadStats();
+        }));
+        div.querySelectorAll('.lst-reject').forEach(btn => btn.addEventListener('click', async () => {
+            setLoading(btn, true);
+            await API.rejectListing(parseInt(btn.dataset.id, 10)).catch(() => {});
+            loadListings(); loadStats();
+        }));
+    } catch (err) {
+        document.getElementById('listings-content').innerHTML = '<div style="padding:1rem;color:#b71c1c;">Failed to load.</div>';
+    }
+}
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    try { await API.logout(); } catch (_) {}
+    Auth.clear();
+    window.location.href = '/';
+});
+
+document.getElementById('refresh-eft').addEventListener('click', loadEft);
+document.getElementById('refresh-kyc').addEventListener('click', loadKyc);
+document.getElementById('refresh-listings').addEventListener('click', loadListings);
+
+// Load everything
+loadStats();
+loadEft();
+loadKyc();
+loadListings();
+</script>
+</body>
+</html>

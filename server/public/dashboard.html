@@ -89,6 +89,17 @@
         <!-- PayFast subscription form injection point -->
         <div id="pf-container" style="display:none;"></div>
 
+        <!-- Referral card -->
+        <div id="referral-card" class="card mt-4 hidden" style="background:#f0f7f1;border:1px solid #dde8dd;">
+            <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Bring a neighbour, earn R100</h3>
+            <p class="text-muted" style="font-size:.9rem;margin-bottom:.75rem;">Share your referral link. When your neighbour buys their first report, you get a R100 voucher automatically.</p>
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+                <input type="text" id="referral-link-input" readonly style="flex:1;min-width:0;background:#fff;font-size:.85rem;">
+                <button id="copy-ref-btn" class="btn btn-outline" style="font-size:.85rem;white-space:nowrap;">Copy link</button>
+            </div>
+            <p class="text-muted" style="font-size:.78rem;margin-top:.5rem;" id="ref-stats"></p>
+        </div>
+
         <!-- EFT payment fallback -->
         <div class="card mt-4" style="background:#f0f7f1;border:1px solid #dde8dd;">
             <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Paying by EFT?</h3>
@@ -196,6 +207,26 @@ if (payParam === 'success') {
 } else if (payParam === 'cancelled') {
     showAlert('alert-box', 'Payment was cancelled. No charge was made.', 'info');
 }
+
+// Load referral info
+API.getReferrals().then(r => {
+    const card = document.getElementById('referral-card');
+    const inp  = document.getElementById('referral-link-input');
+    const stats = document.getElementById('ref-stats');
+    if (!card || !inp) return;
+    inp.value = r.referral_link;
+    card.classList.remove('hidden');
+    if (r.total_referrals > 0) {
+        stats.textContent = `${r.total_referrals} referral(s) — R${((r.total_earned_cents||0)/100).toFixed(0)} earned so far.`;
+    }
+}).catch(() => {});
+
+document.getElementById('copy-ref-btn')?.addEventListener('click', () => {
+    const inp = document.getElementById('referral-link-input');
+    if (inp) { inp.select(); navigator.clipboard?.writeText(inp.value); }
+    const btn = document.getElementById('copy-ref-btn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy link', 2000); }
+});
 
 loadDashboard();
 </script>

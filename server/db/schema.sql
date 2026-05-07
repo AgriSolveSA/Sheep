@@ -132,6 +132,20 @@ CREATE TABLE IF NOT EXISTS audit_log (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Referrals (Month 6 growth)
+CREATE TABLE IF NOT EXISTS referrals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_id INTEGER NOT NULL,
+    referred_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'pending',
+    reward_cents INTEGER DEFAULT 10000,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(referrer_id) REFERENCES users(id),
+    FOREIGN KEY(referred_id) REFERENCES users(id)
+);
+CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_referred ON referrals(referred_id);
+
 -- Email leads (free estimator captures)
 CREATE TABLE IF NOT EXISTS leads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -10,10 +10,11 @@ const PAYFAST_IPS = [
     '127.0.0.1' // localhost for sandbox testing
 ];
 
-function buildPayFastForm({ paymentId, reportId, userId, email, fullName, amountCents }) {
+function buildPayFastForm({ paymentId, reportId, userId, email, fullName, amountCents, itemName, customType }) {
     const sandbox  = process.env.PAYFAST_SANDBOX !== 'false';
     const host     = sandbox ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
     const baseUrl  = process.env.BASE_URL || 'https://shepherdai.co.za';
+    const type     = customType || 'report';
 
     const params = {
         merchant_id:    process.env.PAYFAST_MERCHANT_ID,
@@ -26,11 +27,11 @@ function buildPayFastForm({ paymentId, reportId, userId, email, fullName, amount
         email_address:  email,
         m_payment_id:   paymentId.toString(),
         amount:         (amountCents / 100).toFixed(2),
-        item_name:      'ShepherdAI Farm Report',
+        item_name:      itemName || 'ShepherdAI Farm Report',
         item_description: 'Personalised livestock profitability report',
         custom_str1:    paymentId.toString(),
-        custom_str2:    reportId.toString(),
-        custom_str3:    userId.toString()
+        custom_str2:    type === 'report' ? (reportId || '').toString() : type,
+        custom_str3:    type === 'report' ? userId.toString() : (reportId || '').toString()
     };
 
     if (process.env.PAYFAST_PASSPHRASE) {

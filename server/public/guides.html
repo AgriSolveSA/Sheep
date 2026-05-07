@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Guides — ShepherdAI</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+        .guide-card { border: 1px solid #dde8dd; border-radius: 10px; padding: 1.5rem; background: #fff; display: flex; flex-direction: column; }
+        .guide-card__cat { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #1a5c2a; margin-bottom: .5rem; }
+        .guide-card__title { font-size: 1.05rem; font-weight: 700; color: #1a1a1a; margin-bottom: .5rem; flex: 1; }
+        .guide-card__desc { font-size: .88rem; color: #555; margin-bottom: 1rem; line-height: 1.5; }
+        .guide-card__footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+        .badge-vet { background: #e8f5e9; color: #1b5e20; font-size: .72rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav__inner">
+        <a href="/" class="nav__logo">Shepherd<span>AI</span></a>
+        <div class="nav__links">
+            <a href="/estimator.html" style="color:#c8b400;font-weight:600;">Free estimator</a>
+            <a href="/listings.html">Classifieds</a>
+            <a href="/login.html">Log in</a>
+            <a href="/signup.html" class="btn">Get started</a>
+        </div>
+    </div>
+</nav>
+
+<div class="section" style="background:#f0f7f1;padding-top:2.5rem;">
+    <div class="container">
+        <div style="margin-bottom:2rem;">
+            <h1 style="color:#1a5c2a;font-size:1.8rem;">Digital Farming Guides</h1>
+            <p class="text-muted">Practical, vet-reviewed guides written for South African conditions. Buy once, download immediately.</p>
+        </div>
+
+        <div id="alert-box"></div>
+
+        <div id="guides-loading" style="text-align:center;padding:3rem;color:#555;">
+            <span class="spinner" style="border-top-color:#1a5c2a;border-color:rgba(26,92,42,.2);width:24px;height:24px;"></span> Loading guides…
+        </div>
+
+        <div id="guide-grid" class="guide-grid hidden"></div>
+
+        <div id="guides-empty" class="hidden" style="text-align:center;padding:3rem;color:#555;">
+            <div style="font-size:2.5rem;margin-bottom:1rem;">📚</div>
+            <p>Guides are being prepared. Check back soon.</p>
+        </div>
+
+        <div class="card mt-4" style="background:#fff8e1;border:2px solid #c8b400;max-width:600px;">
+            <h3 style="color:#1a5c2a;margin-bottom:.5rem;">EFT payment for guides</h3>
+            <p class="text-muted" style="font-size:.9rem;">Prefer to pay by EFT? Transfer R49 per guide to <strong>FNB 62XXXXXXXX</strong>, reference your email + guide name. Email <strong>pay@shepherdai.co.za</strong> — we'll send the PDF within 2 hours.</p>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p>ShepherdAI &copy; 2026 &mdash; Built for South African farmers</p>
+    </div>
+</footer>
+
+<script src="/app.js"></script>
+<script>
+'use strict';
+
+const CATS = {
+    sheep: '🐑 Sheep', cattle: '🐄 Cattle', goats: '🐐 Goats',
+    health: '💉 Health', infrastructure: '🔧 Infrastructure',
+    feed: '🌾 Feed', genetics: '🧬 Genetics'
+};
+
+let _purchased = new Set();
+
+async function loadGuides() {
+    try {
+        const [guides, myGuides] = await Promise.all([
+            API.getGuides(),
+            Auth.isLoggedIn() ? API.getMyGuides().catch(() => []) : Promise.resolve([])
+        ]);
+
+        _purchased = new Set(myGuides.map(g => g.id));
+
+        document.getElementById('guides-loading').classList.add('hidden');
+
+        if (!guides.length) {
+            document.getElementById('guides-empty').classList.remove('hidden');
+            return;
+        }
+
+        const grid = document.getElementById('guide-grid');
+        grid.classList.remove('hidden');
+
+        grid.innerHTML = guides.map(g => {
+            const owned = _purchased.has(g.id);
+            const catLabel = CATS[g.category] || g.category;
+            return `<div class="guide-card">
+                <div class="guide-card__cat">${escHtml(catLabel)}</div>
+                <div class="guide-card__title">${escHtml(g.title)}</div>
+                <div class="guide-card__footer">
+                    <div>
+                        <strong style="color:#1a5c2a;font-size:1.1rem;">R${(g.price/100).toFixed(0)}</strong>
+                        ${g.is_vet_reviewed ? '<span class="badge-vet" style="margin-left:.5rem;">Vet reviewed</span>' : ''}
+                    </div>
+                    ${owned
+                        ? `<a href="/api/guides/${g.id}/download?session=${API._session()}" class="btn btn-outline" style="font-size:.82rem;padding:.3rem .7rem;" target="_blank">Download</a>`
+                        : `<button class="btn btn-primary buy-btn" style="font-size:.82rem;padding:.3rem .75rem;" data-id="${g.id}">Buy R${(g.price/100).toFixed(0)}</button>`
+                    }
+                </div>
+            </div>`;
+        }).join('');
+
+        grid.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', () => buyGuide(parseInt(btn.dataset.id, 10), btn));
+        });
+
+    } catch (err) {
+        document.getElementById('guides-loading').classList.add('hidden');
+        showAlert('alert-box', 'Failed to load guides. Please refresh.', 'error');
+    }
+}
+
+async function buyGuide(id, btn) {
+    if (!Auth.isLoggedIn()) {
+        window.location.href = '/login.html?next=/guides.html';
+        return;
+    }
+    setLoading(btn, true);
+    try {
+        const res = await API.purchaseGuide(id);
+        // Inject PayFast form and redirect
+        const div = document.createElement('div');
+        div.innerHTML = res.pfForm.html;
+        document.body.appendChild(div);
+    } catch (err) {
+        showAlert('alert-box', err.message || 'Could not initiate payment. Please try again.', 'error');
+        setLoading(btn, false);
+    }
+}
+
+loadGuides();
+</script>
+</body>
+</html>

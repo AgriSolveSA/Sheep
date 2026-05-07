@@ -3,11 +3,14 @@ const express = require('express');
 const path    = require('path');
 const fs      = require('fs');
 
-const logger      = require('./middleware/logger');
-const authRoutes  = require('./routes/auth');
-const calcRoutes  = require('./routes/calculate');
-const payRoutes   = require('./routes/payments');
-const repRoutes   = require('./routes/reports');
+const logger       = require('./middleware/logger');
+const authRoutes   = require('./routes/auth');
+const calcRoutes   = require('./routes/calculate');
+const payRoutes    = require('./routes/payments');
+const repRoutes    = require('./routes/reports');
+const guideRoutes  = require('./routes/guides');
+const listRoutes   = require('./routes/listings');
+const refRoutes    = require('./routes/referrals');
 const { getDb }   = require('./db/database');
 const { runBackup }= require('./services/backupService');
 
@@ -60,6 +63,9 @@ app.use('/api/calculate',   calcRoutes);
 app.use('/api',             payRoutes);
 app.use('/api/reports',     repRoutes);
 app.use('/api/report',      repRoutes);
+app.use('/api',             guideRoutes);
+app.use('/api',             listRoutes);
+app.use('/api',             refRoutes);
 
 // PayFast ITN endpoint (outside /api prefix)
 app.use('/webhook',         payRoutes);
@@ -100,6 +106,30 @@ app.listen(PORT, () => {
         const schema = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
         db.exec(schema);
         console.log('Database schema verified.');
+
+        // Safe column migrations (idempotent — ignore if column already exists)
+        const COLUMN_MIGRATIONS = [
+            'ALTER TABLE users ADD COLUMN referral_code TEXT',
+            'ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0',
+        ];
+        for (const sql of COLUMN_MIGRATIONS) {
+            try { db.prepare(sql).run(); } catch (_) {}
+        }
+
+        // Backfill referral codes for existing users
+        const noCode = db.prepare('SELECT id FROM users WHERE referral_code IS NULL').all();
+        const crypto = require('crypto');
+        for (const u of noCode) {
+            db.prepare('UPDATE users SET referral_code = ? WHERE id = ?')
+              .run(crypto.randomBytes(4).toString('hex').toUpperCase(), u.id);
+        }
+        if (noCode.length) console.log(`Backfilled ${noCode.length} referral code(s).`);
+
+        // Ensure upload directories exist
+        ['uploads/kyc', 'uploads/listings'].forEach(d => {
+            const dir = path.join(__dirname, d);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        });
     } catch (err) {
         console.error('Database init error:', err);
     }

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classifieds — ShepherdAI</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+        .listing-card { border: 1px solid #dde8dd; border-radius: 10px; padding: 1.25rem; background: #fff; cursor: pointer; transition: box-shadow .15s; }
+        .listing-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+        .listing-card.premium { border-color: #c8b400; border-width: 2px; }
+        .listing-card__cat { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a5c2a; margin-bottom: .4rem; }
+        .listing-card__title { font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: .3rem; }
+        .listing-card__price { font-size: 1.15rem; font-weight: 800; color: #1a5c2a; }
+        .listing-card__meta { font-size: .8rem; color: #777; margin-top: .5rem; }
+        .filter-bar { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: flex-end; }
+        .filter-bar select, .filter-bar input { padding: .45rem .65rem; border: 1px solid #dde8dd; border-radius: 6px; font-size: .9rem; background: #fff; }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav__inner">
+        <a href="/" class="nav__logo">Shepherd<span>AI</span></a>
+        <div class="nav__links">
+            <a href="/estimator.html" style="color:#c8b400;font-weight:600;">Free estimator</a>
+            <a href="/guides.html">Guides</a>
+            <a href="/login.html">Log in</a>
+            <a href="/signup.html" class="btn">Get started</a>
+        </div>
+    </div>
+</nav>
+
+<div class="section" style="background:#f0f7f1;padding-top:2.5rem;padding-bottom:3rem;">
+    <div class="container">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+            <div>
+                <h1 style="color:#1a5c2a;font-size:1.8rem;margin-bottom:.25rem;">Farm Classifieds</h1>
+                <p class="text-muted">Buy and sell livestock, equipment, feed, and services across South Africa.</p>
+            </div>
+            <a href="/post-listing.html" class="btn btn-primary">+ Post a listing</a>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+            <div>
+                <label style="display:block;font-size:.8rem;color:#555;margin-bottom:.2rem;">Province</label>
+                <select id="f-province">
+                    <option value="">All provinces</option>
+                    <option>Western Cape</option><option>Northern Cape</option>
+                    <option>Eastern Cape</option><option>KwaZulu-Natal</option>
+                    <option>Free State</option><option>Limpopo</option>
+                    <option>Mpumalanga</option><option>North West</option><option>Gauteng</option>
+                </select>
+            </div>
+            <div>
+                <label style="display:block;font-size:.8rem;color:#555;margin-bottom:.2rem;">Category</label>
+                <select id="f-category">
+                    <option value="">All categories</option>
+                    <option value="sheep">🐑 Sheep</option>
+                    <option value="cattle">🐄 Beef cattle</option>
+                    <option value="goats">🐐 Goats</option>
+                    <option value="dairy">🥛 Dairy</option>
+                    <option value="pigs">🐖 Pigs</option>
+                    <option value="poultry">🐔 Poultry</option>
+                    <option value="bees">🐝 Bees</option>
+                    <option value="equipment">🔧 Equipment</option>
+                    <option value="feed">🌾 Feed</option>
+                    <option value="land">🌍 Land</option>
+                    <option value="services">🤝 Services</option>
+                    <option value="supplier">🏭 Suppliers</option>
+                </select>
+            </div>
+            <div style="flex:1;min-width:180px;">
+                <label style="display:block;font-size:.8rem;color:#555;margin-bottom:.2rem;">Search</label>
+                <input type="search" id="f-search" placeholder="e.g. Merino ewes…">
+            </div>
+            <button id="filter-btn" class="btn btn-outline">Search</button>
+        </div>
+
+        <div id="alert-box"></div>
+
+        <div id="listings-loading" style="text-align:center;padding:3rem;color:#555;">
+            <span class="spinner" style="border-top-color:#1a5c2a;border-color:rgba(26,92,42,.2);width:24px;height:24px;"></span> Loading listings…
+        </div>
+
+        <div id="listing-grid" class="listing-grid hidden"></div>
+
+        <div id="listings-empty" class="hidden" style="text-align:center;padding:3rem;color:#555;">
+            <div style="font-size:2.5rem;margin-bottom:1rem;">📋</div>
+            <p><strong>No listings found.</strong></p>
+            <p class="mt-1">Try different filters, or <a href="/post-listing.html">post a listing</a> yourself.</p>
+        </div>
+
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p>ShepherdAI &copy; 2026 &mdash; Built for South African farmers</p>
+        <p style="font-size:.8rem;margin-top:.5rem;">
+            <a href="/">Home</a> &middot; <a href="/guides.html">Guides</a> &middot; <a href="/estimator.html">Estimator</a>
+        </p>
+    </div>
+</footer>
+
+<script src="/app.js"></script>
+<script>
+'use strict';
+
+const CAT_EMOJI = {
+    sheep:'🐑', cattle:'🐄', goats:'🐐', dairy:'🥛', pigs:'🐖',
+    poultry:'🐔', bees:'🐝', equipment:'🔧', feed:'🌾', land:'🌍',
+    services:'🤝', supplier:'🏭'
+};
+
+async function loadListings() {
+    const province = document.getElementById('f-province').value;
+    const category = document.getElementById('f-category').value;
+    const q        = document.getElementById('f-search').value.trim();
+
+    document.getElementById('listing-grid').classList.add('hidden');
+    document.getElementById('listings-empty').classList.add('hidden');
+    document.getElementById('listings-loading').classList.remove('hidden');
+
+    try {
+        const filters = {};
+        if (province) filters.province = province;
+        if (category) filters.category = category;
+        if (q)        filters.q = q;
+
+        const listings = await API.getListings(filters);
+        document.getElementById('listings-loading').classList.add('hidden');
+
+        if (!listings.length) {
+            document.getElementById('listings-empty').classList.remove('hidden');
+            return;
+        }
+
+        const grid = document.getElementById('listing-grid');
+        grid.innerHTML = listings.map(l => {
+            const isPremium = l.plan_type === 'premium' || l.plan_type === 'urgent';
+            const emoji = CAT_EMOJI[l.category] || '📋';
+            const price = l.price
+                ? `R ${Number(l.price).toLocaleString('en-ZA')}${l.price_negotiable ? ' (neg)' : ''}`
+                : 'POA';
+            return `<div class="listing-card${isPremium ? ' premium' : ''}" onclick="window.location='/listings.html?id=${l.id}'">
+                ${isPremium ? '<div style="font-size:.7rem;font-weight:700;color:#c8b400;margin-bottom:.3rem;">⭐ FEATURED</div>' : ''}
+                <div class="listing-card__cat">${emoji} ${escHtml(l.category)}</div>
+                <div class="listing-card__title">${escHtml(l.title)}</div>
+                <div class="listing-card__price">${escHtml(price)}</div>
+                <div class="listing-card__meta">📍 ${escHtml(l.province)} &nbsp;·&nbsp; ${fmtDate(l.created_at)}</div>
+            </div>`;
+        }).join('');
+        grid.classList.remove('hidden');
+
+    } catch (err) {
+        document.getElementById('listings-loading').classList.add('hidden');
+        showAlert('alert-box', 'Failed to load listings. Please try again.', 'error');
+    }
+}
+
+document.getElementById('filter-btn').addEventListener('click', loadListings);
+document.getElementById('f-search').addEventListener('keydown', e => { if (e.key === 'Enter') loadListings(); });
+
+// If ?id= param, show detail inline (simple MVP)
+const listingId = new URLSearchParams(window.location.search).get('id');
+if (listingId) {
+    document.querySelector('.filter-bar').style.display = 'none';
+    document.getElementById('listings-loading').classList.remove('hidden');
+    API.getListing(parseInt(listingId, 10)).then(l => {
+        document.getElementById('listings-loading').classList.add('hidden');
+        const grid = document.getElementById('listing-grid');
+        const price = l.price ? `R ${Number(l.price).toLocaleString('en-ZA')}${l.price_negotiable ? ' (negotiable)' : ''}` : 'POA';
+        grid.innerHTML = `
+            <div class="card" style="grid-column:1/-1;max-width:640px;">
+                <div style="font-size:.75rem;color:#1a5c2a;font-weight:700;text-transform:uppercase;margin-bottom:.5rem;">${escHtml(l.category)}</div>
+                <h1 style="font-size:1.4rem;margin-bottom:.5rem;">${escHtml(l.title)}</h1>
+                <p style="font-size:1.3rem;font-weight:800;color:#1a5c2a;margin-bottom:1rem;">${escHtml(price)}</p>
+                <p style="color:#333;line-height:1.7;">${escHtml(l.description || '')}</p>
+                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #dde8dd;font-size:.9rem;color:#555;">
+                    <p>📍 ${escHtml(l.province)}${l.district ? ' — ' + escHtml(l.district) : ''}</p>
+                    <p>👤 ${escHtml(l.seller_name || 'Seller')}</p>
+                    ${l.seller_mobile ? `<p>📞 <a href="tel:${escHtml(l.seller_mobile)}">${escHtml(l.seller_mobile)}</a></p>` : ''}
+                    <p>📅 Posted ${fmtDate(l.created_at)}</p>
+                </div>
+                <div style="margin-top:1.25rem;">
+                    <a href="/listings.html" class="btn btn-outline">← Back to listings</a>
+                </div>
+            </div>`;
+        grid.classList.remove('hidden');
+    }).catch(() => {
+        document.getElementById('listings-loading').classList.add('hidden');
+        document.getElementById('listings-empty').classList.remove('hidden');
+    });
+} else {
+    loadListings();
+}
+</script>
+</body>
+</html>

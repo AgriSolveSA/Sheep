@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Listing — ShepherdAI</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .plan-option { border: 2px solid #dde8dd; border-radius: 8px; padding: 1rem; cursor: pointer; transition: border-color .15s; }
+        .plan-option.selected { border-color: #1a5c2a; background: #f0f7f1; }
+        .plan-option input[type=radio] { display: none; }
+        .plan-option__name { font-weight: 700; color: #1a1a1a; }
+        .plan-option__price { font-size: 1.1rem; color: #1a5c2a; font-weight: 800; }
+        .plan-option__desc { font-size: .8rem; color: #555; margin-top: .3rem; }
+    </style>
+</head>
+<body class="auth-page">
+
+<div class="auth-box" style="max-width:600px;">
+    <a href="/" class="auth-logo">Shepherd<span>AI</span></a>
+    <h1 style="font-size:1.4rem;">Post a listing</h1>
+    <p class="text-muted mt-1">Reach thousands of farmers across South Africa.</p>
+
+    <div id="alert-box" class="mt-2"></div>
+
+    <form id="listing-form" class="mt-3" novalidate>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" required>
+                <option value="">— Select category —</option>
+                <option value="sheep">🐑 Sheep</option>
+                <option value="cattle">🐄 Beef cattle</option>
+                <option value="goats">🐐 Goats</option>
+                <option value="dairy">🥛 Dairy</option>
+                <option value="pigs">🐖 Pigs</option>
+                <option value="poultry">🐔 Poultry</option>
+                <option value="bees">🐝 Bees</option>
+                <option value="equipment">🔧 Equipment</option>
+                <option value="feed">🌾 Feed &amp; supplements</option>
+                <option value="land">🌍 Land &amp; property</option>
+                <option value="services">🤝 Services</option>
+                <option value="supplier">🏭 Supplier</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="title">Listing title</label>
+            <input type="text" id="title" placeholder="e.g. 50x Merino ewes — Western Cape" required minlength="5" maxlength="120">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description <span class="text-muted" style="font-weight:400;">(optional)</span></label>
+            <textarea id="description" rows="4" placeholder="Age, condition, vaccination history, delivery options…" style="width:100%;resize:vertical;"></textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group">
+                <label for="price">Price (R) <span class="text-muted" style="font-weight:400;">(optional)</span></label>
+                <input type="number" id="price" min="0" placeholder="Leave blank for POA">
+            </div>
+            <div class="form-group" style="padding-top:1.5rem;">
+                <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;">
+                    <input type="checkbox" id="price_negotiable" checked>
+                    Price negotiable
+                </label>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group">
+                <label for="province">Province</label>
+                <select id="province" required>
+                    <option value="">— Province —</option>
+                    <option>Western Cape</option><option>Northern Cape</option>
+                    <option>Eastern Cape</option><option>KwaZulu-Natal</option>
+                    <option>Free State</option><option>Limpopo</option>
+                    <option>Mpumalanga</option><option>North West</option><option>Gauteng</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="district">District <span class="text-muted" style="font-weight:400;">(optional)</span></label>
+                <input type="text" id="district" placeholder="e.g. Swartland">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Listing plan</label>
+            <div class="plan-grid">
+                <label class="plan-option selected" for="plan-free">
+                    <input type="radio" id="plan-free" name="plan_type" value="free" checked>
+                    <div class="plan-option__name">Free</div>
+                    <div class="plan-option__price">R0</div>
+                    <div class="plan-option__desc">Basic listing, 30 days</div>
+                </label>
+                <label class="plan-option" for="plan-standard">
+                    <input type="radio" id="plan-standard" name="plan_type" value="standard">
+                    <div class="plan-option__name">Standard</div>
+                    <div class="plan-option__price">R10</div>
+                    <div class="plan-option__desc">Featured in category, 30 days</div>
+                </label>
+                <label class="plan-option" for="plan-premium">
+                    <input type="radio" id="plan-premium" name="plan_type" value="premium">
+                    <div class="plan-option__name">Premium</div>
+                    <div class="plan-option__price">R30</div>
+                    <div class="plan-option__desc">Top of category, 60 days</div>
+                </label>
+                <label class="plan-option" for="plan-urgent">
+                    <input type="radio" id="plan-urgent" name="plan_type" value="urgent">
+                    <div class="plan-option__name">Urgent</div>
+                    <div class="plan-option__price">R50</div>
+                    <div class="plan-option__desc">Email alert to buyers</div>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full mt-2" id="submit-btn">Post listing</button>
+    </form>
+
+    <div id="pf-container" style="display:none;"></div>
+
+    <p class="text-center text-muted mt-2" style="font-size:.85rem;">
+        <a href="/listings.html">← Back to listings</a>
+    </p>
+</div>
+
+<script src="/app.js"></script>
+<script>
+'use strict';
+Auth.requireAuth();
+
+// Plan option visual selection
+document.querySelectorAll('.plan-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+        document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+    });
+});
+
+document.getElementById('listing-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAlert('alert-box');
+
+    const category   = document.getElementById('category').value;
+    const title      = document.getElementById('title').value.trim();
+    const description= document.getElementById('description').value.trim();
+    const price      = document.getElementById('price').value;
+    const price_neg  = document.getElementById('price_negotiable').checked;
+    const province   = document.getElementById('province').value;
+    const district   = document.getElementById('district').value.trim();
+    const plan_type  = document.querySelector('input[name=plan_type]:checked').value;
+
+    if (!category) return showAlert('alert-box', 'Please select a category.', 'error');
+    if (!title)    return showAlert('alert-box', 'Please enter a listing title.', 'error');
+    if (!province) return showAlert('alert-box', 'Please select your province.', 'error');
+
+    const btn = document.getElementById('submit-btn');
+    setLoading(btn, true);
+
+    try {
+        const res = await API.createListing({
+            category, title, description, province, district,
+            price: price ? parseFloat(price) : null,
+            price_negotiable: price_neg,
+            plan_type
+        });
+
+        if (res.pfForm) {
+            // Paid plan — redirect to PayFast
+            const container = document.getElementById('pf-container');
+            container.style.display = 'block';
+            container.innerHTML = res.pfForm.html;
+        } else {
+            showAlert('alert-box', 'Your listing is live! <a href="/listings.html">View listings →</a>', 'success');
+            document.getElementById('listing-form').reset();
+            setLoading(btn, false);
+        }
+    } catch (err) {
+        if (err.code === 'KYC_REQUIRED') {
+            showAlert('alert-box', 'KYC verification is required for paid listing plans. <a href="/dashboard.html">Verify your identity</a>.', 'error');
+        } else {
+            showAlert('alert-box', err.message || 'Failed to post listing. Please try again.', 'error');
+        }
+        setLoading(btn, false);
+    }
+});
+</script>
+</body>
+</html>

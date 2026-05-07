@@ -10,7 +10,18 @@ const SUBSCRIPTION_PRICE_CENTS = 9900; // R99.00
 
 const router = express.Router();
 
-const REPORT_PRICE_CENTS = 19900; // R199.00
+const REPORT_PRICE_CENTS  = 19900; // R199.00 — sheep, goats, pigs, poultry, bees, dairy
+const CATTLE_PRICE_CENTS  = 29900; // R299.00 — beef cattle (higher value module)
+const CATTLE_TYPES        = ['cattle', 'beef', 'beef_cattle'];
+
+function reportPrice(inputs) {
+    const t = ((inputs.livestockType || inputs.type || '')).toLowerCase().replace(/\s/g, '_');
+    return CATTLE_TYPES.includes(t) ? CATTLE_PRICE_CENTS : REPORT_PRICE_CENTS;
+}
+function reportItemName(inputs) {
+    const t = ((inputs.livestockType || inputs.type || '')).toLowerCase().replace(/\s/g, '_');
+    return CATTLE_TYPES.includes(t) ? 'ShepherdAI Cattle Report' : 'ShepherdAI Farm Report';
+}
 
 function audit(db, userId, action, req, details = null) {
     db.prepare('INSERT INTO audit_log (user_id, action, ip_address, user_agent, details) VALUES (?,?,?,?,?)')
@@ -29,9 +40,10 @@ router.post('/create-order', requireAuth, (req, res) => {
         'INSERT INTO reports (user_id, inputs_json, results_json, status) VALUES (?,?,?,?)'
     ).run(req.user.id, JSON.stringify(inputs), JSON.stringify(results), 'pending');
 
+    const priceCents = reportPrice(inputs);
     const paymentRow = db.prepare(
         'INSERT INTO payments (user_id, amount, method, status) VALUES (?,?,?,?)'
-    ).run(req.user.id, REPORT_PRICE_CENTS, 'payfast', 'pending');
+    ).run(req.user.id, priceCents, 'payfast', 'pending');
 
     // Associate payment with report
     db.prepare('UPDATE reports SET payment_id = ? WHERE id = ?').run(paymentRow.lastInsertRowid, reportRow.lastInsertRowid);
@@ -42,7 +54,8 @@ router.post('/create-order', requireAuth, (req, res) => {
         userId:      req.user.id,
         email:       req.user.email,
         fullName:    req.user.full_name || '',
-        amountCents: REPORT_PRICE_CENTS
+        amountCents: priceCents,
+        itemName:    reportItemName(inputs)
     });
 
     audit(db, req.user.id, 'create_order', req, { paymentId: paymentRow.lastInsertRowid });
@@ -62,7 +75,31 @@ router.post('/payfast-itn', express.urlencoded({ extended: false }), async (req,
             return;
         }
 
-        // Route: subscription vs one-time report
+        // Route: subscription vs guide vs listing_upgrade vs one-time report
+        if (req.body.custom_str2 === 'guide') {
+            if (req.body.payment_status !== 'COMPLETE') return;
+            const paymentId = parseInt(req.body.custom_str1, 10);
+            const guideId   = parseInt(req.body.custom_str3, 10);
+            const payment   = db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
+            if (!payment || payment.status === 'completed') return;
+            db.prepare('UPDATE payments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('completed', paymentId);
+            db.prepare('INSERT OR IGNORE INTO user_guides (user_id, guide_id) VALUES (?,?)').run(payment.user_id, guideId);
+            audit(db, payment.user_id, 'guide_purchased', req, { paymentId, guideId });
+            return;
+        }
+
+        if (req.body.custom_str2 === 'listing_upgrade') {
+            if (req.body.payment_status !== 'COMPLETE') return;
+            const paymentId = parseInt(req.body.custom_str1, 10);
+            const listingId = parseInt(req.body.custom_str3, 10);
+            const payment   = db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
+            if (!payment || payment.status === 'completed') return;
+            db.prepare('UPDATE payments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('completed', paymentId);
+            db.prepare("UPDATE listings SET status = 'active', starts_at = CURRENT_TIMESTAMP WHERE id = ?").run(listingId);
+            audit(db, payment.user_id, 'listing_upgraded', req, { paymentId, listingId });
+            return;
+        }
+
         if (req.body.custom_str2 === 'subscription') {
             const userId    = parseInt(req.body.custom_str1, 10);
             const paymentId = parseInt(req.body.custom_str3, 10);
@@ -116,6 +153,18 @@ router.post('/payfast-itn', express.urlencoded({ extended: false }), async (req,
 
         db.prepare('UPDATE reports SET status = ? WHERE id = ?').run('delivered', reportId);
         audit(db, payment.user_id, 'payment_complete', req, { paymentId, reportId });
+
+        // Referral reward: if this is user's first completed purchase, reward referrer
+        const prevPayments = db.prepare("SELECT COUNT(*) AS n FROM payments WHERE user_id = ? AND status = 'completed' AND id != ?").get(payment.user_id, paymentId);
+        if (prevPayments.n === 0) {
+            const referral = db.prepare("SELECT * FROM referrals WHERE referred_id = ? AND status = 'pending'").get(payment.user_id);
+            if (referral) {
+                const voucherCode = 'REF-' + require('crypto').randomBytes(4).toString('hex').toUpperCase();
+                db.prepare('INSERT INTO vouchers (code, amount, user_id) VALUES (?,?,?)').run(voucherCode, referral.reward_cents, referral.referrer_id);
+                db.prepare("UPDATE referrals SET status = 'rewarded' WHERE id = ?").run(referral.id);
+                audit(db, referral.referrer_id, 'referral_rewarded', req, { voucherCode, referredUserId: payment.user_id });
+            }
+        }
     } catch (err) {
         console.error('PayFast ITN error:', err);
         audit(db, null, 'payfast_itn_error', req, { error: err.message });

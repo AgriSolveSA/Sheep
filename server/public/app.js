@@ -23,7 +23,7 @@ const API = {
     },
 
     // Auth
-    signup(email, password, fullName, mobile)  { return this._fetch('POST', '/api/signup',  { email, password, full_name: fullName, mobile }); },
+    signup(email, password, fullName, mobile, referrerCode) { return this._fetch('POST', '/api/signup', { email, password, full_name: fullName, mobile, referrer_code: referrerCode || null }); },
     login(email, password)                     { return this._fetch('POST', '/api/login',   { email, password }); },
     logout()                                   { return this._fetch('POST', '/api/logout'); },
     getUser()                                  { return this._fetch('GET',  '/api/user'); },
@@ -43,6 +43,33 @@ const API = {
 
     // Leads
     captureLead(email, data)                   { return this._fetch('POST', '/api/leads', { email, ...data }); },
+
+    // Guides
+    getGuides()                                { return this._fetch('GET',  '/api/guides'); },
+    getMyGuides()                              { return this._fetch('GET',  '/api/guides/my'); },
+    purchaseGuide(guideId)                     { return this._fetch('POST', '/api/guides/purchase', { guide_id: guideId }); },
+
+    // Listings
+    getListings(filters)                       { return this._fetch('GET',  '/api/listings?' + new URLSearchParams(filters || {}).toString()); },
+    getListing(id)                             { return this._fetch('GET',  `/api/listings/${id}`); },
+    createListing(data)                        { return this._fetch('POST', '/api/listings', data); },
+    deleteListing(id)                          { return this._fetch('DELETE', `/api/listings/${id}`); },
+
+    // KYC
+    uploadKyc(formData)                        { return fetch('/api/kyc/upload', { method: 'POST', headers: { 'X-Session-Id': this._session() }, body: formData }).then(r => r.json()); },
+
+    // Referrals
+    getReferrals()                             { return this._fetch('GET',  '/api/referrals'); },
+
+    // Admin
+    getAdminStats()                            { return this._fetch('GET',  '/api/admin/stats'); },
+    getAdminKyc()                              { return this._fetch('GET',  '/api/admin/kyc'); },
+    verifyKyc(id, approved)                    { return this._fetch('POST', `/api/admin/kyc/${id}/verify`, { approved }); },
+    getAdminListings()                         { return this._fetch('GET',  '/api/admin/listings'); },
+    approveListing(id)                         { return this._fetch('POST', `/api/admin/listings/${id}/approve`); },
+    rejectListing(id)                          { return this._fetch('POST', `/api/admin/listings/${id}/reject`); },
+    getAdminEftPending()                       { return this._fetch('GET',  '/api/admin/eft-pending'); },
+    confirmEft(paymentId)                      { return this._fetch('POST', '/api/admin/eft-confirm', { payment_id: paymentId }); },
 
     // Health
     health()                                   { return this._fetch('GET',  '/api/health'); }

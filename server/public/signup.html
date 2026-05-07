@@ -69,9 +69,11 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     if (!email) return showAlert('alert-box', 'Email address is required.', 'error');
     if (password.length < 8) return showAlert('alert-box', 'Password must be at least 8 characters.', 'error');
 
+    const refCode = new URLSearchParams(window.location.search).get('ref') || null;
+
     setLoading(btn, true);
     try {
-        await API.signup(email, password, fullName || null, mobile || null);
+        await API.signup(email, password, fullName || null, mobile || null, refCode);
         // Auto-login after signup
         const res = await API.login(email, password);
         Auth.save(res.sessionId, res.userId);
