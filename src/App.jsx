@@ -649,15 +649,15 @@ const POULTRY_PROVINCE_DEFAULTS = {
 // milk litres. A dedicated dairy model (milk yield × litres × price) should replace calcFull
 // when activating. Flesh out fully before going live.
 const DAIRY_PROVINCE_DATA = {
-  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"High", drought:"Frequent", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:["Holstein"], avoid:["Holstein in lowveld heat"], why:"Very limited commercial dairy in Limpopo. Highveld fringe (Tzaneen irrigation area) viable with Bos taurus-tolerant breeds and good feed supply. Heat stress significantly reduces Holstein production.", tip:"Tzaneen area only — irrigation for year-round fodder essential. Jersey more heat-tolerant than Holstein.", breed:"Jersey", type:"Dairy", market:"Parmalat Polokwane · local fresh milk supply", rep:25, oh:1800, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:220, dressing:45, wool:0, feed:8000, health:1400, ewePrice:22000, weanerPrice:6000, be:28 },
-  north_west:   { name:"North West",   short:"N. West",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Medium", drought:"Frequent", dairyDensity:"Low", primary:["Holstein","Guernsey"], secondary:["Jersey"], avoid:[], why:"Marico and Potchefstroom irrigation schemes support small-scale dairy. Lucerne production for year-round feed. Supply to Gauteng processors.", tip:"Irrigation and fodder self-sufficiency are prerequisites. Without feed security, dairy is high risk.", breed:"Holstein", type:"Dairy", market:"Gauteng processors · Nestlé Mossel Bay · Parmalat supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:8500, health:1500, ewePrice:24000, weanerPrice:6500, be:25 },
-  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Gauteng peri-urban dairy faces land cost and zoning challenges. Strong milk demand. Proximity to Clover, Parmalat, and Nestlé processing. Few remaining commercial dairies.", tip:"Few large operations viable given land cost. Focus on value-add (artisanal cheese, pasteurised direct sales).", breed:"Holstein", type:"Dairy", market:"Clover Pretoria · Parmalat Johannesburg · premium fresh milk", rep:25, oh:2500, labour:6000, hired:12000, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:9000, health:1600, ewePrice:28000, weanerPrice:7500, be:22 },
-  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Highveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey"], avoid:[], why:"Highveld Mpumalanga (Dullstroom, Lydenburg area) has excellent dairy climate. Good fodder production. Supply to Gauteng and Mozambique border markets.", tip:"Standerton and Lydenburg — good dairy potential with irrigation. Consider cheese/yoghurt value-add.", breed:"Holstein", type:"Dairy", market:"Parmalat Mpumalanga · Gauteng supply · regional processors", rep:25, oh:2000, labour:5400, hired:11000, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8500, health:1500, ewePrice:25000, weanerPrice:6800, be:24 },
-  free_state:   { name:"Free State",   short:"Free State", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Bloemfontein basin and Wepener area support commercial dairy. Low parasite pressure. Cold winters reduce mastitis pressure. Strong Clover and Parmalat procurement in province.", tip:"Winter fodder planning critical. Good maize silage production possible on centre pivots.", breed:"Holstein", type:"Dairy", market:"Clover Bloemfontein · Parmalat Free State · Nestlé supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:91, survival:89, liveKg:235, dressing:45, wool:0, feed:8000, health:1400, ewePrice:24000, weanerPrice:6500, be:23 },
-  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Very high", drought:"Rare", dairyDensity:"Medium", primary:["Holstein","Guernsey"], secondary:["Jersey","Ayrshire"], avoid:["Holstein in hot coastal zones"], why:"KZN Midlands (Nottingham Road, Mooi River) is SA's most scenic dairy country. Excellent rainfall, year-round grazing possible. Mastitis management essential in high humidity.", tip:"Notties-Mooi River: the benchmark for SA pasture-based dairy. Excellent grass growth year-round.", breed:"Holstein × Guernsey", type:"Dairy", market:"Clover KZN · Nestlé Mossel Bay supply · Natal Fresh Produce", rep:25, oh:2200, labour:5600, hired:11500, woolMonth:0, lambing:92, survival:90, liveKg:240, dressing:46, wool:0, feed:7500, health:1600, ewePrice:26000, weanerPrice:7000, be:21 },
-  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey","Ayrshire"], secondary:["Guernsey"], avoid:[], why:"Eastern Cape (Tsitsikamma, Humansdorp, Queenstown) has strong dairy heritage. Tsitsikamma pasture-based systems internationally renowned. Good milk processor access.", tip:"Tsitsikamma: SA's premium pasture-based dairy region. Jersey grass milk commands retail premiums.", breed:"Jersey", type:"Dairy", market:"Parmalat Eastern Cape · Woodlands Dairy · Keiskamma Trust", rep:25, oh:1900, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:230, dressing:45, wool:0, feed:7800, health:1400, ewePrice:23000, weanerPrice:6200, be:25 },
-  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", dairyDensity:"Very high", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Western Cape (Overberg, Swartland, George) dominates SA dairy. SA's most productive dairy region. Year-round grass growth in coastal areas. Excellent cold chain, processor access and export potential.", tip:"Overberg is SA's dairy heartland — Caledon to Bredasdorp. Jersey pasture milk fetches R9–12/litre from premium processors.", breed:"Holstein / Jersey", type:"Dairy", market:"Clover WC · Danone South Africa · Parmalat WC · Woolworths milk supply", rep:25, oh:2500, labour:6000, hired:12500, woolMonth:0, lambing:93, survival:91, liveKg:250, dressing:47, wool:0, feed:8500, health:1500, ewePrice:30000, weanerPrice:8000, be:18 },
-  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:[], avoid:["Holstein without full TMR and cooling"], why:"Very limited dairy in Northern Cape. Upington and Springbok small operations on irrigation. High feed import cost. Only viable with irrigation water rights and committed processor contract.", tip:"Only consider with permanent irrigation and a signed processor contract. Heat stress cooling system mandatory.", breed:"Jersey", type:"Dairy", market:"Kimberley local supply · small-scale fresh milk", rep:25, oh:1700, labour:4800, hired:9500, woolMonth:0, lambing:87, survival:86, liveKg:200, dressing:44, wool:0, feed:9000, health:1600, ewePrice:20000, weanerPrice:5500, be:38 },
+  limpopo:      { name:"Limpopo",      short:"Limpopo",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Bushveld · Semi-arid · 400–600mm · Hot", rainfall:"400–600mm", season:"Summer", frost:"None", humidity:"Low", parasites:"High", drought:"Frequent", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:["Holstein"], avoid:["Holstein in lowveld heat"], why:"Very limited commercial dairy in Limpopo. Highveld fringe (Tzaneen irrigation area) viable with Bos taurus-tolerant breeds and good feed supply. Heat stress significantly reduces Holstein production.", tip:"Tzaneen area only — irrigation for year-round fodder essential. Jersey more heat-tolerant than Holstein.", breed:"Jersey", type:"Dairy", market:"Parmalat Polokwane · local fresh milk supply", rep:25, oh:1800, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:4500, dressing:45, wool:0, feed:12000, health:1400, ewePrice:22000, weanerPrice:6000, be:7 },
+  north_west:   { name:"North West",   short:"N. West",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Semi-arid · 300–500mm · Hot and dry", rainfall:"300–500mm", season:"Summer", frost:"Light", humidity:"Low", parasites:"Medium", drought:"Frequent", dairyDensity:"Low", primary:["Holstein","Guernsey"], secondary:["Jersey"], avoid:[], why:"Marico and Potchefstroom irrigation schemes support small-scale dairy. Lucerne production for year-round feed. Supply to Gauteng processors.", tip:"Irrigation and fodder self-sufficiency are prerequisites. Without feed security, dairy is high risk.", breed:"Holstein", type:"Dairy", market:"Gauteng processors · Nestlé Mossel Bay · Parmalat supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:90, survival:88, liveKg:5500, dressing:45, wool:0, feed:14000, health:1500, ewePrice:24000, weanerPrice:6500, be:5 },
+  gauteng:      { name:"Gauteng",      short:"Gauteng",    fill:"#c86000", stroke:"#844000", hoverFill:"#dc7818", climate:"Highveld · 600–800mm · Mild", rainfall:"600–800mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Gauteng peri-urban dairy faces land cost and zoning challenges. Strong milk demand. Proximity to Clover, Parmalat, and Nestlé processing. Few remaining commercial dairies.", tip:"Few large operations viable given land cost. Focus on value-add (artisanal cheese, pasteurised direct sales).", breed:"Holstein", type:"Dairy", market:"Clover Pretoria · Parmalat Johannesburg · premium fresh milk", rep:25, oh:2500, labour:6000, hired:12000, woolMonth:0, lambing:92, survival:90, liveKg:7000, dressing:46, wool:0, feed:18000, health:1600, ewePrice:28000, weanerPrice:7500, be:5 },
+  mpumalanga:   { name:"Mpumalanga",   short:"Mpuma-\nlanga", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Highveld · 600–900mm · Summer rain", rainfall:"600–900mm", season:"Summer", frost:"Moderate", humidity:"Medium", parasites:"Medium", drought:"Occasional", dairyDensity:"Low", primary:["Holstein","Jersey"], secondary:["Guernsey"], avoid:[], why:"Highveld Mpumalanga (Dullstroom, Lydenburg area) has excellent dairy climate. Good fodder production. Supply to Gauteng and Mozambique border markets.", tip:"Standerton and Lydenburg — good dairy potential with irrigation. Consider cheese/yoghurt value-add.", breed:"Holstein", type:"Dairy", market:"Parmalat Mpumalanga · Gauteng supply · regional processors", rep:25, oh:2000, labour:5400, hired:11000, woolMonth:0, lambing:91, survival:89, liveKg:6000, dressing:45, wool:0, feed:14000, health:1500, ewePrice:25000, weanerPrice:6800, be:5 },
+  free_state:   { name:"Free State",   short:"Free State", fill:"#c8b400", stroke:"#847800", hoverFill:"#deca18", climate:"Semi-arid Grassland · 350–550mm · Cold winters", rainfall:"350–550mm", season:"Summer", frost:"Severe", humidity:"Low", parasites:"Low", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Bloemfontein basin and Wepener area support commercial dairy. Low parasite pressure. Cold winters reduce mastitis pressure. Strong Clover and Parmalat procurement in province.", tip:"Winter fodder planning critical. Good maize silage production possible on centre pivots.", breed:"Holstein", type:"Dairy", market:"Clover Bloemfontein · Parmalat Free State · Nestlé supply", rep:25, oh:1900, labour:5200, hired:10500, woolMonth:0, lambing:91, survival:89, liveKg:6500, dressing:45, wool:0, feed:13000, health:1400, ewePrice:24000, weanerPrice:6500, be:4 },
+  kwazulu_natal:{ name:"KwaZulu-Natal",short:"KZN",        fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Sub-tropical · 700–1100mm · Hot and humid", rainfall:"700–1100mm", season:"Summer", frost:"None", humidity:"High", parasites:"Very high", drought:"Rare", dairyDensity:"Medium", primary:["Holstein","Guernsey"], secondary:["Jersey","Ayrshire"], avoid:["Holstein in hot coastal zones"], why:"KZN Midlands (Nottingham Road, Mooi River) is SA's most scenic dairy country. Excellent rainfall, year-round grazing possible. Mastitis management essential in high humidity.", tip:"Notties-Mooi River: the benchmark for SA pasture-based dairy. Excellent grass growth year-round.", breed:"Holstein × Guernsey", type:"Dairy", market:"Clover KZN · Nestlé Mossel Bay supply · Natal Fresh Produce", rep:25, oh:2200, labour:5600, hired:11500, woolMonth:0, lambing:92, survival:90, liveKg:6500, dressing:46, wool:0, feed:11000, health:1600, ewePrice:26000, weanerPrice:7000, be:4 },
+  eastern_cape: { name:"Eastern Cape", short:"E. Cape",    fill:"#58aa18", stroke:"#3a7010", hoverFill:"#70c228", climate:"Diverse · 250–700mm · Variable", rainfall:"250–700mm", season:"Mixed", frost:"Moderate", humidity:"Variable", parasites:"Medium", drought:"Frequent", dairyDensity:"Medium", primary:["Holstein","Jersey","Ayrshire"], secondary:["Guernsey"], avoid:[], why:"Eastern Cape (Tsitsikamma, Humansdorp, Queenstown) has strong dairy heritage. Tsitsikamma pasture-based systems internationally renowned. Good milk processor access.", tip:"Tsitsikamma: SA's premium pasture-based dairy region. Jersey grass milk commands retail premiums.", breed:"Jersey", type:"Dairy", market:"Parmalat Eastern Cape · Woodlands Dairy · Keiskamma Trust", rep:25, oh:1900, labour:5000, hired:10000, woolMonth:0, lambing:90, survival:88, liveKg:5500, dressing:45, wool:0, feed:10000, health:1400, ewePrice:23000, weanerPrice:6200, be:5 },
+  western_cape: { name:"Western Cape", short:"W. Cape",    fill:"#1a8a20", stroke:"#0e5a14", hoverFill:"#28a030", climate:"Mediterranean · 400–800mm · Winter rain", rainfall:"400–800mm", season:"Winter", frost:"Light", humidity:"Moderate", parasites:"Low", drought:"Seasonal", dairyDensity:"Very high", primary:["Holstein","Jersey"], secondary:["Guernsey","Ayrshire"], avoid:[], why:"Western Cape (Overberg, Swartland, George) dominates SA dairy. SA's most productive dairy region. Year-round grass growth in coastal areas. Excellent cold chain, processor access and export potential.", tip:"Overberg is SA's dairy heartland — Caledon to Bredasdorp. Jersey pasture milk fetches R9–12/litre from premium processors.", breed:"Holstein / Jersey", type:"Dairy", market:"Clover WC · Danone South Africa · Parmalat WC · Woolworths milk supply", rep:25, oh:2500, labour:6000, hired:12500, woolMonth:0, lambing:93, survival:91, liveKg:7500, dressing:47, wool:0, feed:12000, health:1500, ewePrice:30000, weanerPrice:8000, be:4 },
+  northern_cape:{ name:"Northern Cape",short:"N. Cape",    fill:"#b81818", stroke:"#781010", hoverFill:"#d02828", climate:"Arid · 150–300mm · Extreme temperatures", rainfall:"150–300mm", season:"Mixed", frost:"Severe", humidity:"Very low", parasites:"Very low", drought:"Endemic", dairyDensity:"Very low", primary:["Jersey","Ayrshire"], secondary:[], avoid:["Holstein without full TMR and cooling"], why:"Very limited dairy in Northern Cape. Upington and Springbok small operations on irrigation. High feed import cost. Only viable with irrigation water rights and committed processor contract.", tip:"Only consider with permanent irrigation and a signed processor contract. Heat stress cooling system mandatory.", breed:"Jersey", type:"Dairy", market:"Kimberley local supply · small-scale fresh milk", rep:25, oh:1700, labour:4800, hired:9500, woolMonth:0, lambing:87, survival:86, liveKg:4000, dressing:44, wool:0, feed:15000, health:1600, ewePrice:20000, weanerPrice:5500, be:13 },
 };
 const DAIRY_CARRYING_CAPACITY = {
   extensive:     { limpopo:0.5, north_west:0.4, gauteng:0.8, mpumalanga:0.7, free_state:0.5, kwazulu_natal:0.8, eastern_cape:0.5, western_cape:1.0, northern_cape:0.2 },
@@ -755,14 +755,14 @@ const LIVESTOCK_MODULES = {
   dairy: {
     id:"dairy", emoji:"🐮", label:"Dairy Cattle", labelPlural:"SA Dairy Cattle",
     terms:{ unit:"cow", units:"cows", group:"herd", young:"heifer", youngs:"heifers",
-            rateLabel:"Calving", priceLabel:"Cow price", saleMonthLabel:"Peak milk months" },
+            rateLabel:"Calving", priceLabel:"Milk R/litre", saleMonthLabel:"Peak milk months" },
     provinceData: DAIRY_PROVINCE_DATA,
     carryingCapacity: DAIRY_CARRYING_CAPACITY,
     provinceDefaults: DAIRY_PROVINCE_DEFAULTS,
     calcFn: (reg, carcass, size, labour, overhead, extra) =>
-      calcFull(reg, carcass, size, labour, overhead, extra, [5, 10, 20, 50, 100, 200]),
-    carcassDefault: 7,
-    carcassLabel: "Milk R/litre (placeholder)",
+      calcDairy(reg, carcass, size, labour, overhead, extra, [5, 10, 20, 50, 100, 200, 500]),
+    carcassDefault: 6.5,
+    carcassLabel: "Milk R/litre",
   },
 };
 
@@ -1201,6 +1201,127 @@ function calcPigs(reg, carcass, sowCount, labour, overhead = reg.oh ?? 1800, ext
   };
 }
 
+function calcDairy(reg, milkPrice, herdSize, labour, overhead = reg.oh ?? 2000, extraCosts = {}, scalePoints = [5, 10, 20, 50, 100, 200, 500]) {
+  const {
+    bond           = 0,
+    feedOverride   = null,
+    healthOverride = null,
+    fencing        = 0,
+    misc           = 0,
+  } = extraCosts;
+
+  const feedCost   = feedOverride   !== null ? feedOverride   : reg.feed;
+  const healthCost = healthOverride !== null ? healthOverride : reg.health;
+  const extraFixed = bond + fencing + misc;
+
+  const litresPerCow  = reg.liveKg;                              // repurposed: milk L/cow/yr
+  const calvingRate   = reg.lambing / 100;                       // 0.87–0.93
+  const replaceCost   = reg.ewePrice * (reg.rep / 100);          // R20k-30k × 25%
+  const cullIncome    = calvingRate * (reg.rep / 100) * reg.ewePrice * 0.40; // culled cows @ 40% of replacement value
+
+  const milkRevPerCow  = litresPerCow * milkPrice;
+  const totalRevPerCow = milkRevPerCow + cullIncome;
+
+  const labourShare   = (labour * 12) / herdSize;
+  const overheadShare = ((overhead + extraFixed) * 12) / herdSize;
+  const totalCostPerCow = feedCost + healthCost + labourShare + overheadShare + replaceCost;
+  const profitPerCow  = totalRevPerCow - totalCostPerCow;
+
+  const roi     = profitPerCow / reg.ewePrice;
+  const payback = profitPerCow > 0 ? reg.ewePrice / profitPerCow : null;
+
+  const varMargin   = totalRevPerCow - feedCost - healthCost - replaceCost;
+  const fixedAnnual = (labour + overhead + extraFixed) * 12;
+  const breakeven   = varMargin > 0 ? Math.ceil(fixedAnnual / varMargin) : null;
+
+  const cowPurchase    = herdSize * reg.ewePrice;
+  const monthlyOpex    = (feedCost / 12 + healthCost / 12) * herdSize
+                         + labour + overhead + extraFixed
+                         + reg.ewePrice * (reg.rep / 100) * herdSize / 12;
+  const workingCapital = Math.round(monthlyOpex * 6); // 6-month setup buffer
+  const capital        = cowPurchase + workingCapital;
+
+  const costBreakdown = {
+    feed:     { label: "Feed (TMR / pasture)", annual: feedCost * herdSize,    perEwe: feedCost },
+    health:   { label: "Meds / vet",           annual: healthCost * herdSize,  perEwe: healthCost },
+    labour:   { label: "Labour",               annual: labour * 12,            perEwe: labourShare },
+    overhead: { label: "Overhead",             annual: overhead * 12,          perEwe: (overhead * 12) / herdSize },
+    replace:  { label: "Heifer replacement",   annual: replaceCost * herdSize, perEwe: replaceCost },
+    bond:     { label: "Bond repayment",       annual: bond * 12,              perEwe: (bond * 12) / herdSize },
+    fencing:  { label: "Fencing / infra",      annual: fencing * 12,           perEwe: (fencing * 12) / herdSize },
+    misc:     { label: "Miscellaneous",        annual: misc * 12,              perEwe: (misc * 12) / herdSize },
+  };
+
+  const scaleRows = scalePoints.map(n => {
+    const ls   = (labour * 12) / n;
+    const os   = ((overhead + extraFixed) * 12) / n;
+    const cost = feedCost + healthCost + ls + os + replaceCost;
+    const p    = totalRevPerCow - cost;
+    return { n, rev: totalRevPerCow * n, profit: p * n, roi: p / reg.ewePrice };
+  });
+
+  // Dairy cashflow: monthly milk income from month 4 (herd settles in, first full lactation)
+  const monthlyRev = (totalRevPerCow * herdSize) / 12;
+  const cf36 = Array.from({ length: 36 }, (_, i) => {
+    const m   = i + 1;
+    const rev = m >= 4 ? monthlyRev : monthlyRev * 0.35 * (m / 3);
+    const ev  = [];
+    if (m === 1)                               ev.push("Herd purchased · Milking parlour commissioned");
+    if (m === 4 || m === 16 || m === 28)       ev.push("AI / Mating");
+    if (m === 9 || m === 21 || m === 33)       ev.push("Calving");
+    if ([2, 7, 11, 14, 19, 23].includes(m))   ev.push("Vet check · Milk quality test");
+    if (m === 12 || m === 24 || m === 36)      ev.push("Annual production review");
+    return {
+      m, rev, lambRev: rev, woolRev: 0, cost: monthlyOpex, profit: rev - monthlyOpex,
+      mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), events: ev.join(", "),
+    };
+  });
+  let cum = -cowPurchase;
+  cf36.forEach(r => { cum += r.profit; r.cum = Math.round(cum); });
+
+  const firstProfitMonth = cf36.find(r => r.profit > 0)?.m ?? null;
+  const paybackMonth     = cf36.find(r => r.cum >= 0)?.m ?? null;
+  const yr1 = cf36[11]?.cum ?? 0;
+  const yr2 = cf36[23]?.cum ?? 0;
+  const yr3 = cf36[35]?.cum ?? 0;
+
+  const annualFlockProfit = profitPerCow * herdSize;
+  const npv5 = [-cowPurchase, ...Array(5).fill(annualFlockProfit)]
+    .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+
+  let mvoCapital = null;
+  if (breakeven) {
+    const mvoOpex = (feedCost / 12 + healthCost / 12) * breakeven + labour + overhead + extraFixed
+                    + reg.ewePrice * (reg.rep / 100) * breakeven / 12;
+    mvoCapital = breakeven * reg.ewePrice + Math.round(mvoOpex * 6);
+  }
+
+  const sensRows = [-20, -15, -10, -5, 0, 5, 10, 15, 20].map(pct => {
+    const adj   = milkPrice * (1 + pct / 100);
+    const rAdj  = litresPerCow * adj + cullIncome;
+    const vmAdj = rAdj - feedCost - healthCost - replaceCost;
+    const pAdj  = rAdj - feedCost - healthCost - replaceCost - fixedAnnual / herdSize;
+    const beAdj = vmAdj > 0 ? Math.ceil(fixedAnnual / vmAdj) : null;
+    return { pct, adj, pp: pAdj, fp: pAdj * herdSize, roi: pAdj / reg.ewePrice, be: beAdj };
+  });
+
+  return {
+    lambsPerEwe: litresPerCow, carcassKg: 1.0,
+    lambRevPerEwe: milkRevPerCow, woolRevPerEwe: cullIncome, totalRevPerEwe: totalRevPerCow,
+    labourShare, overheadShare, replaceCost, totalCostPerEwe: totalCostPerCow,
+    profitPerEwe: profitPerCow, roi, payback, breakeven,
+    ewePurchase: cowPurchase, workingCapital, capital, mvoCapital,
+    flockRev: totalRevPerCow * herdSize,
+    flockProfit: profitPerCow * herdSize,
+    varMargin, fixedAnnual,
+    costBreakdown, feedCost, healthCost, extraFixed,
+    scaleRows, yr1, yr2, yr3, cf36, npv5,
+    firstProfitMonth, paybackMonth,
+    litresPerCow, milkRevPerCow, cullIncome,
+    isDairy: true,
+  };
+}
+
 function calcPoultry(reg, carcass, flockSize, labour, overhead = reg.oh ?? 2000, extraCosts = {}, scalePoints = [500, 1000, 2000, 5000, 10000, 20000]) {
   const {
     bond           = 0,
@@ -1393,7 +1514,7 @@ const LIVESTOCK_TYPES = [
   { id:"goats",   emoji:"🐐", label:"Goats",         sub:"Boer goat & dairy operations",      status:"active" },
   { id:"pigs",    emoji:"🐖", label:"Pigs",          sub:"Commercial piggery models",          status:"active" },
   { id:"poultry", emoji:"🐓", label:"Poultry",       sub:"Broiler & layer operations",         status:"active" },
-  { id:"dairy",   emoji:"🐮", label:"Dairy Cattle",  sub:"Milk production feasibility",        status:"soon"   },
+  { id:"dairy",   emoji:"🐮", label:"Dairy Cattle",  sub:"Milk production feasibility",        status:"active" },
 ];
 const riskLabel = v => v === "Low" || v === "Very low" || v === "None" ? "risk-low" : v === "High" || v === "Very high" || v === "Severe, frequent" ? "risk-high" : "risk-med";
 const PAY_METHODS = [

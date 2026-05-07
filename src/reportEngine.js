@@ -137,10 +137,13 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
   const ck        = r.liveKg * (r.dressing / 100);
   const isPig     = r.lambing > 1000;
   const isPoultry = !isPig && r.liveKg < 5 && r.dressing !== 100;
+  const isDairy   = !isPig && !isPoultry && r.liveKg >= 4000;
   const lpe       = isPig
     ? r.lambing / 100
     : isPoultry
     ? (r.lambing / 100) * (r.survival / 100)
+    : isDairy
+    ? r.liveKg                               // litres per cow per year
     : (r.lambing / 100) * (r.survival / 100) * 0.85;
   const fa  = (lab + r.oh + extraFixed) * 12;
   const revPE = lpe * ck * carcass + r.wool;
@@ -170,7 +173,7 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
   const lrm = Math.floor(flock * lpe * 0.5) * ck * carcass;
   const wrm = r.wool * flock;
   const isBee    = r.dressing === 100;
-  const isCattle = !isBee && !isPig && !isPoultry && r.liveKg >= 100;
+  const isCattle = !isBee && !isPig && !isPoultry && !isDairy && r.liveKg >= 100;
   let cum = -(flock * r.ewePrice);
   const cfRows = Array.from({ length: 36 }, (_, i) => {
     const m  = i + 1;
@@ -297,6 +300,73 @@ export function buildReportData(r, flock, lm, carcass, inputs = {}) {
       yr2: cfRowsPoultry[23]?.cum ?? 0,
       yr3: cfRowsPoultry[35]?.cum ?? 0,
       isPoultry: true, chickCostPerYear, infraPerSlot,
+    };
+  }
+
+  // ── Dairy (milk-yield) branch ─────────────────────────────────────────────────
+  if (isDairy) {
+    const litresPerCow   = r.liveKg;
+    const calvingRate    = r.lambing / 100;
+    const replaceCostD   = r.ewePrice * (r.rep / 100);
+    const cullIncome     = calvingRate * (r.rep / 100) * r.ewePrice * 0.40;
+    const milkRevPerCow  = litresPerCow * carcass;
+    const totalRevPerCow = milkRevPerCow + cullIncome;
+    const varPEDairy     = feedCost + healthCost + replaceCostD;
+    const vmDairy        = totalRevPerCow - varPEDairy;
+    const ppDairy        = totalRevPerCow - varPEDairy - fa / flock;
+    const beDairy        = vmDairy > 0 ? Math.ceil(fa / vmDairy) : null;
+
+    const cowPurchase    = flock * r.ewePrice;
+    const mcDairy        = (feedCost / 12 + healthCost / 12) * flock
+                           + lab + r.oh + extraFixed
+                           + r.ewePrice * (r.rep / 100) * flock / 12;
+    const capitalDairy   = cowPurchase + Math.round(mcDairy * 6);
+    const npv5Dairy      = [-cowPurchase, ...Array(5).fill(ppDairy * flock)]
+      .reduce((acc, v, i) => acc + v / Math.pow(1.10, i), 0);
+
+    const monthlyRevDairy = (totalRevPerCow * flock) / 12;
+    let cumD = -cowPurchase;
+    const cfRowsDairy = Array.from({ length: 36 }, (_, i) => {
+      const m      = i + 1;
+      const rev    = m >= 4 ? monthlyRevDairy : monthlyRevDairy * 0.35 * (m / 3);
+      const profit = rev - mcDairy;
+      cumD += profit;
+      const ev = [];
+      if (m === 1)                               ev.push("Herd purchased · Parlour commissioned");
+      if (m === 4 || m === 16 || m === 28)       ev.push("AI / Mating");
+      if (m === 9 || m === 21 || m === 33)       ev.push("Calving");
+      if ([2, 7, 11, 14, 19, 23].includes(m))   ev.push("Vet check · Milk quality test");
+      if ([12, 24, 36].includes(m))              ev.push("Annual production review");
+      return { m, mo: MONTHS[(m - 1) % 12], yr: Math.ceil(m / 12), rev, cost: mcDairy, profit, cum: Math.round(cumD), events: ev.join(", ") };
+    });
+
+    const firstPositiveDairy = cfRowsDairy.find(d => d.rev > 0);
+    const scaleRowsDairy = [5, 10, 20, 50, 100, 200, 500].map(n => {
+      const ls = fa / n;
+      const p  = totalRevPerCow - varPEDairy - ls;
+      return { n, pp: p, fp: p * n, rev: totalRevPerCow * n, roi: p / r.ewePrice, cap: n * r.ewePrice + Math.round(mcDairy * 6), ok: p > 0 };
+    });
+    const sensRowsDairy = [-20, -15, -10, -5, 0, 5, 10, 15, 20].map(pct => {
+      const adj   = carcass * (1 + pct / 100);
+      const rAdj  = litresPerCow * adj + cullIncome;
+      const vmAdj = rAdj - varPEDairy;
+      const pAdj  = rAdj - varPEDairy - fa / flock;
+      const beAdj = vmAdj > 0 ? Math.ceil(fa / vmAdj) : null;
+      return { pct, adj, pp: pAdj, fp: pAdj * flock, roi: pAdj / r.ewePrice, be: beAdj };
+    });
+
+    return {
+      r, flock, lm, carcass,
+      lab, ck: 1.0, lpe: litresPerCow, fa,
+      revPE: totalRevPerCow, varPE: varPEDairy, vm: vmDairy,
+      be: beDairy, pp: ppDairy, capital: capitalDairy, npv5: npv5Dairy,
+      scaleRows: scaleRowsDairy, cfRows: cfRowsDairy, firstPositive: firstPositiveDairy,
+      sensRows: sensRowsDairy, mc: mcDairy,
+      feedCost, healthCost, productionSystem, marketChannel, feedSource,
+      yr1: cfRowsDairy[11]?.cum ?? 0,
+      yr2: cfRowsDairy[23]?.cum ?? 0,
+      yr3: cfRowsDairy[35]?.cum ?? 0,
+      isDairy: true, litresPerCow, milkRevPerCow, cullIncome, replaceCost: replaceCostD,
     };
   }
 
@@ -2247,13 +2317,234 @@ FIVE ACTIONS THIS WEEK:
   };
 }
 
+// ── DAIRY BREED SOURCES ───────────────────────────────────────────────────────
+const DAIRY_BREED_SOURCES = {
+  "Holstein":
+    "Holstein SA (holstein.co.za) coordinates annual progeny tests and young bull evaluations. For commercial cow herds, source from SA Studbook (studbook.co.za) registered breeders — insist on cows with a minimum of three lactation records and a published production index. The South African Dairy Genetic Improvement Scheme (SAGIS — sagis.org.za) publishes EBV data for all registered bulls and can supply sire referrals. For contract AI, contact STUD SA (studsa.co.za) for a current Holstein sire catalogue with SA-calibrated production EBVs.",
+  "Jersey":
+    "Jersey SA (jersey.co.za) maintains the breed register and coordinates the annual Jersey National Championship. Jersey cows with production records above 5,500L/lactation represent top-quartile genetics in SA — source from breeders with at least two generations of recorded data. For pasture-based systems, the SA Jersey excels in butterfat percentage (4.8–5.2%) and heat tolerance — ideal for KZN Midlands, Eastern Cape, and Western Cape systems. Contact Jersey SA for a province-specific stud directory.",
+  "Holstein × Guernsey":
+    "The Holstein × Guernsey (and similar Bos taurus crossbreds) are common in pasture-based systems, particularly KZN Midlands. Cross-bred cows from commercial dairy herds are available through Livestock Auctioneers SA (LAASA — laasa.co.za) provincial sales. For systematic crossbreeding, contact Moorepark Genetics (Ireland) South African distributors for Guernsey semen, or use STUD SA for a local Guernsey sire selection.",
+  "Holstein / Jersey":
+    "Western Cape producers often run both Holstein and Jersey herds, or Holstein × Jersey crosses, to combine milk volume with fat/protein percentage. Source from Cape Winelands and Overberg registered breeders — the Western Cape Dairy Association (wcda.co.za) coordinates farm visits and genetic referrals. Premium Woolworths and Danone supply contracts in the Western Cape specify minimum fat % thresholds — confirm breed selection matches your processor's payment schedule.",
+  "Guernsey":
+    "The Guernsey is less common in SA but is experiencing a revival in pasture-based premium milk production. Guernsey milk has naturally high A2 beta-casein content, commanding growing consumer premiums. Contact the Guernsey Cattle Society of SA for registered breeders. Best suited to Western Cape, KZN Midlands, and Mpumalanga Highveld pasture systems.",
+  "Ayrshire":
+    "The Ayrshire is a robust dual-purpose breed used in both dairy and marginal conditions. SA Ayrshire Cattle Breeders' Society coordinates provincial sales. Ayrshire suits emerging farmer programs and heat-tolerant systems in Limpopo and Northern Cape where Holstein productivity drops under heat stress.",
+  "_default":
+    "Contact Milk SA (milksa.co.za) — SA's dairy industry body — for a list of registered stud breeders and commercial replacement heifer auctions in your province. The South African Studbook (studbook.co.za) maintains the official dairy breed registers. For AI semen, STUD SA (studsa.co.za) and SEMEX SA offer provincial sire catalogues with SA production EBV data. Always insist on three-lactation production records before purchasing cows — undocumented cows from clearance sales are the single largest source of poor performance in new dairy enterprises.",
+};
+
+// ── DAIRY REPORT ──────────────────────────────────────────────────────────────
+function generateDairyReport(reportData, buyerName, T) {
+  const { r, flock, lm, carcass, lab, fa, revPE, varPE, vm, be, pp, capital, npv5,
+          scaleRows, cfRows, firstPositive, sensRows, yr1, yr2, yr3, mc,
+          feedCost, healthCost, productionSystem, marketChannel, feedSource,
+          litresPerCow, milkRevPerCow, cullIncome, replaceCost } = reportData;
+
+  const calvingRate = r.lambing / 100;
+
+  const lmNote     = lm === "owner"
+    ? `owner-operated (${ZAR(lab)}/mo notional — BCEA 2024 hired benchmark ${ZAR(r.hired)}/mo)`
+    : `hired worker at ${ZAR(r.hired)}/mo (BCEA 2024 Sectoral Determination + UIF + SDL)`;
+  const feedNote   = feedCost !== r.feed
+    ? `${ZAR(feedCost)}/cow/yr — client-specified (province benchmark: ${ZAR(r.feed)})`
+    : `${ZAR(feedCost)}/cow/yr — TMR / pasture supplement budget based on ${litresPerCow.toLocaleString()}L/cow/yr yield target in ${r.name}`;
+  const healthNote = healthCost !== r.health
+    ? `${ZAR(healthCost)}/cow/yr — client-specified (province benchmark: ${ZAR(r.health)})`
+    : `${ZAR(healthCost)}/cow/yr — routine vet, mastitis treatment, foot bathing, vaccination (FMD, Brucellosis, BVD), pregnancy diagnosis`;
+  const profileLine = `Production system: ${productionSystem} · Market channel: ${marketChannel} · Feed source: ${feedSource}`;
+
+  const s20 = sensRows.find(s => s.pct === -20);
+  const viabilityVerdict = pp > 0
+    ? `VIABLE — this ${flock}-cow ${r.breed} dairy in ${r.name} is profitable at R${carcass}/litre, generating ${ZAR(pp)}/cow/year net (${PCT(pp / r.ewePrice)} ROI on cow capital).`
+    : `MARGINAL — at ${flock} cows, this operation falls below the ${be ?? "?"}-cow breakeven. Fixed costs of ${ZAR(fa)}/yr cannot be covered at current scale. Scale to at least ${be ?? flock + 5} cows before committing to full infrastructure.`;
+  const bankRating = pp > 0 && flock >= (be ?? 0) * 1.2 ? "STRONG" : pp > 0 ? "MODERATE" : "MARGINAL";
+  const breedSource = DAIRY_BREED_SOURCES[r.breed] || DAIRY_BREED_SOURCES["_default"];
+  const scaleStr = scaleRows.filter((_,i) => i % 2 === 0)
+    .map(rw => `${rw.n} cows: profit/cow ${ZAR(rw.fp / rw.n)} · herd profit ${ZAR(rw.fp)} · ROI ${PCT(rw.roi)}`)
+    .join("\n");
+  const sensTable = sensRows.filter(s => [-20,-10,0,10,20].includes(s.pct))
+    .map(s => `  ${s.pct>0?"+":""}${s.pct}% (R${s.adj.toFixed(2)}/L): profit/cow ${ZAR(s.pp)} · ROI ${PCT(s.roi)} · BE ${s.be ?? "∞"} cows`)
+    .join("\n");
+  const cfTable = cfRows.filter(row => row.rev > 0 || row.m === 1 || row.m % 12 === 0)
+    .map(rw => `Mo ${rw.m} (${rw.mo} Yr${rw.yr}): Rev ${ZAR(rw.rev)} · Cost ${ZAR(rw.cost)} · P&L ${ZAR(rw.profit)} · Cum ${ZAR(rw.cum)}`)
+    .join("\n");
+
+  const TITLES = [
+    "Executive Summary", "Regional Analysis", "Breed Analysis",
+    "Financial Model & Assumptions", "36-Month Cashflow Analysis",
+    "Scale & Breakeven Analysis", "Risk Analysis & Sensitivity",
+    "Capital Structure & Financing", "Implementation Roadmap",
+  ];
+
+  const bodies = [
+    `${viabilityVerdict}
+
+Operation profile: ${flock}-cow commercial dairy in ${r.name}. Target: ${litresPerCow.toLocaleString()}L/cow/yr · Milk price: R${carcass}/litre · Calving rate: ${(calvingRate*100).toFixed(0)}% · ${r.breed}. System: ${productionSystem} · Market: ${marketChannel} · Labour: ${lmNote}.
+
+Key financials: Milk revenue ${ZAR(milkRevPerCow)}/cow/yr · Cull cow income ${ZAR(Math.round(cullIncome))}/cow/yr · Total revenue ${ZAR(revPE)}/cow/yr · Variable cost ${ZAR(varPE)}/cow · Variable margin ${ZAR(vm)}/cow · Fixed annual ${ZAR(fa)} · Breakeven ${be ?? "N/A"} cows · Profit/cow ${ZAR(pp)}/yr · Herd profit ${ZAR(pp * flock)}/yr · Capital required ${ZAR(capital)} · 5-year NPV at 10%: ${ZAR(npv5)}.
+
+Cashflow: First milk revenue from Month 1 (ramp-up 3 months). Full monthly milk income from Month 4. Three-year trajectory: Year 1 cumulative ${ZAR(yr1)} · Year 2 ${ZAR(yr2)} · Year 3 ${ZAR(yr3)}.
+
+Land Bank bankability: ${bankRating}. ${bankRating === "STRONG" ? "Strong monthly milk income with predictable processor payment (Clover, Parmalat, Danone typically pay within 21 days of delivery) — dairy is among the most bankable SA agricultural enterprises at scale." : bankRating === "MODERATE" ? "Viable margin at current scale — the fixed-cost leverage of dairy improves rapidly above 20 cows." : `Below the ${be}-cow breakeven — commit to scale before commissioning a milking parlour.`}`,
+
+    `${r.name} — ${r.climate}.
+
+Commercial dairy in ${r.name}: ${r.why}
+
+Market infrastructure: ${r.market}.
+
+${r.name} dairy productivity context: The model targets ${litresPerCow.toLocaleString()} litres/cow/year — reflecting local climate, breed, and system intensity. SA commercial benchmark: 6,000–9,000L/cow/yr for intensive Holstein; 4,500–6,000L for intensive Jersey; 5,500–7,500L for well-managed pasture systems (KZN Midlands, Western Cape). Below-average operations: <4,000L/cow/yr.
+
+Feed cost dominates dairy economics in ${r.name}: ${feedNote}. Feed represents 50–65% of total variable cost in SA commercial dairy. In intensive TMR systems (Gauteng, North West), feed cost is 65–70% of total. In pasture-based systems (Western Cape, KZN, Eastern Cape), it drops to 40–50% as grazed grass replaces expensive concentrate. Fodder self-sufficiency (maize silage, lucerne, ryegrass) is the most powerful long-term cost lever.
+
+${r.tip ? `Provincial insight: ${r.tip}` : ""}`,
+
+    `${r.breed} — the primary commercial dairy breed for ${r.name}.
+
+Production parameters used in this model:
+• Milk yield: ${litresPerCow.toLocaleString()} litres/cow/year (at R${carcass}/litre = ${ZAR(milkRevPerCow)}/cow/yr milk revenue)
+• Calving rate: ${(calvingRate*100).toFixed(0)}% · Replacement rate: ${r.rep}%/yr → ${Math.round(flock * r.rep/100)} heifers/yr for this ${flock}-cow herd
+• Cull cow income: ${ZAR(Math.round(cullIncome))}/cow/yr — culled cows (${r.rep}% turnover) at ~40% of replacement value
+• Total revenue per cow: ${ZAR(Math.round(revPE))}
+• Replacement heifer cost: ${ZAR(r.ewePrice)} × ${r.rep}% = ${ZAR(Math.round(replaceCost))}/cow/yr
+
+${r.breed} in ${r.name}: ${r.breed.includes("Holstein")
+  ? `The Holstein is the world's highest-producing dairy breed but has the greatest heat stress sensitivity — sustained temperatures above 26°C reduce milk yield 10–25%. In ${r.name}, ${r.name === "Western Cape" || r.name === "KwaZulu-Natal" || r.name === "Mpumalanga" ? "climate conditions are favourable and Holstein performance is close to genetic potential with good management." : "Holstein production falls below potential without shade, cooling, and high-quality TMR — consider heat-tolerant crossbreds if cooling infrastructure is not planned."}`
+  : r.breed.includes("Jersey")
+  ? `The Jersey is SA's most heat-tolerant Bos taurus dairy breed, with the highest butterfat (4.8–5.2%) and protein (3.5–3.8%) of the main commercial breeds. Jersey is the preferred breed for premium processors (Woolworths, artisanal cheese, A2 milk). A well-managed Jersey in ${r.name} achieves ${litresPerCow.toLocaleString()}L/cow/yr with a feed cost advantage of 15–20% over Holstein at equivalent milk income (butterfat payment premiums offset the lower volume).`
+  : `The ${r.breed} delivers consistent milk production in ${r.name}'s conditions. Cross-bred herds benefit from hybrid vigour (10–15% production advantage over the lower-performing purebred parent) and can combine the Holstein's milk volume with the Jersey's butterfat percentage and heat tolerance.`}
+
+Where to source stock: ${breedSource}`,
+
+    `Financial model assumptions — SA commercial dairy benchmark.
+
+Revenue assumptions:
+• Milk yield: ${litresPerCow.toLocaleString()}L/cow/yr · Milk price: R${carcass}/litre (verify current processor contract rate and DALRRD minimum milk price)
+• Milk revenue/cow: ${ZAR(milkRevPerCow)}
+• Cull cow income: ${ZAR(Math.round(cullIncome))}/cow/yr (${r.rep}% of herd culled/yr × ${ZAR(r.ewePrice)} replacement value × 40% cull discount)
+• Total revenue/cow: ${ZAR(Math.round(revPE))}
+
+Cost assumptions:
+• Feed: ${feedNote}
+• Health / vet: ${healthNote}
+• Labour: ${lmNote}
+• Overhead: ${ZAR(r.oh)}/mo — electricity (milking parlour, bulk tank, cooling), water, fuel, vehicle, admin
+• Replacement heifer: ${ZAR(r.ewePrice)}/heifer × ${r.rep}%/yr = ${ZAR(Math.round(replaceCost))}/cow/yr
+• ${profileLine}
+
+Variable margin of ${ZAR(vm)}/cow/yr is the key profitability indicator. Every cow above breakeven (${be ?? "N/A"}) adds ${ZAR(vm)} directly to profit. Milk price and feed cost are the two most volatile inputs — they often move in opposite directions (high maize price = high feed cost; export grain = weak Rand = higher import protein prices). Milk price sensitivity is shown in Section 7.
+
+Note on milk pricing: SA processors pay on a monthly basis with quality deductions for somatic cell count (SCC > 400,000/mL triggers price penalties), butterfat %, protein %, and total bacterial count. Your quoted R${carcass}/litre is a baseline — actual receipts will vary 5–15% monthly based on quality.`,
+
+    `Dairy cashflow — ${flock}-cow herd, monthly milk income.
+
+Ramp-up period (Months 1–3): Herd purchased and settled. Milk production below capacity during stress adjustment. Estimated milk revenue at 35% of steady-state.
+Full production (Month 4 onwards): ${ZAR(Math.round((revPE * flock) / 12))}/month steady milk income.
+
+Month-by-month cashflow (key events and year-ends shown):
+${cfTable}
+
+Year 1 cumulative: ${ZAR(yr1)}. Year 2: ${ZAR(yr2)}. Year 3: ${ZAR(yr3)}.
+
+Dairy cash-flow advantage: Milk is delivered daily and paid monthly — no other livestock enterprise generates revenue as continuously as dairy. The predictable monthly processor payment makes dairy the most bankable SA agricultural enterprise. The challenge is that costs are equally daily — cows cannot skip feeding, dosing, or milking without immediate production loss.
+
+Working capital: The 6-month buffer of ${ZAR(Math.round(mc * 6))} covers the ramp-up period and initial vet/start-up costs on top of the cow purchase of ${ZAR(flock * r.ewePrice)}.`,
+
+    `Breakeven: ${be ?? "N/A"} cows. Variable margin of ${ZAR(vm)}/cow/yr covers fixed overhead of ${ZAR(fa)}/yr.
+
+${scaleStr}
+
+Your position: ${flock} cows${be && flock < be ? ` — ${be - flock} cows below breakeven` : be ? ` — ${flock - be} cows above breakeven (${PCT((flock - be) / be)} headroom)` : ""}.
+
+Scale insight: Dairy fixed costs (milking parlour, bulk tank, one full-time employee) are spread over the herd. The breakeven (${be ?? "N/A"} cows) is low because milk revenue per cow is high relative to fixed costs. Each cow added above breakeven generates ${ZAR(vm)}/yr additional net income. The challenge in SA dairy is not breakeven — it is capital for infrastructure and cow purchase. A 50-cow parlour is the practical minimum for a cost-efficient milking operation.
+
+At what scale does this become a primary income? ${vm > 0 ? `${Math.round((fa + 500000) / vm)} cows generate approximately R500,000/year net — a full primary farm income.` : "Improve variable margin (milk price, feed cost, or yield) first."}`,
+
+    `1. MILK PRICE RISK (Revenue sensitivity)
+${sensTable}
+
+At a 20% milk price drop (to R${s20?.adj.toFixed(2) ?? "?"}/litre): ${s20 && s20.pp < 0 ? `this ${flock}-cow herd falls below breakeven. SA milk prices have experienced drops of 15–20% during processor contract renegotiations. Build a 3-month cash buffer of ${ZAR(Math.round(mc * 3))} before year 1.` : `profit/cow drops to ${ZAR(s20?.pp ?? 0)} — this operation remains viable even in a price trough.`}
+
+Import parity note: SA milk prices track import parity for powdered milk. Rand weakness typically pushes processor prices up; Rand strength pushes them down. Multi-year processor contracts (Clover, Parmalat, Danone) offer 12–24 month price stability — prioritise these over spot market.
+
+2. FEED / MAIZE PRICE RISK (50–65% of variable cost)
+A 20% maize price increase in ${r.name} increases annual feed cost by approximately ${ZAR(Math.round(feedCost * 0.15 * flock))}/yr for this ${flock}-cow herd (assuming 30% maize content in TMR ration). Mitigation: grow your own silage where land allows; negotiate fixed-price annual supply contracts with local co-ops; consider pre-buying maize in harvest season (April–June) when SA prices are lowest.
+
+3. MASTITIS RISK (Production destroyer)
+Mastitis is the most common and costly disease in SA dairy — subclinical mastitis (no visible symptoms) costs R2,000–5,000/cow/year in undetected yield loss. Prevention: California Mastitis Test (CMT) monthly on all quarters; teat dipping after every milking; dry-cow therapy at drying-off (all cows, all quarters). Target somatic cell count (SCC) below 200,000/mL — above 400,000/mL triggers processor price penalties and indicates systemic mastitis. ${r.name === "KwaZulu-Natal" ? "KZN's high humidity significantly elevates mastitis risk — teat hygiene and parlour sanitation protocols are non-negotiable." : ""}
+
+4. ELECTRICITY / COLD CHAIN RISK (Milk is perishable in hours)
+A ${flock}-cow dairy milking twice daily uses approximately ${Math.round(flock * 12)} kWh/day for milking, cooling, and bulk tank. Fresh milk must reach ≤4°C within 2 hours of milking — above this temperature, it is condemned at the processor. Load-shedding above Stage 2 requires a backup generator sized to run the bulk milk tank cooling compressor. Budget ${ZAR(Math.round(flock * 3500))} for a standby generator as a non-negotiable capital item.
+
+5. REPRODUCTION RISK (Empty cows cost R5,000+/month in wasted feed)
+A cow that does not conceive within 100 days post-calving is progressively less profitable. Target: Calving Interval ≤ 385 days; Conception Rate ≥ 50% at first AI; Involuntary Culling Rate < 10%/yr. Track these KPIs monthly — they are the leading indicators of next year's milk revenue. Poor reproduction is responsible for 30–40% of the gap between top-quartile and average SA dairy operations.`,
+
+    `Total capital required: ${ZAR(capital)}.
+
+Cow/heifer purchase: ${ZAR(flock * r.ewePrice)} (${flock} cows × ${ZAR(r.ewePrice)}/cow)
+6-month working capital (ramp-up buffer): ${ZAR(Math.round(mc * 6))}
+  (Monthly opex ${ZAR(Math.round(mc))} × 6 months — covers feed, vet, labour during transition)
+
+Infrastructure capital (farmer-provided — not in working capital above):
+• Milking parlour (herringbone 4+4 for <30 cows; 8+8 for 30–80; rotary for 80+): R250,000–R1,500,000
+• Bulk milk tank (2,500L for 20–40 cows; 5,000L for 40–80 cows): R150,000–R400,000
+• Cow housing / free-stall barns (intensive): R4,000–R10,000/cow
+• Fodder storage (silage bunker, hay shed): R150,000–R500,000 depending on size
+• Standby generator (bulk tank cooling + parlour): ${ZAR(Math.round(flock * 3500))} estimated
+• Estimated total infrastructure for ${flock}-cow dairy: ${ZAR(flock * 25000)}–${ZAR(flock * 50000)} (highly variable by spec)
+
+Financing options:
+• Land Bank Dairy Production Loan: Land Bank has a dedicated dairy product line — contact your nearest branch with this feasibility report and a 12-month milk delivery schedule. Dairy qualifies for production credit against monthly milk income as collateral.
+• ABSA Agri Mortgage / FNB Agri: Dairy infrastructure qualifies as agricultural assets for 72–120 month term finance. Milking parlour and bulk tank are standard security assets.
+• Milk SA (milksa.co.za) development fund: Contact Milk SA for current dairy producer support programs — specifically the Dairy Hub model for small-scale processors and new entrant grants through the DALRRD.
+• Processor financing: Clover, Parmalat, and Danone have historically offered equipment finance arrangements for supply-secured producers. Discuss with your provincial processor representative.
+
+Payback on cow capital: ${pp > 0 ? `${(r.ewePrice / pp).toFixed(1)} years per cow at current margin — infrastructure adds 3–5 years to full payback.` : "not yet viable at current scale — improve yield, price, or reduce feed cost first."}`,
+
+    `PHASE 1 — Site planning and approvals (Months 1–2):
+• Select a site with year-round clean water (dairy uses 80–120L/cow/day minimum), slope for effluent drainage, and all-weather access road for the milk tanker
+• Obtain environmental authorisation for effluent management — dairies above 20 cows require a Water Use License (WUL) from the Department of Water and Sanitation (DWS — dws.gov.za)
+• Contact your target processor (Clover, Parmalat, Danone, or regional processor) — confirm milk supply agreement terms, transport distances, quality requirements, and payment schedule before committing to infrastructure
+• Register as a dairy producer with your provincial DAFF office and enrol in the National Animal Health Information System (NAHIS) — mandatory for FMD vaccination compliance
+
+PHASE 2 — Infrastructure (Months 2–5):
+• Commission a milking parlour and bulk milk tank (herringbone 4+4 or 6+6 is appropriate for 20–60 cows) — engage a specialist dairy equipment supplier for design
+• Install effluent management system: concrete-lined sump and lined storage lagoon (or biodigester) — non-negotiable before first cow arrives
+• Feed storage: concrete bunker silo for maize silage if growing own fodder; enclosed hay shed for dry roughage
+• Install standby generator sized to run bulk tank compressor — confirm load before purchasing
+
+PHASE 3 — Herd establishment (Month 1 of operation):
+• Source ${flock} cows from a registered stud with minimum 2 lactation records: ${breedSource.split(".")[0]}.
+• Health clearance on arrival: Brucellosis (B. abortus B19 vaccination mandatory for all females; DAFF licensed vet); Tuberculosis testing (if from unknown status herd); Johne's disease ELISA test recommended
+• Day 1–7: milk individual cows on all four quarters for CMT (California Mastitis Test) — identify and treat high SCC cows before entering the bulk tank
+• Register with your chosen processor and book first milk collection — confirm cooling tank is operational ≥48 hours before first milking
+• Establish a daily milk record: cow ID, milk weight AM + PM, SCC sample monthly. A basic parlour milk meter costs R800–R2,000/unit and is the most important ROI tool you will own
+
+FIVE ACTIONS THIS WEEK:
+1. Contact Milk SA (milksa.co.za) — request the ${r.name} processor directory and ask for a list of SAGIS-registered studs near you
+2. Call your nearest Clover, Parmalat, or regional processor representative — confirm current milk price, quality requirements, and transport availability in ${r.name}
+3. Get a milking parlour quote from a specialist equipment supplier (GEA, DeLaval, or local SA agent) for a system sized to your ${flock}-cow herd
+4. Apply for Land Bank dairy pre-qualification — bring this feasibility report and your intended processor contract
+5. Contact your provincial DAFF veterinarian — confirm current FMD vaccination area status and Brucellosis accreditation requirements for ${r.name}`,
+  ];
+
+  return {
+    sections: TITLES.map((title, i) => ({ title, body: bodies[i] ?? "" })),
+    raw: bodies.join("\n\n"),
+    reportData, buyerName, generatedAt: new Date().toISOString(), isSandbox: false,
+  };
+}
+
 // ── DISPATCHER ────────────────────────────────────────────────────────────────
 export function generateProReport(reportData, buyerName, terms) {
   const T = terms ?? { unit:"ewe", units:"ewes", group:"flock", young:"lamb", youngs:"lambs", rateLabel:"Lambing" };
-  if (T.unit === "hive")  return generateBeesReport(reportData, buyerName, T);
-  if (T.unit === "cow")   return generateCattleReport(reportData, buyerName, T);
-  if (T.unit === "doe")   return generateGoatsReport(reportData, buyerName, T);
-  if (T.unit === "sow")   return generatePigsReport(reportData, buyerName, T);
-  if (T.unit === "bird")  return generatePoultryReport(reportData, buyerName, T);
+  if (reportData.isDairy)  return generateDairyReport(reportData, buyerName, T);
+  if (T.unit === "hive")   return generateBeesReport(reportData, buyerName, T);
+  if (T.unit === "cow")    return generateCattleReport(reportData, buyerName, T);
+  if (T.unit === "doe")    return generateGoatsReport(reportData, buyerName, T);
+  if (T.unit === "sow")    return generatePigsReport(reportData, buyerName, T);
+  if (T.unit === "bird")   return generatePoultryReport(reportData, buyerName, T);
   return generateSheepReport(reportData, buyerName, T);
 }
