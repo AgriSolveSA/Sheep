@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0; }
-        .plan-option { border: 2px solid #dde8dd; border-radius: 8px; padding: 1rem; cursor: pointer; transition: border-color .15s; }
-        .plan-option.selected { border-color: #1a5c2a; background: #f0f7f1; }
+        .plan-option { border: 1.5px solid var(--border); border-radius: 8px; padding: 1rem; cursor: pointer; transition: border-color .15s, background .15s; background: var(--surface); }
+        .plan-option.selected { border-color: var(--green); background: rgba(122,204,58,.08); }
         .plan-option input[type=radio] { display: none; }
-        .plan-option__name { font-weight: 700; color: #1a1a1a; }
-        .plan-option__price { font-size: 1.1rem; color: #1a5c2a; font-weight: 800; }
-        .plan-option__desc { font-size: .8rem; color: #555; margin-top: .3rem; }
+        .plan-option__name { font-weight: 600; color: #f0ece0; }
+        .plan-option__price { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #7acc3a; font-weight: 700; }
+        .plan-option__desc { font-size: .78rem; color: #9a9590; margin-top: .3rem; }
     </style>
 </head>
 <body class="auth-page">
@@ -86,6 +86,17 @@
         </div>
 
         <div class="form-group">
+            <label>Photos <span class="text-muted" style="font-weight:400;">(optional — up to 3)</span></label>
+            <label id="photo-zone" style="display:block;border:1.5px dashed #2c3c2c;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:var(--surface);transition:border-color .15s;">
+                <input type="file" id="photos" accept="image/jpeg,image/png" multiple style="display:none;">
+                <div style="font-size:1.5rem;margin-bottom:.3rem;">📷</div>
+                <div style="color:var(--muted);font-size:.88rem;">Click to add photos</div>
+                <div style="color:var(--dim);font-size:.78rem;margin-top:.2rem;">JPG or PNG · max 5 MB each · up to 3</div>
+            </label>
+            <div id="photo-preview" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;"></div>
+        </div>
+
+        <div class="form-group">
             <label>Listing plan</label>
             <div class="plan-grid">
                 <label class="plan-option selected" for="plan-free">
@@ -130,7 +141,7 @@
 'use strict';
 Auth.requireAuth();
 
-// Plan option visual selection
+// ─── Plan option visual selection ─────────────────────────────────────────────
 document.querySelectorAll('.plan-option').forEach(opt => {
     opt.addEventListener('click', () => {
         document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
@@ -138,18 +149,56 @@ document.querySelectorAll('.plan-option').forEach(opt => {
     });
 });
 
+// ─── Photo upload & preview ───────────────────────────────────────────────────
+let photoFiles = [];
+
+document.getElementById('photo-zone').addEventListener('mouseenter', () => {
+    document.getElementById('photo-zone').style.borderColor = '#7acc3a';
+});
+document.getElementById('photo-zone').addEventListener('mouseleave', () => {
+    document.getElementById('photo-zone').style.borderColor = '#2c3c2c';
+});
+
+document.getElementById('photos').addEventListener('change', function () {
+    const remaining = 3 - photoFiles.length;
+    const added = Array.from(this.files).slice(0, remaining);
+    photoFiles = [...photoFiles, ...added];
+    this.value = '';
+    renderPreviews();
+});
+
+function renderPreviews() {
+    const container = document.getElementById('photo-preview');
+    container.innerHTML = photoFiles.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        return `<div style="position:relative;">
+            <img src="${url}" style="height:80px;width:80px;object-fit:cover;border-radius:6px;border:1px solid #2c3c2c;">
+            <button type="button" onclick="removePhoto(${i})" title="Remove"
+                style="position:absolute;top:-6px;right:-6px;background:#c0392b;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:.75rem;line-height:18px;padding:0;text-align:center;">×</button>
+        </div>`;
+    }).join('');
+    const zone = document.getElementById('photo-zone').querySelector('div:last-child');
+    if (zone) zone.style.display = photoFiles.length >= 3 ? 'none' : '';
+}
+
+function removePhoto(i) {
+    photoFiles.splice(i, 1);
+    renderPreviews();
+}
+
+// ─── Form submit ──────────────────────────────────────────────────────────────
 document.getElementById('listing-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAlert('alert-box');
 
-    const category   = document.getElementById('category').value;
-    const title      = document.getElementById('title').value.trim();
-    const description= document.getElementById('description').value.trim();
-    const price      = document.getElementById('price').value;
-    const price_neg  = document.getElementById('price_negotiable').checked;
-    const province   = document.getElementById('province').value;
-    const district   = document.getElementById('district').value.trim();
-    const plan_type  = document.querySelector('input[name=plan_type]:checked').value;
+    const category    = document.getElementById('category').value;
+    const title       = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const price       = document.getElementById('price').value;
+    const price_neg   = document.getElementById('price_negotiable').checked;
+    const province    = document.getElementById('province').value;
+    const district    = document.getElementById('district').value.trim();
+    const plan_type   = document.querySelector('input[name=plan_type]:checked').value;
 
     if (!category) return showAlert('alert-box', 'Please select a category.', 'error');
     if (!title)    return showAlert('alert-box', 'Please enter a listing title.', 'error');
@@ -159,6 +208,7 @@ document.getElementById('listing-form').addEventListener('submit', async (e) => 
     setLoading(btn, true);
 
     try {
+        // Step 1: create the listing
         const res = await API.createListing({
             category, title, description, province, district,
             price: price ? parseFloat(price) : null,
@@ -166,14 +216,29 @@ document.getElementById('listing-form').addEventListener('submit', async (e) => 
             plan_type
         });
 
+        // Step 2: upload photos if any
+        if (photoFiles.length > 0) {
+            const fd = new FormData();
+            photoFiles.forEach(f => fd.append('images', f));
+            await fetch(`/api/listings/${res.id}/images`, {
+                method: 'POST',
+                headers: { 'X-Session-Id': API._session() },
+                body: fd
+            });
+        }
+
+        // Step 3: redirect to PayFast for paid plans, or show success
         if (res.pfForm) {
-            // Paid plan — redirect to PayFast
             const container = document.getElementById('pf-container');
             container.style.display = 'block';
             container.innerHTML = res.pfForm.html;
+            const form = container.querySelector('#pf-form');
+            if (form) form.submit();
         } else {
             showAlert('alert-box', 'Your listing is live! <a href="/listings.html">View listings →</a>', 'success');
             document.getElementById('listing-form').reset();
+            photoFiles = [];
+            renderPreviews();
             setLoading(btn, false);
         }
     } catch (err) {

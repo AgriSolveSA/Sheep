@@ -63,7 +63,7 @@ router.post('/create-order', requireAuth, (req, res) => {
 });
 
 // POST /webhook/payfast  — PayFast ITN
-router.post('/payfast-itn', express.urlencoded({ extended: false }), async (req, res) => {
+router.post('/payfast', express.urlencoded({ extended: false }), async (req, res) => {
     // Always respond 200 first — PayFast retries on non-200
     res.sendStatus(200);
 
@@ -131,8 +131,8 @@ router.post('/payfast-itn', express.urlencoded({ extended: false }), async (req,
         }
 
         const amountReceived = Math.round(parseFloat(req.body.amount_gross) * 100);
-        if (amountReceived < REPORT_PRICE_CENTS) {
-            audit(db, payment.user_id, 'payfast_amount_mismatch', req, { expected: REPORT_PRICE_CENTS, received: amountReceived });
+        if (amountReceived < payment.amount) {
+            audit(db, payment.user_id, 'payfast_amount_mismatch', req, { expected: payment.amount, received: amountReceived });
             return;
         }
 
@@ -159,7 +159,7 @@ router.post('/payfast-itn', express.urlencoded({ extended: false }), async (req,
         if (prevPayments.n === 0) {
             const referral = db.prepare("SELECT * FROM referrals WHERE referred_id = ? AND status = 'pending'").get(payment.user_id);
             if (referral) {
-                const voucherCode = 'REF-' + require('crypto').randomBytes(4).toString('hex').toUpperCase();
+                const voucherCode = 'REF-' + crypto.randomBytes(4).toString('hex').toUpperCase();
                 db.prepare('INSERT INTO vouchers (code, amount, user_id) VALUES (?,?,?)').run(voucherCode, referral.reward_cents, referral.referrer_id);
                 db.prepare("UPDATE referrals SET status = 'rewarded' WHERE id = ?").run(referral.id);
                 audit(db, referral.referrer_id, 'referral_rewarded', req, { voucherCode, referredUserId: payment.user_id });
@@ -262,10 +262,88 @@ router.post('/eft-notify', requireAuth, (req, res) => {
     });
 });
 
+function isAdmin(user) { return user.is_admin === 1 || user.id === 1; }
+
+// GET /api/admin/stats
+router.get('/admin/stats', requireAuth, (req, res) => {
+    if (!isAdmin(req.user)) return res.status(403).json({ error: true, code: 'FORBIDDEN', message: 'Admin only.' });
+    const db = getDb();
+
+    const users = db.prepare(`
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN created_at >= datetime('now', '-7 days') THEN 1 ELSE 0 END) AS new_7d,
+            SUM(ecosystem_member) AS members
+        FROM users
+    `).get();
+
+    const revenue = db.prepare(`
+        SELECT ROUND(SUM(amount) / 100.0, 2) AS total_zar
+        FROM payments WHERE status = 'completed'
+    `).get();
+
+    const reports = db.prepare(`
+        SELECT SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END) AS delivered
+        FROM reports
+    `).get();
+
+    const leads = db.prepare('SELECT COUNT(*) AS total FROM leads').get();
+
+    const eft_pending = db.prepare(
+        "SELECT COUNT(*) AS n FROM payments WHERE method = 'manual_eft' AND status = 'pending'"
+    ).get().n;
+
+    const kyc_pending = db.prepare(
+        "SELECT COUNT(*) AS n FROM kyc_documents WHERE verified = 0"
+    ).get().n;
+
+    const listings = db.prepare(
+        "SELECT SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending FROM listings"
+    ).get();
+
+    const referrals = db.prepare(
+        "SELECT SUM(CASE WHEN status = 'rewarded' THEN 1 ELSE 0 END) AS rewarded FROM referrals"
+    ).get();
+
+    const recent_audit = db.prepare(`
+        SELECT a.created_at, a.action, a.ip_address, u.email
+        FROM audit_log a LEFT JOIN users u ON u.id = a.user_id
+        ORDER BY a.created_at DESC LIMIT 50
+    `).all();
+
+    res.json({
+        users:       { total: users.total || 0, new_7d: users.new_7d || 0, members: users.members || 0 },
+        revenue:     { total_zar: revenue.total_zar || 0 },
+        reports:     { delivered: reports.delivered || 0 },
+        leads:       { total: leads.total || 0 },
+        eft_pending:  eft_pending || 0,
+        kyc_pending:  kyc_pending || 0,
+        listings:    { pending: listings.pending || 0 },
+        referrals:   { rewarded: referrals.rewarded || 0 },
+        recent_audit
+    });
+});
+
+// GET /api/admin/eft-pending
+router.get('/admin/eft-pending', requireAuth, (req, res) => {
+    if (!isAdmin(req.user)) return res.status(403).json({ error: true, code: 'FORBIDDEN', message: 'Admin only.' });
+    const db = getDb();
+    const payments = db.prepare(`
+        SELECT p.id, p.amount, p.created_at,
+               u.email, u.full_name,
+               r.id AS report_id
+        FROM payments p
+        JOIN users u ON u.id = p.user_id
+        LEFT JOIN reports r ON r.payment_id = p.id
+        WHERE p.method = 'manual_eft' AND p.status = 'pending'
+        ORDER BY p.created_at ASC
+    `).all();
+    res.json(payments);
+});
+
 // POST /api/admin/eft-confirm  — admin confirms EFT received and triggers PDF + email
-// Protected by admin check (user_id === 1 for now — replace with role field later)
 router.post('/admin/eft-confirm', requireAuth, async (req, res) => {
-    if (req.user.id !== 1)
+    if (!isAdmin(req.user))
         return res.status(403).json({ error: true, code: 'FORBIDDEN', message: 'Admin only.' });
 
     const { payment_id } = req.body;

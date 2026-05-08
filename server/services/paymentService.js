@@ -2,6 +2,16 @@ const crypto = require('crypto');
 const https  = require('https');
 const qs     = require('querystring');
 
+function _signParams(params) {
+    const base = Object.entries(params)
+        .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
+        .join('&');
+    const sigStr = process.env.PAYFAST_PASSPHRASE
+        ? `${base}&passphrase=${encodeURIComponent(process.env.PAYFAST_PASSPHRASE)}`
+        : base;
+    return crypto.createHash('md5').update(sigStr).digest('hex');
+}
+
 // PayFast IP whitelist (sandbox + live)
 const PAYFAST_IPS = [
     '197.97.145.144','197.97.145.145','197.97.145.146','197.97.145.147',
@@ -34,17 +44,7 @@ function buildPayFastForm({ paymentId, reportId, userId, email, fullName, amount
         custom_str3:    type === 'report' ? userId.toString() : (reportId || '').toString()
     };
 
-    if (process.env.PAYFAST_PASSPHRASE) {
-        const sigStr = Object.entries(params)
-            .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
-            .join('&') + `&passphrase=${encodeURIComponent(process.env.PAYFAST_PASSPHRASE)}`;
-        params.signature = crypto.createHash('md5').update(sigStr).digest('hex');
-    } else {
-        const sigStr = Object.entries(params)
-            .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
-            .join('&');
-        params.signature = crypto.createHash('md5').update(sigStr).digest('hex');
-    }
+    params.signature = _signParams(params);
 
     const fields = Object.entries(params)
         .map(([k, v]) => `<input type="hidden" name="${k}" value="${String(v).replace(/"/g, '&quot;')}" />`)
@@ -52,7 +52,7 @@ function buildPayFastForm({ paymentId, reportId, userId, email, fullName, amount
 
     return {
         action: `https://${host}/eng/process`,
-        html: `<form id="pf-form" action="https://${host}/eng/process" method="POST">${fields}<button type="submit">Pay R${(amountCents/100).toFixed(2)} via PayFast</button></form><script>document.getElementById('pf-form').submit();</script>`
+        html: `<form id="pf-form" action="https://${host}/eng/process" method="POST">${fields}</form>`
     };
 }
 
@@ -143,17 +143,7 @@ function buildSubscriptionForm({ paymentId, userId, email, fullName }) {
         cycles:            '0'    // indefinite
     };
 
-    if (process.env.PAYFAST_PASSPHRASE) {
-        const sigStr = Object.entries(params)
-            .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
-            .join('&') + `&passphrase=${encodeURIComponent(process.env.PAYFAST_PASSPHRASE)}`;
-        params.signature = crypto.createHash('md5').update(sigStr).digest('hex');
-    } else {
-        const sigStr = Object.entries(params)
-            .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim())}`)
-            .join('&');
-        params.signature = crypto.createHash('md5').update(sigStr).digest('hex');
-    }
+    params.signature = _signParams(params);
 
     const fields = Object.entries(params)
         .map(([k, v]) => `<input type="hidden" name="${k}" value="${String(v).replace(/"/g, '&quot;')}" />`)
@@ -161,7 +151,7 @@ function buildSubscriptionForm({ paymentId, userId, email, fullName }) {
 
     return {
         action: `https://${host}/eng/process`,
-        html:   `<form id="pf-form" action="https://${host}/eng/process" method="POST">${fields}<button type="submit">Subscribe R99/month via PayFast</button></form><script>document.getElementById('pf-form').submit();</script>`
+        html:   `<form id="pf-form" action="https://${host}/eng/process" method="POST">${fields}</form>`
     };
 }
 

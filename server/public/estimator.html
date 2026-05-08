@@ -7,37 +7,38 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         .estimator-hero {
-            background: linear-gradient(135deg, #1a5c2a 0%, #2d7a42 100%);
-            color: #fff;
+            background: linear-gradient(135deg, var(--bg) 0%, var(--surface) 100%);
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
             padding: 3rem 1rem 2rem;
             text-align: center;
         }
-        .estimator-hero h1 { font-size: clamp(1.5rem, 4vw, 2.4rem); margin-bottom: .75rem; }
-        .estimator-hero p  { font-size: 1.05rem; opacity: .88; max-width: 520px; margin: 0 auto; }
+        .estimator-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 4vw, 2.4rem); margin-bottom: .75rem; }
+        .estimator-hero p  { font-size: .95rem; color: #b8b4a8; max-width: 520px; margin: 0 auto; }
         .savings-card {
-            background: linear-gradient(135deg, #1a5c2a, #2d7a42);
-            color: #fff;
+            background: var(--card);
+            border: 1px solid #2c3c2c;
             border-radius: 12px;
             padding: 2rem;
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        .savings-card__label { font-size: .85rem; opacity: .8; text-transform: uppercase; letter-spacing: .05em; }
-        .savings-card__amount { font-size: clamp(2rem, 8vw, 3.2rem); font-weight: 800; margin: .25rem 0; }
-        .savings-card__sub { font-size: .85rem; opacity: .75; }
+        .savings-card__label { font-size: .8rem; color: #9a9590; text-transform: uppercase; letter-spacing: .06em; }
+        .savings-card__amount { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 8vw, 3rem); font-weight: 700; color: #7acc3a; margin: .25rem 0; }
+        .savings-card__sub { font-size: .85rem; color: #b8b4a8; }
         .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
         .breakdown-item {
-            background: #fff;
-            border: 1px solid #dde8dd;
+            background: var(--card);
+            border: 1px solid #2c3c2c;
             border-radius: 8px;
             padding: 1rem;
             text-align: center;
         }
-        .breakdown-item__value { font-size: 1.5rem; font-weight: 700; color: #1a5c2a; }
-        .breakdown-item__label { font-size: .82rem; color: #555; margin-top: .25rem; }
+        .breakdown-item__value { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #7acc3a; }
+        .breakdown-item__label { font-size: .8rem; color: #9a9590; margin-top: .25rem; }
         .capture-card {
-            background: #fff8e1;
-            border: 2px solid #c8b400;
+            background: rgba(212,181,90,.08);
+            border: 1.5px solid rgba(212,181,90,.35);
             border-radius: 10px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
@@ -52,11 +53,11 @@
 
 <!-- Nav -->
 <nav class="nav">
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="color:#fff;font-size:1.15rem;font-weight:700;">Shepherd<span style="color:#c8b400;">AI</span></a>
-        <div style="display:flex;gap:1rem;align-items:center;">
-            <a href="/login.html" style="color:rgba(255,255,255,.85);font-size:.9rem;">Log in</a>
-            <a href="/signup.html" class="btn" style="background:#c8b400;color:#000;border:none;padding:.4rem 1rem;font-size:.9rem;">Get started</a>
+    <div class="nav__inner">
+        <a href="/" class="nav__logo">Shepherd<span>AI</span></a>
+        <div class="nav__links" id="nav-auth">
+            <a href="/login.html">Log in</a>
+            <a href="/signup.html" class="btn">Get started</a>
         </div>
     </div>
 </nav>
@@ -68,13 +69,13 @@
 </div>
 
 <!-- Content -->
-<div class="section" style="background:#f0f7f1;padding-top:2.5rem;padding-bottom:3rem;">
+<div class="section" style="padding-top:2.5rem;padding-bottom:3rem;">
     <div class="container">
 
         <!-- STEP 1: Form -->
         <div id="step-form" class="step">
             <div class="card" style="padding:2rem;">
-                <h2 style="color:#1a5c2a;margin-bottom:1.5rem;font-size:1.3rem;">Enter your farm details</h2>
+                <h2 style="color:var(--text);margin-bottom:1.5rem;font-size:1.2rem;font-family:'Playfair Display',serif;">Enter your farm details</h2>
 
                 <form id="estimator-form" novalidate>
                     <div class="form-group">
@@ -157,14 +158,14 @@
             </div>
 
             <!-- What this means -->
-            <div class="card" style="background:#fff;margin-bottom:1.5rem;">
-                <h3 style="color:#1a5c2a;margin-bottom:.75rem;">What this means for your farm</h3>
-                <p id="insight-text" style="color:#333;line-height:1.7;"></p>
+            <div class="card" style="margin-bottom:1.5rem;">
+                <h3 style="color:#7acc3a;margin-bottom:.75rem;">What this means for your farm</h3>
+                <p id="insight-text" style="color:var(--muted);line-height:1.7;"></p>
             </div>
 
             <!-- Email capture -->
             <div class="capture-card" id="capture-section">
-                <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Get the full breakdown by email</h3>
+                <h3 style="color:#d4b55a;margin-bottom:.5rem;">Get the full breakdown by email</h3>
                 <p class="text-muted" style="font-size:.9rem;margin-bottom:1rem;">
                     We'll send you your results + 3 quick wins you can implement this week. Free.
                 </p>
@@ -188,7 +189,7 @@
 
             <!-- CTA to full report -->
             <div style="text-align:center;padding:1.5rem 0 1rem;">
-                <p style="color:#444;margin-bottom:1rem;max-width:440px;margin-left:auto;margin-right:auto;">
+                <p style="color:var(--muted);margin-bottom:1rem;max-width:440px;margin-left:auto;margin-right:auto;">
                     The full report includes a 36-month cashflow model, province-level benchmarks, your Inefficiency Score, and a prioritised action plan.
                 </p>
                 <a href="/signup.html" class="btn btn-primary btn-lg">Get full report — R199</a>
@@ -222,6 +223,10 @@
 <script src="/app.js"></script>
 <script>
 'use strict';
+if (Auth.isLoggedIn()) {
+    document.getElementById('nav-auth').innerHTML =
+        '<a href="/dashboard.html" class="btn" style="background:#d4b55a;color:#0a0c0a;border-color:#d4b55a;">My dashboard</a>';
+}
 
 // ─── Lookup tables ────────────────────────────────────────────────────────────
 const LIVESTOCK = {

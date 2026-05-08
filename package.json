@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "npx vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server/server.js",
+    "server:dev": "node --watch server/server.js",
+    "init-db": "node server/db/init.js",
+    "seed": "node server/scripts/seed.js"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

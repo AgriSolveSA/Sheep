@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         .guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
-        .guide-card { border: 1px solid #dde8dd; border-radius: 10px; padding: 1.5rem; background: #fff; display: flex; flex-direction: column; }
-        .guide-card__cat { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #1a5c2a; margin-bottom: .5rem; }
-        .guide-card__title { font-size: 1.05rem; font-weight: 700; color: #1a1a1a; margin-bottom: .5rem; flex: 1; }
-        .guide-card__desc { font-size: .88rem; color: #555; margin-bottom: 1rem; line-height: 1.5; }
+        .guide-card { border: 1px solid #2c3c2c; border-radius: 10px; padding: 1.5rem; background: var(--card); display: flex; flex-direction: column; transition: border-color .15s; }
+        .guide-card:hover { border-color: #7acc3a; }
+        .guide-card__cat { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #7acc3a; margin-bottom: .5rem; }
+        .guide-card__title { font-size: 1rem; font-weight: 700; color: #f0ece0; margin-bottom: .5rem; flex: 1; }
+        .guide-card__desc { font-size: .88rem; color: #b8b4a8; margin-bottom: 1rem; line-height: 1.5; }
         .guide-card__footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-        .badge-vet { background: #e8f5e9; color: #1b5e20; font-size: .72rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; }
+        .badge-vet { background: rgba(122,204,58,.15); color: #7acc3a; font-size: .7rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -21,37 +22,36 @@
     <div class="nav__inner">
         <a href="/" class="nav__logo">Shepherd<span>AI</span></a>
         <div class="nav__links">
-            <a href="/estimator.html" style="color:#c8b400;font-weight:600;">Free estimator</a>
+            <a href="/estimator.html" style="color:#d4b55a;font-weight:500;">Free estimator</a>
             <a href="/listings.html">Classifieds</a>
-            <a href="/login.html">Log in</a>
-            <a href="/signup.html" class="btn">Get started</a>
+            <span id="nav-auth"></span>
         </div>
     </div>
 </nav>
 
-<div class="section" style="background:#f0f7f1;padding-top:2.5rem;">
+<div class="section" style="padding-top:2.5rem;">
     <div class="container">
         <div style="margin-bottom:2rem;">
-            <h1 style="color:#1a5c2a;font-size:1.8rem;">Digital Farming Guides</h1>
+            <h1 style="font-family:'Playfair Display',serif;color:var(--text);font-size:1.8rem;">Digital Farming Guides</h1>
             <p class="text-muted">Practical, vet-reviewed guides written for South African conditions. Buy once, download immediately.</p>
         </div>
 
         <div id="alert-box"></div>
 
-        <div id="guides-loading" style="text-align:center;padding:3rem;color:#555;">
-            <span class="spinner" style="border-top-color:#1a5c2a;border-color:rgba(26,92,42,.2);width:24px;height:24px;"></span> Loading guides…
+        <div id="guides-loading" style="text-align:center;padding:3rem;color:var(--muted);">
+            <span class="spinner"></span> Loading guides…
         </div>
 
         <div id="guide-grid" class="guide-grid hidden"></div>
 
-        <div id="guides-empty" class="hidden" style="text-align:center;padding:3rem;color:#555;">
+        <div id="guides-empty" class="hidden" style="text-align:center;padding:3rem;color:var(--muted);">
             <div style="font-size:2.5rem;margin-bottom:1rem;">📚</div>
             <p>Guides are being prepared. Check back soon.</p>
         </div>
 
-        <div class="card mt-4" style="background:#fff8e1;border:2px solid #c8b400;max-width:600px;">
-            <h3 style="color:#1a5c2a;margin-bottom:.5rem;">EFT payment for guides</h3>
-            <p class="text-muted" style="font-size:.9rem;">Prefer to pay by EFT? Transfer R49 per guide to <strong>FNB 62XXXXXXXX</strong>, reference your email + guide name. Email <strong>pay@shepherdai.co.za</strong> — we'll send the PDF within 2 hours.</p>
+        <div class="card mt-4" style="background:rgba(212,181,90,.08);border:1.5px solid rgba(212,181,90,.35);max-width:600px;">
+            <h3 style="color:#d4b55a;margin-bottom:.5rem;">EFT payment for guides</h3>
+            <p class="text-muted" style="font-size:.88rem;">Prefer to pay by EFT? Transfer R49 per guide to <strong style="color:var(--text);">FNB 62XXXXXXXX</strong>, reference your email + guide name. Email <strong style="color:var(--text);">pay@shepherdai.co.za</strong> — we'll send the PDF within 2 hours.</p>
         </div>
     </div>
 </div>
@@ -99,9 +99,10 @@ async function loadGuides() {
             return `<div class="guide-card">
                 <div class="guide-card__cat">${escHtml(catLabel)}</div>
                 <div class="guide-card__title">${escHtml(g.title)}</div>
+                ${g.description ? `<div class="guide-card__desc">${escHtml(g.description)}</div>` : ''}
                 <div class="guide-card__footer">
                     <div>
-                        <strong style="color:#1a5c2a;font-size:1.1rem;">R${(g.price/100).toFixed(0)}</strong>
+                        <strong style="color:#7acc3a;font-size:1.05rem;">R${(g.price/100).toFixed(0)}</strong>
                         ${g.is_vet_reviewed ? '<span class="badge-vet" style="margin-left:.5rem;">Vet reviewed</span>' : ''}
                     </div>
                     ${owned
@@ -130,14 +131,23 @@ async function buyGuide(id, btn) {
     setLoading(btn, true);
     try {
         const res = await API.purchaseGuide(id);
-        // Inject PayFast form and redirect
         const div = document.createElement('div');
         div.innerHTML = res.pfForm.html;
         document.body.appendChild(div);
+        const form = document.getElementById('pf-form');
+        if (form) form.submit();
     } catch (err) {
         showAlert('alert-box', err.message || 'Could not initiate payment. Please try again.', 'error');
         setLoading(btn, false);
     }
+}
+
+// Nav: show dashboard link if logged in, otherwise login + signup
+const navAuth = document.getElementById('nav-auth');
+if (Auth.isLoggedIn()) {
+    navAuth.innerHTML = '<a href="/dashboard.html" class="btn" style="background:#d4b55a;color:#0a0c0a;border-color:#d4b55a;">My dashboard</a>';
+} else {
+    navAuth.innerHTML = '<a href="/login.html">Log in</a> <a href="/signup.html" class="btn">Get started</a>';
 }
 
 loadGuides();

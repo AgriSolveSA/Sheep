@@ -47,6 +47,9 @@ router.post('/signup', limits.signup, async (req, res) => {
     }
 
     audit(db, result.lastInsertRowid, 'signup', req);
+
+    emailService.sendWelcome(email, full_name || '').catch(err => console.error('Welcome email error:', err));
+
     res.status(201).json({ success: true, userId: result.lastInsertRowid });
 });
 
@@ -85,7 +88,7 @@ router.post('/logout', requireAuth, (req, res) => {
 // GET /api/user
 router.get('/user', requireAuth, (req, res) => {
     const db   = getDb();
-    const user = db.prepare('SELECT id, email, full_name, mobile, ecosystem_member, verified, created_at FROM users WHERE id = ?').get(req.user.id);
+    const user = db.prepare('SELECT id, email, full_name, mobile, ecosystem_member, kyc_status, verified, created_at FROM users WHERE id = ?').get(req.user.id);
     res.json(user);
 });
 

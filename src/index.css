@@ -23,6 +23,19 @@
   --danger:     #e06848;   /* orange-red  — losses, warnings                */
 }
 
+[data-theme="light"] {
+  --bg:      #f5f3ee;
+  --surface: #eceae3;
+  --card:    #ffffff;
+  --border:  #c8c4b8;
+  --accent:  #4a8f1f;
+  --gold:    #9e7a14;
+  --text:    #1c1a14;
+  --muted:   #52504a;
+  --dim:     #706e68;
+  --danger:  #c0402a;
+}
+
 /* ── Reset ────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 svg { display: block; }
@@ -72,9 +85,9 @@ body        { font-family: 'DM Mono', 'Courier New', monospace; color: var(--tex
 
 /* ── Map tooltips ─────────────────────────────────────────────────────── */
 .prov-tip {
-  background: rgba(10, 12, 10, 0.96) !important;
-  border: 1px solid #2c3c2c !important;
-  color: #f0ece0 !important;           /* warm white on near-black */
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
   font-family: 'DM Mono', 'Courier New', monospace !important;
   font-size: 13px !important;
   padding: 3px 8px !important;
@@ -85,13 +98,13 @@ body        { font-family: 'DM Mono', 'Courier New', monospace; color: var(--tex
 
 /* ── Leaflet overrides ────────────────────────────────────────────────── */
 .leaflet-container     { font-family: 'DM Mono', 'Courier New', monospace; }
-.leaflet-control-zoom  { border: 1px solid #2c3c2c !important; }
+.leaflet-control-zoom  { border: 1px solid var(--border) !important; }
 .leaflet-control-zoom a {
-  background: #1a201a !important;
-  color: #7acc3a !important;
-  border-bottom: 1px solid #2c3c2c !important;
+  background: var(--card) !important;
+  color: var(--accent) !important;
+  border-bottom: 1px solid var(--border) !important;
 }
-.leaflet-control-zoom a:hover { background: #2c3c2c !important; }
+.leaflet-control-zoom a:hover { background: var(--border) !important; }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 480px) {

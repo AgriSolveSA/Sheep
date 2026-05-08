@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
     ecosystem_member INTEGER DEFAULT 0,
     kyc_status TEXT DEFAULT 'pending',
     verified INTEGER DEFAULT 0,
+    referral_code TEXT,
+    is_admin INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -79,6 +81,7 @@ CREATE TABLE IF NOT EXISTS listings (
     status TEXT DEFAULT 'pending',
     plan_type TEXT DEFAULT 'free',
     visibility_level TEXT DEFAULT 'standard',
+    payment_id INTEGER,
     starts_at DATETIME,
     expires_at DATETIME,
     views INTEGER DEFAULT 0,
@@ -90,7 +93,8 @@ CREATE TABLE IF NOT EXISTS listings (
 -- Guides (digital products)
 CREATE TABLE IF NOT EXISTS guides (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
+    title TEXT NOT NULL UNIQUE,
+    description TEXT,
     category TEXT,
     price INTEGER DEFAULT 4900,
     pdf_path TEXT,
@@ -167,4 +171,5 @@ CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);
 CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
 CREATE INDEX IF NOT EXISTS idx_listings_province ON listings(province);
 CREATE INDEX IF NOT EXISTS idx_vouchers_code ON vouchers(code);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_guides_title ON guides(title);
 CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);

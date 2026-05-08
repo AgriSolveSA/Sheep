@@ -29,7 +29,17 @@ function fileFilter(req, file, cb) {
     }
 }
 
-const kycUpload     = multer({ storage: makeStorage('kyc'),      fileFilter, limits: { fileSize: MAX_SIZE } });
-const listingUpload = multer({ storage: makeStorage('listings'), fileFilter, limits: { fileSize: MAX_SIZE } });
+function imageFilter(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only JPG and PNG images are allowed.'));
+    }
+}
 
-module.exports = { kycUpload, listingUpload };
+const kycUpload          = multer({ storage: makeStorage('kyc'),      fileFilter,  limits: { fileSize: MAX_SIZE } });
+const listingUpload      = multer({ storage: makeStorage('listings'), fileFilter,  limits: { fileSize: MAX_SIZE } });
+const listingImageUpload = multer({ storage: makeStorage('listings'), fileFilter: imageFilter, limits: { fileSize: MAX_SIZE } });
+
+module.exports = { kycUpload, listingUpload, listingImageUpload };

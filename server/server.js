@@ -34,6 +34,9 @@ app.use(express.json({ limit: '1mb' }));
 // ─── Request logging ─────────────────────────────────────────────────────────
 app.use(logger);
 
+// ─── Static: uploaded files (listing photos, KYC docs) ───────────────────────
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // ─── Static: public HTML pages (landing, login, signup, dashboard) ───────────
 const publicDir = path.join(__dirname, 'public');
 if (fs.existsSync(publicDir)) {

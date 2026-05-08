@@ -1,10 +1,8 @@
 const express        = require('express');
-const path           = require('path');
-const fs             = require('fs');
 const { getDb }      = require('../db/database');
 const { requireAuth, optionalAuth } = require('../middleware/auth');
 const paymentService = require('../services/paymentService');
-const { kycUpload }  = require('../services/uploadService');
+const { kycUpload, listingImageUpload } = require('../services/uploadService');
 
 const router = express.Router();
 
@@ -31,7 +29,7 @@ router.get('/listings', optionalAuth, (req, res) => {
     const db = getDb();
     let sql  = `
         SELECT l.id, l.category, l.title, l.price, l.price_negotiable,
-               l.province, l.district, l.plan_type, l.views,
+               l.province, l.district, l.plan_type, l.views, l.images,
                l.created_at, l.expires_at, u.full_name AS seller_name
         FROM listings l
         JOIN users u ON u.id = l.user_id
@@ -51,7 +49,7 @@ router.get('/listings', optionalAuth, (req, res) => {
         params.push(term, term);
     }
 
-    sql += ' ORDER BY l.plan_type DESC, l.created_at DESC LIMIT 60';
+    sql += ` ORDER BY CASE l.plan_type WHEN 'urgent' THEN 4 WHEN 'premium' THEN 3 WHEN 'standard' THEN 2 ELSE 1 END DESC, l.created_at DESC LIMIT 60`;
     const listings = db.prepare(sql).all(...params);
     res.json(listings);
 });
@@ -155,6 +153,27 @@ router.delete('/listings/:id', requireAuth, (req, res) => {
     db.prepare("UPDATE listings SET status = 'removed' WHERE id = ?").run(listing.id);
     audit(db, req.user.id, 'listing_removed', req, { listingId: listing.id });
     res.json({ success: true });
+});
+
+// POST /api/listings/:id/images  — attach photos to an existing listing (max 3)
+router.post('/listings/:id/images', requireAuth, listingImageUpload.array('images', 3), (req, res) => {
+    if (!req.files?.length)
+        return res.status(400).json({ error: true, code: 'NO_FILE', message: 'No image uploaded.' });
+
+    const db        = getDb();
+    const listingId = parseInt(req.params.id, 10);
+    const listing   = db.prepare('SELECT * FROM listings WHERE id = ? AND user_id = ?').get(listingId, req.user.id);
+
+    if (!listing)
+        return res.status(404).json({ error: true, code: 'NOT_FOUND', message: 'Listing not found.' });
+
+    const existing = listing.images ? JSON.parse(listing.images) : [];
+    const added    = req.files.map(f => `/uploads/listings/${f.filename}`);
+    const combined = [...existing, ...added].slice(0, 3);
+
+    db.prepare('UPDATE listings SET images = ? WHERE id = ?').run(JSON.stringify(combined), listingId);
+    audit(db, req.user.id, 'listing_images_uploaded', req, { listingId, count: req.files.length });
+    res.json({ success: true, images: combined });
 });
 
 // POST /api/kyc/upload  — submit KYC documents

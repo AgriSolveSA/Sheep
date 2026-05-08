@@ -987,10 +987,10 @@ const PF = {
   merchantId:  import.meta.env?.VITE_PF_MERCHANT_ID  || "REPLACE_MERCHANT_ID",
   merchantKey: import.meta.env?.VITE_PF_MERCHANT_KEY || "REPLACE_MERCHANT_KEY",
   passphrase:  import.meta.env?.VITE_PF_PASSPHRASE   || "REPLACE_PASSPHRASE",
-  returnUrl:   "https://agrimodel.co.za/success",
-  cancelUrl:   "https://agrimodel.co.za/",
-  notifyUrl:   "https://agrimodel.co.za/api/payfast-notify",
-  sandbox:     false,
+  returnUrl:   (import.meta.env?.VITE_BASE_URL || "https://shepherdai.co.za") + "/calculator/?payment=success",
+  cancelUrl:   (import.meta.env?.VITE_BASE_URL || "https://shepherdai.co.za") + "/calculator/",
+  notifyUrl:   (import.meta.env?.VITE_BASE_URL || "https://shepherdai.co.za") + "/webhook/payfast",
+  sandbox:     import.meta.env?.VITE_PF_SANDBOX !== "false",
   price:       497,
 };
 
@@ -1442,19 +1442,27 @@ function calcPoultry(reg, carcass, flockSize, labour, overhead = reg.oh ?? 2000,
   };
 }
 
-const PALETTE = {
+const DARK_PALETTE = {
   bg:"#0a0c0a",       surface:"#131713",   card:"#1a201a",   border:"#2c3c2c",
   borderHover:"#4a6a34", accent:"#7acc3a", gold:"#d4b55a",   goldDim:"#9a7830",
   text:"#f0ece0",     muted:"#b8b4a8",     dim:"#9a9590",    faint:"#263626",
   danger:"#e06848",   dangerBg:"rgba(224,104,72,.10)",
   ocean:"#0a1520",    land:"rgba(18,36,14,.6)",
 };
+const LIGHT_PALETTE = {
+  bg:"#f5f3ee",       surface:"#eceae3",   card:"#ffffff",   border:"#c8c4b8",
+  borderHover:"#8ab87a", accent:"#4a8f1f", gold:"#9e7a14",   goldDim:"#7a5e0a",
+  text:"#1c1a14",     muted:"#52504a",     dim:"#706e68",    faint:"#d8d4c8",
+  danger:"#c0402a",   dangerBg:"rgba(192,64,42,.10)",
+  ocean:"#c8d8e8",    land:"rgba(200,220,180,.6)",
+};
+let PALETTE = {...DARK_PALETTE};
 
-const CSS = `
+function buildCSS(P) { return `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Mono:wght@300;400;500&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{height:100%;background:${PALETTE.bg};}
-  body{font-family:'DM Mono','Courier New',monospace;color:${PALETTE.text};}
+  html,body{height:100%;background:${P.bg};}
+  body{font-family:'DM Mono','Courier New',monospace;color:${P.text};}
   svg{display:block;}
   .slide-up{animation:su .4s cubic-bezier(.22,.68,0,1.12) both;}
   @keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -1467,21 +1475,21 @@ const CSS = `
   .loading-bar{animation:slide 1.8s linear infinite;}
   .glow-btn{transition:all .2s;}
   .leaflet-container{font-family:'DM Mono','Courier New',monospace;}
-  .prov-tip{background:rgba(10,12,10,.96)!important;border:1px solid #2c3c2c!important;color:#f0ece0!important;font-family:'DM Mono','Courier New',monospace!important;font-size:11px!important;padding:3px 8px!important;border-radius:3px!important;box-shadow:none!important;}
+  .prov-tip{background:${P.surface}!important;border:1px solid ${P.border}!important;color:${P.text}!important;font-family:'DM Mono','Courier New',monospace!important;font-size:11px!important;padding:3px 8px!important;border-radius:3px!important;box-shadow:none!important;}
   .prov-tip::before{display:none!important;}
-  .leaflet-control-zoom{border:1px solid #2c3c2c!important;}
-  .leaflet-control-zoom a{background:#1a201a!important;color:#7acc3a!important;border-bottom:1px solid #2c3c2c!important;}
-  .leaflet-control-zoom a:hover{background:#2c3c2c!important;}
+  .leaflet-control-zoom{border:1px solid ${P.border}!important;}
+  .leaflet-control-zoom a{background:${P.card}!important;color:${P.accent}!important;border-bottom:1px solid ${P.border}!important;}
+  .leaflet-control-zoom a:hover{background:${P.border}!important;}
   .glow-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 24px rgba(200,168,75,.45)!important;}
-  .tab-btn:hover{background:${PALETTE.card}!important;}
-  .pill-btn:hover{border-color:${PALETTE.accent}!important;color:${PALETTE.accent}!important;}
+  .tab-btn:hover{background:${P.card}!important;}
+  .pill-btn:hover{border-color:${P.accent}!important;color:${P.accent}!important;}
   input:focus,select:focus{outline:none;}
   button{touch-action:manipulation;}
   ::-webkit-scrollbar{width:4px;height:4px;}
-  ::-webkit-scrollbar-track{background:${PALETTE.bg};}
-  ::-webkit-scrollbar-thumb{background:${PALETTE.faint};border-radius:2px;}
-  ::-webkit-scrollbar-thumb:hover{background:${PALETTE.dim};}
-  .risk-low{color:#82d448;} .risk-med{color:#c8a84b;} .risk-high{color:#e05c3a;}
+  ::-webkit-scrollbar-track{background:${P.bg};}
+  ::-webkit-scrollbar-thumb{background:${P.faint};border-radius:2px;}
+  ::-webkit-scrollbar-thumb:hover{background:${P.dim};}
+  .risk-low{color:#4a8f1f;} .risk-med{color:#c8a84b;} .risk-high{color:#e05c3a;}
   .hdr-btn-short{display:none;}
   .hdr-btn-full{display:inline;}
   @media(max-width:520px){
@@ -1501,7 +1509,7 @@ const CSS = `
     button{display:none!important;}
     .leaflet-container{display:none!important;}
   }
-`;
+`;}
 
 
 // Module-level constants — avoids recreation on every render
@@ -3049,6 +3057,13 @@ function AdvisorWizard({
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 
 function AgrimodelPro() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('sai_theme') || 'dark');
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sai_theme', theme);
+  }, [theme]);
+  Object.assign(PALETTE, theme === 'dark' ? DARK_PALETTE : LIGHT_PALETTE);
+
   const [selected,  setSelected]  = useState(null);
   const [hovered,   setHovered]   = useState(null);
   const [showPay,   setShowPay]   = useState(false);
@@ -3116,7 +3131,7 @@ function AgrimodelPro() {
 
   // Load accurate province boundaries from GADM 4.1 (authoritative SA demarcation data)
   useEffect(() => {
-    const GADM_URL = "/sa-provinces.json";
+    const GADM_URL = `${import.meta.env.BASE_URL}sa-provinces.json`;
     fetch(GADM_URL)
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(setProvGeo)
@@ -3371,7 +3386,7 @@ function AgrimodelPro() {
 
   return (
     <>
-      <style>{CSS}</style>
+      <style>{buildCSS(PALETTE)}</style>
       {showRestore && <RestoreModal onClose={()=>setShowRestore(false)} onRestore={(code)=>{
         setIsPaid(true);
         setAccessCode(code);
@@ -3493,6 +3508,16 @@ function AgrimodelPro() {
                 <span className="hdr-btn-short">Restore</span>
               </button>
             )}
+            <button
+              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+              title="Toggle light / dark mode"
+              style={{padding:"7px 10px",background:"none",border:`1px solid ${PALETTE.faint}`,color:PALETTE.dim,borderRadius:18,fontSize:16,cursor:"pointer",lineHeight:1}}>
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <a href="/"
+              style={{padding:"7px 12px",background:"none",border:`1px solid ${PALETTE.faint}`,color:PALETTE.muted,borderRadius:18,fontSize:14,cursor:"pointer",textDecoration:"none",whiteSpace:"nowrap"}}>
+              ← Site
+            </a>
             {isPaid ? (
               <button className="glow-btn"
                 onClick={selected ? regenerateReport : undefined}

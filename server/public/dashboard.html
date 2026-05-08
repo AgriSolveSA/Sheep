@@ -11,11 +11,11 @@
 <!-- Header -->
 <div class="dashboard__header">
     <div class="container">
-        <a href="/" style="color:#fff;font-size:1.2rem;font-weight:700;">Shepherd<span style="color:#c8b400;">AI</span></a>
+        <a href="/" style="color:var(--text);font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;">Shepherd<span style="color:#d4b55a;">AI</span></a>
         <div style="display:flex;align-items:center;gap:1.25rem;">
-            <span id="user-greeting" style="font-size:.9rem;opacity:.85;"></span>
-            <a href="/calculator" class="btn" style="background:#c8b400;color:#000;border:none;padding:.4rem 1rem;font-size:.9rem;">New report</a>
-            <button id="logout-btn" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff;padding:.4rem 1rem;font-size:.9rem;">Log out</button>
+            <span id="user-greeting" style="font-size:.85rem;color:var(--muted);"></span>
+            <a href="/calculator" class="btn" style="background:#d4b55a;color:#0a0c0a;border-color:#d4b55a;padding:.4rem 1rem;font-size:.85rem;">New report</a>
+            <button id="logout-btn" class="btn btn-outline" style="padding:.4rem 1rem;font-size:.85rem;">Log out</button>
         </div>
     </div>
 </div>
@@ -35,7 +35,7 @@
                 <div class="stat-card__label">Delivered</div>
             </div>
             <div class="stat-card" id="stat-member-card" style="display:none;">
-                <div class="stat-card__value" style="color:#c8b400;">✓</div>
+                <div class="stat-card__value" style="color:#d4b55a;">✓</div>
                 <div class="stat-card__label">Ecosystem member</div>
             </div>
         </div>
@@ -45,18 +45,18 @@
 
         <!-- Reports table -->
         <div class="card" style="padding:0;overflow:hidden;">
-            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #dde8dd;display:flex;align-items:center;justify-content:space-between;">
-                <h2 style="font-size:1.1rem;color:#1a5c2a;">Your reports</h2>
-                <a href="/calculator" class="btn btn-outline" style="font-size:.85rem;padding:.35rem .9rem;">+ New report</a>
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                <h2 style="font-size:1rem;color:var(--text);font-family:'Playfair Display',serif;">Your reports</h2>
+                <a href="/calculator" class="btn btn-outline" style="font-size:.82rem;padding:.3rem .8rem;">+ New report</a>
             </div>
 
-            <div id="reports-loading" style="padding:2rem;text-align:center;color:#555;">
-                <span class="spinner" style="border-top-color:#1a5c2a;border-color:rgba(26,92,42,.2);width:20px;height:20px;"></span> Loading…
+            <div id="reports-loading" style="padding:2rem;text-align:center;color:var(--muted);">
+                <span class="spinner"></span> Loading…
             </div>
 
-            <div id="reports-empty" class="hidden" style="padding:3rem;text-align:center;color:#555;">
+            <div id="reports-empty" class="hidden" style="padding:3rem;text-align:center;color:var(--muted);">
                 <div style="font-size:3rem;margin-bottom:1rem;">📄</div>
-                <p><strong>No reports yet.</strong></p>
+                <p><strong style="color:var(--text);">No reports yet.</strong></p>
                 <p class="mt-1">Run your first farm profitability analysis to get started.</p>
                 <a href="/calculator" class="btn btn-primary mt-3">Run a report — R199</a>
             </div>
@@ -75,14 +75,14 @@
         </div>
 
         <!-- Upgrade prompt (shown for non-members) -->
-        <div id="upgrade-prompt" class="card mt-4 hidden" style="background:#fff8e1;border:2px solid #c8b400;">
+        <div id="upgrade-prompt" class="card mt-4 hidden" style="background:rgba(212,181,90,.08);border:1.5px solid rgba(212,181,90,.35);">
             <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
                 <div style="font-size:2rem;">⭐</div>
                 <div style="flex:1;">
-                    <strong>Upgrade to Ecosystem membership — R99/month</strong>
-                    <p class="text-muted mt-1" style="font-size:.9rem;">Unlimited reports, quarterly price updates, community access, and priority support.</p>
+                    <strong style="color:var(--text);">Upgrade to Ecosystem membership — R99/month</strong>
+                    <p class="text-muted mt-1" style="font-size:.88rem;">Unlimited reports, quarterly price updates, community access, and priority support.</p>
                 </div>
-                <button id="upgrade-btn" class="btn" style="background:#c8b400;color:#000;border:none;white-space:nowrap;">Subscribe R99/month</button>
+                <button id="upgrade-btn" class="btn" style="background:#d4b55a;color:#0a0c0a;border-color:#d4b55a;white-space:nowrap;">Subscribe R99/month</button>
             </div>
         </div>
 
@@ -90,20 +90,38 @@
         <div id="pf-container" style="display:none;"></div>
 
         <!-- Referral card -->
-        <div id="referral-card" class="card mt-4 hidden" style="background:#f0f7f1;border:1px solid #dde8dd;">
-            <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Bring a neighbour, earn R100</h3>
-            <p class="text-muted" style="font-size:.9rem;margin-bottom:.75rem;">Share your referral link. When your neighbour buys their first report, you get a R100 voucher automatically.</p>
+        <div id="referral-card" class="card mt-4 hidden" style="background:var(--surface);border:1px solid var(--border);">
+            <h3 style="color:#7acc3a;margin-bottom:.5rem;">Bring a neighbour, earn R100</h3>
+            <p class="text-muted" style="font-size:.88rem;margin-bottom:.75rem;">Share your referral link. When your neighbour buys their first report, you get a R100 voucher automatically.</p>
             <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
-                <input type="text" id="referral-link-input" readonly style="flex:1;min-width:0;background:#fff;font-size:.85rem;">
-                <button id="copy-ref-btn" class="btn btn-outline" style="font-size:.85rem;white-space:nowrap;">Copy link</button>
+                <input type="text" id="referral-link-input" readonly style="flex:1;min-width:0;font-size:.85rem;">
+                <button id="copy-ref-btn" class="btn btn-outline" style="font-size:.82rem;white-space:nowrap;">Copy link</button>
             </div>
             <p class="text-muted" style="font-size:.78rem;margin-top:.5rem;" id="ref-stats"></p>
         </div>
 
+        <!-- KYC verification -->
+        <div id="kyc-card" class="card mt-4 hidden" style="background:var(--surface);border:1px solid var(--border);">
+            <h3 style="color:var(--text);margin-bottom:.5rem;">Identity verification (KYC)</h3>
+            <p class="text-muted" style="font-size:.88rem;margin-bottom:1rem;">Required to post paid listings. Upload your South African ID or passport and a proof of address. Verification typically takes 24 hours.</p>
+            <div id="kyc-status-msg"></div>
+            <form id="kyc-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="kyc-id">SA ID / Passport <span style="color:#e06848;">*</span></label>
+                    <input type="file" id="kyc-id" name="id_document" accept=".pdf,.jpg,.jpeg,.png" required>
+                </div>
+                <div class="form-group">
+                    <label for="kyc-poa">Proof of address <span class="text-muted" style="font-weight:400;">(optional)</span></label>
+                    <input type="file" id="kyc-poa" name="proof_of_address" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <button type="submit" class="btn btn-outline" id="kyc-btn" style="font-size:.85rem;">Submit documents</button>
+            </form>
+        </div>
+
         <!-- EFT payment fallback -->
-        <div class="card mt-4" style="background:#f0f7f1;border:1px solid #dde8dd;">
-            <h3 style="color:#1a5c2a;margin-bottom:.5rem;">Paying by EFT?</h3>
-            <p class="text-muted" style="font-size:.9rem;">Transfer R199 to <strong>FNB cheque 62XXXXXXXX, branch 250655</strong>. Use your email address as reference, then email <strong>pay@shepherdai.co.za</strong> with your proof of payment. Your report will be emailed within 2 hours during business hours.</p>
+        <div class="card mt-4" style="background:var(--surface);border:1px solid var(--border);">
+            <h3 style="color:#7acc3a;margin-bottom:.5rem;">Paying by EFT?</h3>
+            <p class="text-muted" style="font-size:.88rem;">Transfer R199 to <strong style="color:var(--text);">FNB cheque 62XXXXXXXX, branch 250655</strong>. Use your email address as reference, then email <strong style="color:var(--text);">pay@shepherdai.co.za</strong> with your proof of payment. Your report will be emailed within 2 hours during business hours.</p>
         </div>
 
     </div>
@@ -123,7 +141,6 @@ const BADGE = {
 
 async function loadDashboard() {
     try {
-        // Load user info
         const user = await API.getUser();
         document.getElementById('user-greeting').textContent = user.full_name
             ? `Hi, ${user.full_name.split(' ')[0]}`
@@ -135,7 +152,6 @@ async function loadDashboard() {
             document.getElementById('upgrade-prompt').classList.remove('hidden');
         }
 
-        // Load reports
         const reports = await API.getReports();
         document.getElementById('reports-loading').classList.add('hidden');
 
@@ -154,7 +170,7 @@ async function loadDashboard() {
         tbody.innerHTML = reports.map(r => {
             const canDownload = (r.status === 'delivered' || r.status === 'paid') && r.pdf_path;
             const dlBtn = canDownload
-                ? `<a href="/api/report/${r.id}/download" class="btn btn-outline" style="font-size:.8rem;padding:.25rem .7rem;" target="_blank">Download PDF</a>`
+                ? `<a href="${API.downloadReport(r.id)}" class="btn btn-outline" style="font-size:.8rem;padding:.25rem .7rem;" target="_blank">Download PDF</a>`
                 : `<span class="text-muted" style="font-size:.85rem;">—</span>`;
             return `<tr>
                 <td>#${r.id}</td>
@@ -175,30 +191,28 @@ async function loadDashboard() {
     }
 }
 
-// Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
     try { await API.logout(); } catch (_) {}
     Auth.clear();
     window.location.href = '/';
 });
 
-// Subscribe to Ecosystem membership via PayFast
 document.getElementById('upgrade-btn')?.addEventListener('click', async () => {
     const btn = document.getElementById('upgrade-btn');
     setLoading(btn, true);
     try {
         const res = await API.createSubscription();
-        // Inject the PayFast auto-submit form and let it redirect
         const container = document.getElementById('pf-container');
         container.style.display = 'block';
         container.innerHTML = res.pfForm.html;
+        const form = container.querySelector('#pf-form');
+        if (form) form.submit();
     } catch (err) {
         showAlert('alert-box', err.message || 'Could not start subscription. Please try again.', 'error');
         setLoading(btn, false);
     }
 });
 
-// Show alerts for PayFast return URLs
 const payParam = new URLSearchParams(window.location.search).get('payment');
 if (payParam === 'success') {
     showAlert('alert-box', 'Payment received! Your report is being generated and will be emailed to you shortly.', 'success');
@@ -208,10 +222,9 @@ if (payParam === 'success') {
     showAlert('alert-box', 'Payment was cancelled. No charge was made.', 'info');
 }
 
-// Load referral info
 API.getReferrals().then(r => {
-    const card = document.getElementById('referral-card');
-    const inp  = document.getElementById('referral-link-input');
+    const card  = document.getElementById('referral-card');
+    const inp   = document.getElementById('referral-link-input');
     const stats = document.getElementById('ref-stats');
     if (!card || !inp) return;
     inp.value = r.referral_link;
@@ -226,6 +239,36 @@ document.getElementById('copy-ref-btn')?.addEventListener('click', () => {
     if (inp) { inp.select(); navigator.clipboard?.writeText(inp.value); }
     const btn = document.getElementById('copy-ref-btn');
     if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy link', 2000); }
+});
+
+// KYC form
+API.getUser().then(u => {
+    if (u.kyc_status === 'verified') return;
+    const card = document.getElementById('kyc-card');
+    if (card) card.classList.remove('hidden');
+    if (u.kyc_status === 'submitted') {
+        document.getElementById('kyc-status-msg').innerHTML = '<p class="text-muted" style="font-size:.85rem;margin-bottom:.75rem;">✓ Documents submitted — under review.</p>';
+        document.getElementById('kyc-form').style.display = 'none';
+    }
+}).catch(() => {});
+
+document.getElementById('kyc-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn  = document.getElementById('kyc-btn');
+    const form = document.getElementById('kyc-form');
+    const fd   = new FormData(form);
+    if (!fd.get('id_document') || !fd.get('id_document').size)
+        return showAlert('alert-box', 'Please select your ID document.', 'error');
+    setLoading(btn, true);
+    try {
+        await API.uploadKyc(fd);
+        document.getElementById('kyc-status-msg').innerHTML = '<p style="color:#7acc3a;font-size:.85rem;margin-bottom:.75rem;">✓ Documents submitted. We\'ll email you once verified (usually 24h).</p>';
+        form.style.display = 'none';
+        setLoading(btn, false);
+    } catch (err) {
+        showAlert('alert-box', err.message || 'Upload failed. Please try again.', 'error');
+        setLoading(btn, false);
+    }
 });
 
 loadDashboard();

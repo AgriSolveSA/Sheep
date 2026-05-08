@@ -1,7 +1,7 @@
 const { getDb } = require('../db/database');
 
 function requireAuth(req, res, next) {
-    const sessionId = req.headers['x-session-id'] || req.cookies?.sessionId;
+    const sessionId = req.headers['x-session-id'] || req.cookies?.sessionId || req.query.session;
 
     if (!sessionId) {
         return res.status(401).json({ error: true, code: 'NO_SESSION', message: 'Authentication required.' });
@@ -9,7 +9,7 @@ function requireAuth(req, res, next) {
 
     const db  = getDb();
     const row = db.prepare(
-        'SELECT s.user_id, s.expires, u.email, u.full_name, u.ecosystem_member FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ?'
+        'SELECT s.user_id, s.expires, u.email, u.full_name, u.ecosystem_member, u.is_admin FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ?'
     ).get(sessionId);
 
     if (!row) {
@@ -20,21 +20,21 @@ function requireAuth(req, res, next) {
         return res.status(401).json({ error: true, code: 'SESSION_EXPIRED', message: 'Session expired. Please log in again.' });
     }
 
-    req.user = { id: row.user_id, email: row.email, full_name: row.full_name, ecosystem_member: row.ecosystem_member };
+    req.user = { id: row.user_id, email: row.email, full_name: row.full_name, ecosystem_member: row.ecosystem_member, is_admin: row.is_admin };
     next();
 }
 
 function optionalAuth(req, res, next) {
-    const sessionId = req.headers['x-session-id'] || req.cookies?.sessionId;
+    const sessionId = req.headers['x-session-id'] || req.cookies?.sessionId || req.query.session;
     if (!sessionId) return next();
 
     const db  = getDb();
     const row = db.prepare(
-        'SELECT s.user_id, s.expires, u.email, u.full_name, u.ecosystem_member FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ?'
+        'SELECT s.user_id, s.expires, u.email, u.full_name, u.ecosystem_member, u.is_admin FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ?'
     ).get(sessionId);
 
     if (row && Date.now() <= row.expires) {
-        req.user = { id: row.user_id, email: row.email, full_name: row.full_name, ecosystem_member: row.ecosystem_member };
+        req.user = { id: row.user_id, email: row.email, full_name: row.full_name, ecosystem_member: row.ecosystem_member, is_admin: row.is_admin };
     }
     next();
 }

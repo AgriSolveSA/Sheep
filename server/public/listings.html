@@ -7,15 +7,15 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
-        .listing-card { border: 1px solid #dde8dd; border-radius: 10px; padding: 1.25rem; background: #fff; cursor: pointer; transition: box-shadow .15s; }
-        .listing-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
-        .listing-card.premium { border-color: #c8b400; border-width: 2px; }
-        .listing-card__cat { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a5c2a; margin-bottom: .4rem; }
-        .listing-card__title { font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: .3rem; }
-        .listing-card__price { font-size: 1.15rem; font-weight: 800; color: #1a5c2a; }
-        .listing-card__meta { font-size: .8rem; color: #777; margin-top: .5rem; }
+        .listing-card { border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; background: var(--card); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+        .listing-card:hover { border-color: #7acc3a; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+        .listing-card.premium { border-color: #d4b55a; border-width: 2px; }
+        .listing-card__cat { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #7acc3a; margin-bottom: .4rem; }
+        .listing-card__title { font-size: .98rem; font-weight: 700; color: #f0ece0; margin-bottom: .3rem; }
+        .listing-card__price { font-size: 1.1rem; font-weight: 700; color: #7acc3a; }
+        .listing-card__meta { font-size: .78rem; color: #9a9590; margin-top: .5rem; }
         .filter-bar { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: flex-end; }
-        .filter-bar select, .filter-bar input { padding: .45rem .65rem; border: 1px solid #dde8dd; border-radius: 6px; font-size: .9rem; background: #fff; }
+        .filter-bar select, .filter-bar input { padding: .45rem .65rem; border: 1px solid var(--border); border-radius: 6px; font-size: .88rem; background: var(--card); color: #f0ece0; }
     </style>
 </head>
 <body>
@@ -23,8 +23,8 @@
 <nav class="nav">
     <div class="nav__inner">
         <a href="/" class="nav__logo">Shepherd<span>AI</span></a>
-        <div class="nav__links">
-            <a href="/estimator.html" style="color:#c8b400;font-weight:600;">Free estimator</a>
+        <div class="nav__links" id="nav-auth">
+            <a href="/estimator.html" style="color:#d4b55a;font-weight:500;">Free estimator</a>
             <a href="/guides.html">Guides</a>
             <a href="/login.html">Log in</a>
             <a href="/signup.html" class="btn">Get started</a>
@@ -32,12 +32,12 @@
     </div>
 </nav>
 
-<div class="section" style="background:#f0f7f1;padding-top:2.5rem;padding-bottom:3rem;">
+<div class="section" style="padding-top:2.5rem;padding-bottom:3rem;">
     <div class="container">
 
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
             <div>
-                <h1 style="color:#1a5c2a;font-size:1.8rem;margin-bottom:.25rem;">Farm Classifieds</h1>
+                <h1 style="font-family:'Playfair Display',serif;color:var(--text);font-size:1.8rem;margin-bottom:.25rem;">Farm Classifieds</h1>
                 <p class="text-muted">Buy and sell livestock, equipment, feed, and services across South Africa.</p>
             </div>
             <a href="/post-listing.html" class="btn btn-primary">+ Post a listing</a>
@@ -46,7 +46,7 @@
         <!-- Filters -->
         <div class="filter-bar">
             <div>
-                <label style="display:block;font-size:.8rem;color:#555;margin-bottom:.2rem;">Province</label>
+                <label style="display:block;font-size:.78rem;color:var(--dim);margin-bottom:.2rem;">Province</label>
                 <select id="f-province">
                     <option value="">All provinces</option>
                     <option>Western Cape</option><option>Northern Cape</option>
@@ -56,7 +56,7 @@
                 </select>
             </div>
             <div>
-                <label style="display:block;font-size:.8rem;color:#555;margin-bottom:.2rem;">Category</label>
+                <label style="display:block;font-size:.78rem;color:var(--dim);margin-bottom:.2rem;">Category</label>
                 <select id="f-category">
                     <option value="">All categories</option>
                     <option value="sheep">🐑 Sheep</option>
@@ -74,7 +74,7 @@
                 </select>
             </div>
             <div style="flex:1;min-width:180px;">
-                <label style="display:block;font-size:.8rem;color:#555;margin-bottom:.2rem;">Search</label>
+                <label style="display:block;font-size:.78rem;color:var(--dim);margin-bottom:.2rem;">Search</label>
                 <input type="search" id="f-search" placeholder="e.g. Merino ewes…">
             </div>
             <button id="filter-btn" class="btn btn-outline">Search</button>
@@ -82,13 +82,13 @@
 
         <div id="alert-box"></div>
 
-        <div id="listings-loading" style="text-align:center;padding:3rem;color:#555;">
-            <span class="spinner" style="border-top-color:#1a5c2a;border-color:rgba(26,92,42,.2);width:24px;height:24px;"></span> Loading listings…
+        <div id="listings-loading" style="text-align:center;padding:3rem;color:var(--muted);">
+            <span class="spinner"></span> Loading listings…
         </div>
 
         <div id="listing-grid" class="listing-grid hidden"></div>
 
-        <div id="listings-empty" class="hidden" style="text-align:center;padding:3rem;color:#555;">
+        <div id="listings-empty" class="hidden" style="text-align:center;padding:3rem;color:var(--muted);">
             <div style="font-size:2.5rem;margin-bottom:1rem;">📋</div>
             <p><strong>No listings found.</strong></p>
             <p class="mt-1">Try different filters, or <a href="/post-listing.html">post a listing</a> yourself.</p>
@@ -109,6 +109,12 @@
 <script src="/app.js"></script>
 <script>
 'use strict';
+if (Auth.isLoggedIn()) {
+    document.getElementById('nav-auth').innerHTML =
+        '<a href="/estimator.html" style="color:#d4b55a;font-weight:500;">Free estimator</a>' +
+        '<a href="/guides.html">Guides</a>' +
+        '<a href="/dashboard.html" class="btn" style="background:#d4b55a;color:#0a0c0a;border-color:#d4b55a;">My dashboard</a>';
+}
 
 const CAT_EMOJI = {
     sheep:'🐑', cattle:'🐄', goats:'🐐', dairy:'🥛', pigs:'🐖',
@@ -146,7 +152,10 @@ async function loadListings() {
             const price = l.price
                 ? `R ${Number(l.price).toLocaleString('en-ZA')}${l.price_negotiable ? ' (neg)' : ''}`
                 : 'POA';
+            let thumbHtml = '';
+            if (l.images) { try { const imgs = JSON.parse(l.images); if (imgs[0]) thumbHtml = `<img src="${escHtml(imgs[0])}" style="width:calc(100% + 2.5rem);margin:-1.25rem -1.25rem .75rem;height:160px;object-fit:cover;border-radius:9px 9px 0 0;">`; } catch(e){} }
             return `<div class="listing-card${isPremium ? ' premium' : ''}" onclick="window.location='/listings.html?id=${l.id}'">
+                ${thumbHtml}
                 ${isPremium ? '<div style="font-size:.7rem;font-weight:700;color:#c8b400;margin-bottom:.3rem;">⭐ FEATURED</div>' : ''}
                 <div class="listing-card__cat">${emoji} ${escHtml(l.category)}</div>
                 <div class="listing-card__title">${escHtml(l.title)}</div>
@@ -174,13 +183,16 @@ if (listingId) {
         document.getElementById('listings-loading').classList.add('hidden');
         const grid = document.getElementById('listing-grid');
         const price = l.price ? `R ${Number(l.price).toLocaleString('en-ZA')}${l.price_negotiable ? ' (negotiable)' : ''}` : 'POA';
+        let detailImagesHtml = '';
+        if (l.images) { try { const imgs = JSON.parse(l.images); if (imgs.length) detailImagesHtml = `<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">${imgs.map(img=>`<img src="${escHtml(img)}" style="max-height:240px;max-width:100%;border-radius:8px;object-fit:cover;flex:1 1 200px;">`).join('')}</div>`; } catch(e){} }
         grid.innerHTML = `
             <div class="card" style="grid-column:1/-1;max-width:640px;">
-                <div style="font-size:.75rem;color:#1a5c2a;font-weight:700;text-transform:uppercase;margin-bottom:.5rem;">${escHtml(l.category)}</div>
-                <h1 style="font-size:1.4rem;margin-bottom:.5rem;">${escHtml(l.title)}</h1>
-                <p style="font-size:1.3rem;font-weight:800;color:#1a5c2a;margin-bottom:1rem;">${escHtml(price)}</p>
-                <p style="color:#333;line-height:1.7;">${escHtml(l.description || '')}</p>
-                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #dde8dd;font-size:.9rem;color:#555;">
+                <div style="font-size:.72rem;color:#7acc3a;font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;">${escHtml(l.category)}</div>
+                <h1 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:.5rem;color:var(--text);">${escHtml(l.title)}</h1>
+                <p style="font-size:1.25rem;font-weight:700;color:#7acc3a;margin-bottom:1rem;">${escHtml(price)}</p>
+                ${detailImagesHtml}
+                <p style="color:var(--muted);line-height:1.7;">${escHtml(l.description || '')}</p>
+                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #2c3c2c;font-size:.9rem;color:var(--dim);">
                     <p>📍 ${escHtml(l.province)}${l.district ? ' — ' + escHtml(l.district) : ''}</p>
                     <p>👤 ${escHtml(l.seller_name || 'Seller')}</p>
                     ${l.seller_mobile ? `<p>📞 <a href="tel:${escHtml(l.seller_mobile)}">${escHtml(l.seller_mobile)}</a></p>` : ''}

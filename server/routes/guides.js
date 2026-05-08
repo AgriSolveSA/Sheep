@@ -1,5 +1,4 @@
 const express        = require('express');
-const path           = require('path');
 const fs             = require('fs');
 const { getDb }      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
@@ -15,7 +14,7 @@ function audit(db, userId, action, req, details = null) {
 // GET /api/guides  — list all available guides
 router.get('/guides', (req, res) => {
     const db     = getDb();
-    const guides = db.prepare('SELECT id, title, category, price, is_vet_reviewed FROM guides ORDER BY category, title').all();
+    const guides = db.prepare('SELECT id, title, category, price, is_vet_reviewed, description FROM guides ORDER BY category, title').all();
     res.json(guides);
 });
 

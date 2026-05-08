@@ -1,6 +1,28 @@
 /* ShepherdAI — client-side API utilities */
 'use strict';
 
+/* ─── Theme system ───────────────────────────────────────────────────────── */
+(function () {
+    const saved = localStorage.getItem('sai_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.createElement('button');
+        btn.className = 'theme-toggle';
+        btn.title = 'Toggle light / dark mode';
+        btn.setAttribute('aria-label', 'Toggle light / dark mode');
+        btn.textContent = saved === 'light' ? '🌙' : '☀️';
+        document.body.appendChild(btn);
+
+        btn.addEventListener('click', function () {
+            const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('sai_theme', next);
+            btn.textContent = next === 'light' ? '🌙' : '☀️';
+        });
+    });
+}());
+
 const API = {
     base: '',  // same origin
 
@@ -110,7 +132,7 @@ const Auth = {
 function showAlert(containerId, message, type = 'error') {
     const el = document.getElementById(containerId);
     if (!el) return;
-    el.innerHTML = `<div class="alert alert-${type}">${escHtml(message)}</div>`;
+    el.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 

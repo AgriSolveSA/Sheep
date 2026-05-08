@@ -7,26 +7,26 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .metric { background: #fff; border: 1px solid #dde8dd; border-radius: 8px; padding: 1.25rem; }
-        .metric__value { font-size: 2rem; font-weight: 800; color: #1a5c2a; }
-        .metric__label { font-size: .82rem; color: #555; margin-top: .25rem; }
-        .metric--alert .metric__value { color: #b71c1c; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-        .data-table th { background: #f0f7f1; padding: .6rem .75rem; text-align: left; font-size: .8rem; color: #1a5c2a; text-transform: uppercase; letter-spacing: .04em; }
-        .data-table td { padding: .6rem .75rem; border-bottom: 1px solid #f0f0f0; }
-        .section-card { background: #fff; border: 1px solid #dde8dd; border-radius: 10px; padding: 0; overflow: hidden; margin-bottom: 1.5rem; }
-        .section-card__header { padding: 1rem 1.25rem; border-bottom: 1px solid #dde8dd; display: flex; align-items: center; justify-content: space-between; }
-        .section-card__title { font-weight: 700; color: #1a5c2a; font-size: 1rem; }
+        .metric { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+        .metric__value { font-family: 'Playfair Display', serif; font-size: 1.9rem; font-weight: 700; color: #7acc3a; }
+        .metric__label { font-size: .78rem; color: #9a9590; margin-top: .25rem; letter-spacing: .04em; }
+        .metric--alert .metric__value { color: #e06848; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .data-table th { background: var(--surface); padding: .6rem .75rem; text-align: left; font-size: .75rem; color: #9a9590; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+        .data-table td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); color: #f0ece0; }
+        .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0; overflow: hidden; margin-bottom: 1.5rem; }
+        .section-card__header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); }
+        .section-card__title { font-weight: 600; color: #f0ece0; font-size: .95rem; letter-spacing: .02em; }
     </style>
 </head>
 <body class="dashboard">
 
 <div class="dashboard__header">
     <div class="container">
-        <a href="/" style="color:#fff;font-size:1.2rem;font-weight:700;">Shepherd<span style="color:#c8b400;">AI</span> Admin</a>
+        <a href="/" style="color:var(--text);font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;">Shepherd<span style="color:#d4b55a;">AI</span> <span style="font-size:.75rem;color:var(--dim);font-family:'DM Mono',monospace;">Admin</span></a>
         <div style="display:flex;align-items:center;gap:1rem;">
-            <a href="/dashboard.html" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff;padding:.4rem 1rem;font-size:.85rem;">My dashboard</a>
-            <button id="logout-btn" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff;padding:.4rem 1rem;font-size:.85rem;">Log out</button>
+            <a href="/dashboard.html" class="btn btn-outline" style="padding:.4rem 1rem;font-size:.82rem;">My dashboard</a>
+            <button id="logout-btn" class="btn btn-outline" style="padding:.4rem 1rem;font-size:.82rem;">Log out</button>
         </div>
     </div>
 </div>
@@ -37,7 +37,7 @@
         <div id="alert-box" class="mb-3"></div>
 
         <!-- Stats overview -->
-        <h2 style="color:#1a5c2a;margin-bottom:1rem;">Overview</h2>
+        <h2 style="color:var(--text);font-family:'Playfair Display',serif;margin-bottom:1rem;font-size:1.3rem;">Overview</h2>
         <div class="admin-grid" id="metrics-grid">
             <div class="metric"><div class="metric__value" id="m-users">—</div><div class="metric__label">Total users</div></div>
             <div class="metric"><div class="metric__value" id="m-new">—</div><div class="metric__label">New users (7 days)</div></div>
