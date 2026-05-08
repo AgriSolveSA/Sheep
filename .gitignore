@@ -31,8 +31,13 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 server/db/farm.db
+server/db/*.db-shm
+server/db/*.db-wal
+server/uploads/
 server/reports/
 server/backups/
 server/logs/
 server/.env
 server/node_modules/
+.claude/
+Files/archive/
